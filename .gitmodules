@@ -1,0 +1,7 @@
+[submodule "extern/pybind11"]
+	path = extern/pybind11
+	url = ../../pybind/pybind11
+	branch = stable
+[submodule "extern/libROM"]
+	path = extern/libROM
+	url = https://github.com/LLNL/libROM.git
