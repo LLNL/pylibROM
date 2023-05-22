@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_DIR "bindings/pylibROM")
 include_directories(${SOURCE_DIR})
 
-include_directories("extern/libROM/lib/utilities")
+include_directories("extern/libROM/lib/utils")
 include_directories("extern/libROM/lib")
 
 #add_subdirectory("extern/libROM")
