@@ -1,9 +1,9 @@
-from pylibROM.linalg import pyVector
+from pylibROM.linalg import Vector
 
 
 # Create two Vector objects
-v1 = pyVector.Vector(3, False)
-v2 = pyVector.Vector(3, False)
+v1 = Vector(3, False)
+v2 = Vector(3, False)
 
 # Set the values for v1 and v2
 v1.fill(1.0)

@@ -38,11 +38,11 @@ PYBIND11_MODULE(pylibROM, m) {
         //.def(py::self *= py::self)
         .def("fill", [](Vector& self, const double& value) { self = value; })
 
-        // Bind the equal operator (set every element to a scalar)
-        //.def("__set_scalar__", [](Vector& self, const double& a) { self = a; })
+        //Bind the equal operator (set every element to a scalar)
+        .def("__set_scalar__", [](Vector& self, const double& a) { self = a; })
 
-        // Bind the scaling operator (scale every element by a scalar)
-        //.def("__scale__", [](Vector& self, const double& a) { self *= a; })
+        //Bind the scaling operator (scale every element by a scalar)
+        .def("__scale__", [](Vector& self, const double& a) { self *= a; })
 
         .def("get_data", [](const Vector& self) {
             std::vector<double> data(self.dim());
