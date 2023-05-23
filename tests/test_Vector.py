@@ -1,4 +1,7 @@
-from pylibROM.linalg import Vector
+import sys
+sys.path.append("..")
+
+from build.pylibROM.linalg import Vector
 
 
 # Create two Vector objects
