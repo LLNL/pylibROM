@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v1
       - name: build
         run: |
-            echo build libROM (maybe done in Docker container)
+            echo build libROM, maybe done in Docker container
             echo build pylibROM with pybind11
       - name: test
         run: |
