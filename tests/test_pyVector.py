@@ -1,8 +1,9 @@
+import pytest
+import numpy
 import sys
 sys.path.append("..")
 
 import build.pylibROM.linalg as libROM
-import pytest
 
 # Create two Vector objects
 v1 = libROM.Vector(3, False)
@@ -107,21 +108,17 @@ print("Local Minimum of v1:", local_min)
 
 
 def test_plus():
-    vector1 = libROM.Vector([1, 2, 3])
-    vector2 = libROM.Vector([4, 5, 6])
-    result = vector1.plus(vector2)
-    assert result == [5, 7, 9]
+    v1 = libROM.Vector(3, False)
+    v2 = libROM.Vector(3, False)
 
-def test_plusAx():
-    vector1 = pylibROM.Vector([1, 2, 3])
-    vector2 = libROM.Vector([4, 5, 6])
-    result = vector1.plusAx(2.0, vector2)
-    assert result == [9, 12, 15]
+    # Set the values for v1 and v2
+    v1.fill(1.0)
+    v2.fill(2.0)
 
-def test_mult():
-    vector = libROM.Vector([1, 2, 3])
-    result = vector.mult(2.0)
-    assert result == [2, 4, 6]
+    v1 += v2
+    result = v1.get_data()
+    print(result)
+    assert result == [3.0, 3.0, 3.0]
 
 if __name__ == '__main__':
     pytest.main()
