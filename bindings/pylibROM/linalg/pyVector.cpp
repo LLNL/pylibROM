@@ -7,15 +7,14 @@
 #include <pybind11/stl.h>
 #include "linalg/Vector.h"
 
-
 namespace py = pybind11;
 using namespace CAROM;
-void init_vector(pybind11::module_ &m) {
+PYBIND11_MODULE(pylibROM, m) {
+	py::module linalg = m.def_submodule("linalg");
 
-    py::class_<Vector>(m, "Vector") 
+    py::class_<Vector>(linalg, "Vector")
 
         // Constructor
-        .def(py::init<>())
         .def(py::init<int, bool>())
 
         // Constructor
