@@ -35,7 +35,7 @@ jobs:
             echo built pylibROM
       - name: test
         run: |
-            cd ../tests
+            cd tests
             echo run pyVector unit test
             pytest test_pyVector.py
             echo run pyMatrix unit test
