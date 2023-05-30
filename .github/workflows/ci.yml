@@ -20,6 +20,8 @@ jobs:
           swap-size-gb: 10
       - name: Check out pylibROM
         uses: actions/checkout@v1
+        with:
+            submodules: 'true'
       - name: build
         run: |
             cd extern/libROM
