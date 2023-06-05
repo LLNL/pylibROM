@@ -1,7 +1,7 @@
 # pylibROM
 ## Python Interface for LLNL libROM 
 
-1. Build libROM library (from top-level pylibROM repo):
+1. Build libROM library (from top-level pylibROM repo) Defunct:
   ```
   cd extern/libROM
   .scripts/compile.sh -m
