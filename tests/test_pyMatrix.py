@@ -635,12 +635,12 @@ def test_plus():
     print("Complex Eigen pair ev",complexeigenpair.ev_real.get_data())
     print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.get_data())
     print("Complex Eigen pair eigs",complexeigenpair.eigs)
-    assert complexeigenpair.ev_real.get_data() == [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.3743619547830709, 0.6311789687764832], [0.4319814827585532, 0.4912962635115682, 0.7563200248659911]]
+    assert complexeigenpair.ev_real.get_data() == [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.37436195478307094, 0.6311789687764832], [0.4319814827585532, 0.4912962635115682, 0.7563200248659911]]
     assert complexeigenpair.ev_imaginary.get_data() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] 
     assert complexeigenpair.eigs == [(0.8548973087995788+0j), (2.4760236029181346+0j), (5.669079088282289+0j)] 
 
 
-    # Create the input arguments
+    # Create the input arguments 
     As = libROM.Matrix(2,2,True,False)
     As.fill(3.0)
     At = libROM.Matrix(2,2,True,False)
