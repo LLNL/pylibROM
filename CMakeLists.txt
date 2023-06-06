@@ -16,8 +16,8 @@ add_subdirectory("extern/pybind11")
 # pybind11_add_module(pylibROM ${SOURCE_DIR} "${SOURCE_DIR}/linalg/pyVector.cpp")
 pybind11_add_module(pylibROM
     bindings/pylibROM/linalg.cpp
-    bindings/pylibROM/linalg/pymatrix.cpp
-    bindings/pylibROM/linalg/pyvector.cpp
+    bindings/pylibROM/linalg/pyMatrix.cpp
+    bindings/pylibROM/linalg/pyVector.cpp
 )
 target_link_libraries(pylibROM PRIVATE ROM) 
 
