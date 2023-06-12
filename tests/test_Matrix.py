@@ -186,6 +186,7 @@ for i in range(m2.numRows()):
         print(m2(i, j), end=" ")
     print()
 
+#doubt
 # Apply qr_factorize to the matrix
 m2 = libROM.Matrix(2,2,False,False)
 m2.fill(3.0)
@@ -193,7 +194,7 @@ m2.__setitem__(0, 0,5.0)
 m2.__setitem__(0, 1,8.0) 
 # result = m2.qr_factorize()
 
-# Print the resulting matrix
+# # Print the resulting matrix
 # for i in range(result.numRows()):
 #     for j in range(result.numColumns()):
 #         print(result(i, j), end=" ")
@@ -306,16 +307,4 @@ v= libROM.Vector()
 # result = libROM.SpaceTimeProduct(As, At, Bs, Bt)
 result = libROM.SpaceTimeProduct(m1, m2, m1, m2,[1.0],False,False,False,True)
 print("SpaceTimeProduct",result.get_data())
-
-
-
-
-
-
-
-
-
-
-
-
 
