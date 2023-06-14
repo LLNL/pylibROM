@@ -39,7 +39,7 @@ add_subdirectory("extern/pybind11")
 
 
 pybind11_add_module(pylibROM
-    bindings/pylibROM/linalg.cpp
+    bindings/pylibROM/pylibROM.cpp
     bindings/pylibROM/linalg/pyMatrix.cpp
     bindings/pylibROM/linalg/pyVector.cpp
     bindings/pylibROM/algo/pyDMD.cpp

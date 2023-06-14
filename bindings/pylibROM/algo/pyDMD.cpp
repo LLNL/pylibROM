@@ -11,6 +11,35 @@
 namespace py = pybind11;
 using namespace CAROM;
 using namespace std;
+
+/*
+//wrapper class needed for setOffset and takeSample methods.
+class PyDMD : public DMD
+{
+public:
+    using DMD::DMD;
+
+    void setOffset(py::object offset_vector, int order)
+    {
+        // Convert the Python object to the appropriate type
+        Vector* offset = py::cast<Vector*>(offset_vector);
+        DMD::setOffset(offset, order);
+    }
+
+    void takeSample(py::array_t<double> u_in, double t)
+    {
+        // Access the underlying data of the NumPy array
+        auto buf = u_in.request();
+        double* u_in_ptr = static_cast<double*>(buf.ptr);
+
+        // Call the original method
+        DMD::takeSample(u_in_ptr, t);
+    }
+
+    // Add wrappers for other methods as needed
+};
+*/
+
 void init_DMD(pybind11::module_ &m) {
 
     py::class_<DMD>(m, "DMD")
@@ -37,7 +66,28 @@ void init_DMD(pybind11::module_ &m) {
 				return new DMD(dim, dt, alt_output_basis, NULL);
 		}
 					)) 
-        .def("__del__", [](DMD& self) { self.~DMD(); }); // Destructor
+
+    //.def("setOffset", &PyDMD::setOffset, py::arg("offset_vector"), py::arg("order"))  //problem if we want to name the wrapper as DMD. Could get rid of the using namespace directive?
+    //.def("takeSample", &PyDMD::takeSample, py::arg("u_in"), py::arg("t"))
+    .def("train", py::overload_cast<double, const Matrix*, double>(&DMD::train),
+            py::arg("energy_fraction"), py::arg("W0") = nullptr, py::arg("linearity_tol") = 0.0)
+    .def("train", py::overload_cast<int, const Matrix*, double>(&DMD::train),
+            py::arg("k"), py::arg("W0") = nullptr, py::arg("linearity_tol") = 0.0)
+    .def("projectInitialCondition", &DMD::projectInitialCondition,
+            py::arg("init"), py::arg("t_offset") = -1.0)
+    .def("predict", &DMD::predict, py::arg("t"), py::arg("deg") = 0)
+    .def("getTimeOffset", &DMD::getTimeOffset)
+    .def("getNumSamples", &DMD::getNumSamples)
+    .def("getDimension", &DMD::getDimension)
+    .def("getSnapshotMatrix", &DMD::getSnapshotMatrix)
+    .def("load", py::overload_cast<std::string>(&DMD::load), py::arg("base_file_name"))
+    .def("load", py::overload_cast<const char*>(&DMD::load), py::arg("base_file_name"))
+    .def("save", py::overload_cast<std::string>(&DMD::save), py::arg("base_file_name"))
+    .def("save", py::overload_cast<const char*>(&DMD::save), py::arg("base_file_name"))
+    .def("summary", &DMD::summary, py::arg("base_file_name"))
+
+    //TODO: needed explicitly?
+    .def("__del__", [](DMD& self) { self.~DMD(); }); // Destructor
 	/*
         // Constructor
         .def(py::init<>())
