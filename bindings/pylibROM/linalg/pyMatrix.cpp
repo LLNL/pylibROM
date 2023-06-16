@@ -50,16 +50,22 @@ void init_matrix(pybind11::module_ &m) {
         .def("numColumns", &Matrix::numColumns)
          
         .def("getFirstNColumns", (Matrix* (Matrix::*)(int) const) &Matrix::getFirstNColumns)
-        // .def("getFirstNColumns", (void (Matrix::*)(int, Matrix*&) const) &Matrix::getFirstNColumns)
+
+        .def("getFirstNColumns", [](Matrix& self,int n, Matrix* result){
+              self.getFirstNColumns(n,*result);
+        })
+        
         .def("getFirstNColumns", (void (Matrix::*)(int, Matrix&) const) &Matrix::getFirstNColumns)
         
-        .def("mult",[](Matrix& self, const Matrix& other){
+        .def("mult",[](const Matrix& self, const Matrix& other){
              Matrix* result = new Matrix();
              self.mult(other,result);
              return result; 
         },py::return_value_policy::take_ownership)
         .def("mult", (Matrix* (Matrix::*)(const Matrix*) const) &Matrix::mult)
-        // .def("mult", (void (Matrix::*)(const Matrix&, Matrix*&) const) &Matrix::mult)
+        .def("mult",[](const Matrix& self,const Matrix& other,Matrix* result){
+             self.mult(other,*result);
+        })
         .def("mult", (void (Matrix::*)(const Matrix&, Matrix&) const) &Matrix::mult)
         .def("mult", [](Matrix& self, const Vector& other){
              Vector* result = new Vector();
@@ -67,8 +73,11 @@ void init_matrix(pybind11::module_ &m) {
              return result; 
         }, py::return_value_policy::take_ownership)
         .def("mult", (Vector* (Matrix::*)(const Vector*) const) &Matrix::mult, py::return_value_policy::take_ownership)
-        // .def("mult", (void (Matrix::*)(const Vector&, Vector*&)const) &Matrix::mult)
+        .def("mult",[](const Matrix& self,const Vector& other,Vector* result){
+             self.mult(other,*result);
+        })
         .def("mult", (void (Matrix::*)(const Vector&, Vector&) const) &Matrix::mult)
+
         .def("pointwise_mult",[](const Matrix& self, int this_row, const Vector& other, Vector& result) {
                 self.pointwise_mult(this_row, other, result);
             })
@@ -82,7 +91,9 @@ void init_matrix(pybind11::module_ &m) {
                 return result;
             }, py::return_value_policy::take_ownership)
         .def("elementwise_mult", (Matrix* (Matrix::*)(const Matrix*) const) &Matrix::elementwise_mult, py::return_value_policy::take_ownership)
-        // .def("elementwise_mult",(void (Matrix::*)(const Matrix&,Matrix*&) const) &Matrix::elementwise_mult)
+        .def("elementwise_mult",[](const Matrix& self,const Matrix& other,Matrix* result){
+             self.elementwise_mult(other,*result);
+        })
         .def("elementwise_mult",(void (Matrix::*)(const Matrix&,Matrix&) const) &Matrix::elementwise_mult)
         
         .def("elementwise_square",[](const Matrix& self) {
@@ -90,7 +101,9 @@ void init_matrix(pybind11::module_ &m) {
                 self.elementwise_square(result);
                 return result;
             },py::return_value_policy::take_ownership)
-        // .def("elementwise_square",(void (Matrix::*)(Matrix*&) const) &Matrix::elementwise_square)
+        .def("elementwise_square",[](const Matrix& self,Matrix* result){
+             self.elementwise_square(*result);
+        })
         .def("elementwise_square",(void (Matrix::*)(Matrix&) const) &Matrix::elementwise_square)
 
         .def("multPlus", (void (Matrix::*)(Vector&,const Vector&,double) const) &Matrix::multPlus)
@@ -101,7 +114,9 @@ void init_matrix(pybind11::module_ &m) {
                  return result;
              },py::return_value_policy::take_ownership)
         .def("transposeMult", (Matrix* (Matrix::*)(const Matrix*) const) &Matrix::transposeMult)
-        // .def("transposeMult", (void (Matrix::*)(const Matrix&, Matrix*&) const) &Matrix::transposeMult)
+        .def("transposeMult",[](const Matrix& self,const Matrix& other,Matrix* result){
+             self.transposeMult(other,*result);
+        })
         .def("transposeMult", (void (Matrix::*)(const Matrix&, Matrix&) const) &Matrix::transposeMult)
         .def("transposeMult",[](const Matrix& self, const Vector& other) {
                  Vector* result = new Vector();
@@ -109,7 +124,9 @@ void init_matrix(pybind11::module_ &m) {
                  return result;
              },py::return_value_policy::take_ownership)
         .def("transposeMult", (Vector* (Matrix::*)(const Vector*) const) &Matrix::transposeMult, py::return_value_policy::take_ownership)
-        // .def("transposeMult", (void (Matrix::*)(const Vector&, Vector*&)const) &Matrix::transposeMult) 
+        .def("transposeMult",[](const Matrix& self,const Vector& other,Vector* result){
+             self.transposeMult(other,*result);
+        })
         .def("transposeMult", (void (Matrix::*)(const Vector&, Vector&) const) &Matrix::transposeMult)
 
         .def("inverse",[](const Matrix& self) {
@@ -117,7 +134,9 @@ void init_matrix(pybind11::module_ &m) {
                  self.inverse(result);
                  return result;
              },py::return_value_policy::take_ownership)
-        // .def("inverse", (void (Matrix::*)( Matrix*&)const) &Matrix::inverse)
+        .def("inverse",[](const Matrix& self,Matrix* result){
+             self.inverse(*result);
+        })
         .def("inverse", (void (Matrix::*)(Matrix&) const) &Matrix::inverse)
         .def("inverse",(void (Matrix::*)()) &Matrix::inverse) 
 
@@ -126,25 +145,23 @@ void init_matrix(pybind11::module_ &m) {
                  self.getColumn(column, result);
                  return result;
              }, py::return_value_policy::take_ownership)
-        // .def("getColumn", (void (Matrix::*)(int, Vector*&)const) &Matrix::getColumn)
+        .def("getColumn",[](const Matrix& self,int column,Vector* result){
+             self.getColumn(column,*result);
+        })
         .def("getColumn", (void (Matrix::*)(int, Vector&)const) &Matrix::getColumn)
         
         .def("transpose", (void (Matrix::*)()) &Matrix::transpose)
 
         .def("transposePseudoinverse",(void (Matrix::*)()) &Matrix::transposePseudoinverse)
 
-        // () need to check necessary or not -doubt
         .def("qr_factorize",(Matrix* (Matrix::*)() const) &Matrix::qr_factorize,py::return_value_policy::take_ownership)
 
-        // .def("qrcp_pivots_transpose", (void (Matrix::*)(int* ,int* ,int) const) &Matrix::qrcp_pivots_transpose)
-        
         .def("qrcp_pivots_transpose", [](const Matrix& self, std::vector<int>& row_pivot,
                                           std::vector<int>& row_pivot_owner, int pivots_requested) {
             self.qrcp_pivots_transpose(row_pivot.data(), row_pivot_owner.data(), pivots_requested);
-            return row_pivot,row_pivot_owner;
+            return std::make_tuple(row_pivot, row_pivot_owner);
         })
-
-        
+       
 
         .def("orthogonalize", (void (Matrix::*)()) &Matrix::orthogonalize)
 
@@ -199,7 +216,6 @@ void init_matrix(pybind11::module_ &m) {
         .def_readwrite("V", &SerialSVDDecomposition::V);
     
     m.def("SerialSVD", (void (*)(Matrix*,Matrix*,Vector*,Matrix*)) &SerialSVD);
-    // m.def("SerialSVD", (SerialSVDDecomposition (*)(Matrix*) ) &SerialSVD);
     m.def("SerialSVD", [](Matrix* A) {
         Matrix* U = new Matrix();
        Vector* S = new Vector();

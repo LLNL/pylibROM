@@ -58,6 +58,7 @@ void init_vector(pybind11::module_ &m) {
                 transformer(size, py::array_t<double>(size, vector));
             });
         })
+
         .def("transform", [](Vector &self, Vector* result, py::function transformer) {
             self.transform(result, [transformer](const int size, double* vector) {
                 transformer(size, py::array_t<double>(size, vector));
@@ -95,28 +96,24 @@ void init_vector(pybind11::module_ &m) {
 
         .def("plus", (Vector* (Vector::*)(const Vector&) const) &Vector::plus)
         .def("plus", (Vector* (Vector::*)(const Vector*) const) &Vector::plus)
-//        .def("plus", (void (Vector::*)(const Vector&, Vector*&) const) &Vector::plus)
+        .def("plus", [](const Vector& self,const Vector& other,Vector* result) {
+            self.plus(other,*result);
+        })
         .def("plus", (void (Vector::*)(const Vector&, Vector&) const) &Vector::plus)
 
-        .def("plusAx", [](Vector& self, double factor, const Vector& other) {
-            Vector* result = self.plusAx(factor, other);
-            return result;
-        }, py::return_value_policy::automatic)
-        .def("plusAx", [](Vector* self, double factor, const Vector* other) {
-            Vector* result = self->plusAx(factor, *other);
-            return result;
-        }, py::return_value_policy::automatic)
-//        .def("plusAx", [](Vector& self, double factor, const Vector& other) {
-//            Vector* result = new Vector();
-//            self.plusAx(factor, other, result);
-//            return result;
-//        }, py::arg("factor"), py::arg("other"), py::return_value_policy::take_ownership)
-        .def("plusAx", [](Vector& self, double factor, const Vector& other) {
-            Vector result;
-            self.plusAx(factor, other, result);
-            return result;
-        }, py::return_value_policy::automatic)
 
+        .def("plusAx", [](Vector& self, double factor, const Vector& other) {
+            Vector* result = 0;
+            self.plusAx(factor, other,result);
+            return result;
+        }, py::return_value_policy::automatic)
+        .def("plusAx", (Vector* (Vector::*)(double,const Vector*)) &Vector::plusAx, py::return_value_policy::automatic)
+        .def("plusAx", [](const Vector& self, double factor, const Vector& other,Vector* result) {
+            self.plusAx(factor,other,*result);
+        })
+        .def("plusAx", (void (Vector::*)(double, const Vector&,Vector&) const) &Vector::plusAx)
+
+        
         .def("plusEqAx", (void (Vector::*)(double, const Vector&)) &Vector::plusEqAx)
         .def("plusEqAx", [](Vector& self, double factor, const Vector* other) {
             self.plusEqAx(factor, *other);
@@ -124,23 +121,32 @@ void init_vector(pybind11::module_ &m) {
 
         .def("minus", (Vector* (Vector::*)(const Vector&) const) &Vector::minus)
         .def("minus", (Vector* (Vector::*)(const Vector*) const) &Vector::minus)
-        //        .def("minus", (void (Vector::*)(const Vector&, Vector*&) const) &Vector::minus)
+        .def("minus",[](const Vector& self,const Vector& other,Vector* result){
+                self.minus(other,*result); 
+        })
         .def("minus", (void (Vector::*)(const Vector&, Vector&) const) &Vector::minus)
 
-//        .def("mult", [](const Vector& self, double factor) {
-//            Vector* result = self.mult(factor);
-//            return result;
-//        }, py::return_value_policy::automatic)
-//        .def("mult", [](const Vector& self, double factor, Vector*& result) {
-//            self.mult(factor, result);
-//        })
-//        .def("mult", [](const Vector& self, double factor, Vector& result) {
-//            self.mult(factor, result);
-//        })
-//        .def("__getitem__", (const double& (Vector::*)(int) const) &Vector::item)
-//        .def("__setitem__", (double& (Vector::*)(int)) &Vector::item)
-//        .def("__call__", (const double& (Vector::*)(int) const) &Vector::operator())
-//        .def("__call__", (double& (Vector::*)(int)) &Vector::operator())
+        .def("mult", [](const Vector& self, double factor) {
+           Vector* result = 0;
+           self.mult(factor,result);
+           return result;
+        }, py::return_value_policy::automatic)
+        .def("mult", [](const Vector& self, double factor, Vector* result) {
+           self.mult(factor, *result);
+        })
+        .def("mult", [](const Vector& self, double factor, Vector& result) {
+           self.mult(factor, result);
+        })
+
+        .def("__getitem__", [](const Vector& self, int i) { 
+            const double& value=self.item(i); 
+            return value;
+            })
+        .def("__setitem__", [](Vector& self, int i, double value) { 
+            self.item(i) = value; 
+            })
+        .def("__call__", (const double& (Vector::*)(int) const) &Vector::operator())
+        .def("__call__", (double& (Vector::*)(int)) &Vector::operator())
         .def("print", &Vector::print)
         .def("write", &Vector::write)
         .def("read", &Vector::read)
@@ -158,5 +164,20 @@ void init_vector(pybind11::module_ &m) {
 
         .def("__del__", [](Vector& self) { self.~Vector(); }); // Destructor
 
+    m.def("getCenterPoint", [](std::vector<Vector*>& points, bool use_centroid) {
+        return getCenterPoint(points, use_centroid);
+    });
+
+    m.def("getCenterPoint", [](std::vector<Vector>& points, bool use_centroid) {
+        return getCenterPoint(points, use_centroid);
+    });
+    
+    m.def("getClosestPoint", [](std::vector<Vector*>& points, Vector* test_point) {
+        return getClosestPoint(points, test_point);
+    });
+
+    m.def("getClosestPoint", [](std::vector<Vector>& points, Vector test_point) {
+        return getClosestPoint(points, test_point);
+    });
 
 }

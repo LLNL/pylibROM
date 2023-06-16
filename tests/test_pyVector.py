@@ -6,7 +6,7 @@ sys.path.append("..")
 import build.pylibROM.linalg as libROM
 
 # Create two Vector objects
-v1 = libROM.Vector(3, False)
+v1 = libROM.Vector(3, False) 
 v2 = libROM.Vector(3, False)
 
 # Set the values for v1 and v2

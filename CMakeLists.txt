@@ -18,6 +18,8 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg.cpp
     bindings/pylibROM/linalg/pyMatrix.cpp
     bindings/pylibROM/linalg/pyVector.cpp
+    bindings/pylibROM/linalg/pyBasisGenerator.cpp
+    bindings/pylibROM/linalg/pyOptions.cpp
 )
 target_link_libraries(pylibROM PRIVATE ROM) 
 
