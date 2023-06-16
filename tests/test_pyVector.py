@@ -1,7 +1,8 @@
 import pytest
 import numpy
 import sys
-sys.path.append("..")
+import os.path as pth
+sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
 
 import build.pylibROM.linalg as libROM
 
