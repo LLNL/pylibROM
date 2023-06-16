@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 #=================== libROM ================================
 
 #setup external dependency build and link paths for libROM
@@ -18,7 +20,7 @@ if (BUILD_DEPS)
         	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
         	CONFIGURE_COMMAND ""
         	BINARY_DIR ${LIBROM_SCRIPTS_DIR}
-        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh
+        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -d
         	INSTALL_COMMAND ""
 	)	
 	message("Building libROM dependency...")
