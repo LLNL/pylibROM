@@ -16,11 +16,23 @@ v2.fill(2.0)
 print("Initial data for v1:", v1.get_data())
 print("Initial data for v2:", v2.get_data())
 
+# Test copy constructor
+v3 = libROM.Vector(v1)  
+print("Create a new Vector(v3) using the copy constructor: ",v3.get_data())  
+
+# Test assignment operator
+v3 = v2  
+print("Assign v2 to v3 using the assignment operator: ",v3.get_data())  
+
 # Use the addition operator
 v1 += v2
 
 # Print the updated data for v1
-print("Updated data for v1 after addition:", v1.get_data())
+print("Updated data for v1 after addition:", v1.get_data()) 
+
+# Subtract v2 from v1 using the -= operator
+v1 -= v2
+print("Updated data for v1 after subtraction:", v1.get_data())  
 
 #set every element to a scalar
 v1.__set_scalar__(2)
@@ -81,9 +93,15 @@ print("Result vector after addition of v1 and v2 ", result.get_data())
 v1.plus(v2,v1)
 print("Updated data for v1 after addition of v1 and v2 ", v1.get_data())
 
-#Test the first version of plusAx
+
+# Test plusAx function that returns a new Vector
 result1 = v1.plusAx(2.0, v2)
-print("Result vector", result1.get_data())
+print("Result vector of plusAx function", result1.get_data())
+
+# Test plusAx function that modifies an existing Vector
+result2 = libROM.Vector()
+v1.plusAx(2.0, v2, result2)
+print("Result vector(existing vector) of plusAx function", result2.get_data())
 
 
 #Test the first version of plusEqAx
@@ -99,6 +117,24 @@ v1.minus(v2,v1)
 print("Updated data for v1 after subtraction of v1 and v2 ", v1.get_data())
 
 
+# Test mult function that returns a new Vector
+result1 = v1.mult(2.0)
+print("The result vector of multiplication of vector v1 by a factor of 2.0",result1.get_data())
+
+# Test mult function that modifies an existing Vector
+result2 = libROM.Vector()
+v1.mult(2.0, result2)
+print("The result vector(existing vector) of multiplication of vector v1 by a factor of 2.0",result2.get_data())
+
+v1=libROM.Vector(2,False)
+v1.__setitem__(0, 0)
+v1.__setitem__(1, 2.0)
+print("Set Item(1) of vector v1 to 2.0 ",v1.get_data())
+print("Get Item (1) of vector v1",v1.__getitem__(1) )
+value= v1(1)
+print("value",value)
+print("call function",v1.__call__(1))
+
 # Test the 'localMin' function
 local_min = v1.localMin(0)
 
@@ -106,3 +142,29 @@ local_min = v1.localMin(0)
 print("Local Minimum of v1:", local_min)
 
 
+v2=libROM.Vector(2,False)
+v2.fill(4.0)
+pointers = [v1, v2]
+
+# Test getCenterPoint with vector of Vector pointers
+center_point_1 = libROM.getCenterPoint(pointers, True)
+print("GetCenterPoint with vector of Vector pointers(v1,v2)",center_point_1)
+
+# Create a vector of Vector objects
+objects = [v1, v2]
+
+# Test getCenterPoint with vector of Vector objects
+center_point_2 = libROM.getCenterPoint(objects, True)
+print("GetCenterPoint with vector of Vector objects",center_point_2)
+
+# Create a test Vector object
+test_point = libROM.Vector(2,False)
+test_point.fill(3.0)
+
+# Test getClosestPoint with vector of Vector pointers
+closest_point_1 = libROM.getClosestPoint(pointers, test_point)
+print("GetClosestPoint with vector of Vector pointers",closest_point_1)
+
+# Test getClosestPoint with vector of Vector objects
+closest_point_2 = libROM.getClosestPoint(objects, test_point)
+print("GetClosestPoint with vector of Vector objects",closest_point_2)

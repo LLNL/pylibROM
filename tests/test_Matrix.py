@@ -3,8 +3,13 @@ import os.path as pth
 sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../"))#sys.path.append("..")
 
 import build.pylibROM.linalg as libROM
-import numpy as np
+import numpy as np 
+from mpi4py import MPI 
 
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+print('Hello from process {} out of {}'.format(rank, size))
 
 # Create two Matrix objects
 m1 = libROM.Matrix(3,4, False,True)
@@ -189,30 +194,68 @@ for i in range(m2.numRows()):
 
 #doubt
 # Apply qr_factorize to the matrix
+m2 = libROM.Matrix(2,2,True,False)
+m2.fill(3.0)
+m2.__setitem__(0, 0,5.0) 
+m2.__setitem__(0, 1,8.0) 
+result = m2.qr_factorize()
+
+# Print the resulting matrix
+print("qr_factorize for mtarix m2")
+for i in range(result.numRows()):
+    for j in range(result.numColumns()):
+        print(result(i, j), end=" ")
+    print()
+
+
+# Apply qrcp_pivots_transpose to the matrix
+m2 = libROM.Matrix(4,4,False,False)
+for i in range(4):
+   for j in range(4): 
+        m2.__setitem__(i,j,j) 
+print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
+row_pivot = [0,0,0,0]
+row_pivot_owner = [0,0,0,0]
+row_pivots_requested = 4
+row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
+my_rank = 0 
+for i in range(0,row_pivots_requested):
+    print("row_pivot_owner",row_pivot_owner[i])
+    print(rank)
+    assert row_pivot_owner[i] == rank
+    assert row_pivot[i] < 4
+permutation=[0,1,2,3] 
+assert np.array_equal(row_pivot, permutation)
+print("Row Pivots:", row_pivot)
+print("row_pivot_owner:", row_pivot_owner)
+
+
+# m2 = libROM.Matrix(2,2,False,False)
+# for i in range(2):
+#    for j in range(2): 
+#         m2.__setitem__(i,j,j) 
+# print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
+# row_pivot = [0,0]
+# row_pivot_owner = [0,0]
+# row_pivots_requested = 2
+# row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
+# my_rank = 0 
+# for i in range(0,row_pivots_requested):
+#     print("row_pivot_owner",i, " ",row_pivot_owner[i])
+#     print(rank)
+#     assert row_pivot_owner[i] == rank
+#     assert row_pivot[i] < 2
+# permutation=[0,1] 
+# assert np.array_equal(row_pivot, permutation)
+# print("Row Pivots:", row_pivot)
+# print("row_pivot_owner:", row_pivot_owner)
+
+
+# Apply orthogonalize to the matrix
 m2 = libROM.Matrix(2,2,False,False)
 m2.fill(3.0)
 m2.__setitem__(0, 0,5.0) 
 m2.__setitem__(0, 1,8.0) 
-# result = m2.qr_factorize()
-
-# # Print the resulting matrix
-# for i in range(result.numRows()):
-#     for j in range(result.numColumns()):
-#         print(result(i, j), end=" ")
-#     print()
-
-
-# Apply qrcp_pivots_transpose to the matrix
-row_pivots = [1,2]
-row_pivot_owner = [3,2]
-
-# Call the qrcp_pivots_transpose function
-row_pivots,row_pivot_owner=m2.qrcp_pivots_transpose(row_pivots,row_pivot_owner,1)
-print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
-print("Row Pivots:", row_pivots)
-print("row_pivot_owner:", row_pivot_owner)
-
-# Apply orthogonalize to the matrix
 m2.orthogonalize()
 print("orthogonalize to the matrix m2")
 for i in range(m2.numRows()):
@@ -229,7 +272,6 @@ print("Get Item (0,0)",matrix.__getitem__(0, 0) )
 value= matrix(0, 0)
 print("value",value)
 print("call function",matrix.__call__(2,0))
-
 ptr=m1.getData()
 print("The storage for the Matrix's values on this processor",ptr)
 

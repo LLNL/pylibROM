@@ -202,16 +202,28 @@ m2.__setitem__(0, 1,8.0)
 
 
 # Apply qrcp_pivots_transpose to the matrix
-row_pivots = [1,2]
-row_pivot_owner = [3,2]
-
-# Call the qrcp_pivots_transpose function
-row_pivots,row_pivot_owner=m2.qrcp_pivots_transpose(row_pivots,row_pivot_owner,1)
+m2 = libROM.Matrix(4,4,False,False)
+for i in range(4):
+    for j in range(4): 
+            m2.__setitem__(i,j,j) 
 print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
-print("Row Pivots:", row_pivots)
+row_pivot = [0,0,0,0]
+row_pivot_owner = [0,0,0,0]
+row_pivots_requested = 4 
+row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
+my_rank = 0 
+for i in range(row_pivots_requested):
+    assert row_pivot_owner[i] == my_rank
+    assert row_pivot[i] < 5
+permutation=[0,1,2,3] 
+assert np.array_equal(row_pivot, permutation)
+print("Row Pivots:", row_pivot)
 print("row_pivot_owner:", row_pivot_owner)
 
 # Apply orthogonalize to the matrix
+m2.fill(3.0)
+m2.__setitem__(0, 0,5.0) 
+m2.__setitem__(0, 1,8.0) 
 m2.orthogonalize()
 print("orthogonalize to the matrix m2")
 for i in range(m2.numRows()):
@@ -534,19 +546,29 @@ def test_plus():
 
 
     # Apply qrcp_pivots_transpose to the matrix
-    row_pivots = [1,2]
-    row_pivot_owner = [3,2]
-
-    # Call the qrcp_pivots_transpose function
-    row_pivots,row_pivot_owner=m2.qrcp_pivots_transpose(row_pivots,row_pivot_owner,1)
+    m2 = libROM.Matrix(4,4,False,False)
+    for i in range(4):
+     for j in range(4): 
+            m2.__setitem__(i,j,j) 
     print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
-    assert m2.get_data() == [[5.0, 8.0], [3.0, 3.0]] 
-    print("Row Pivots:", row_pivots)
-    assert row_pivots == 0 
+    row_pivot = [0,0,0,0]
+    row_pivot_owner = [0,0,0,0]
+    row_pivots_requested = 4 
+    row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
+    my_rank = 0 
+    for i in range(row_pivots_requested):
+        assert row_pivot_owner[i] == my_rank
+        assert row_pivot[i] < 5
+    permutation=[0,1,2,3] 
+    assert np.array_equal(row_pivot, permutation)
+    print("Row Pivots:", row_pivot)
     print("row_pivot_owner:", row_pivot_owner)
-    assert row_pivot_owner == 2
 
     # Apply orthogonalize to the matrix
+    m2 = libROM.Matrix(2,2,False,False)
+    m2.fill(3.0)
+    m2.__setitem__(0, 0,5.0) 
+    m2.__setitem__(0, 1,8.0) 
     m2.orthogonalize()
     print("orthogonalize to the matrix m2")
     for i in range(m2.numRows()):
@@ -664,8 +686,4 @@ def test_plus():
 
 if __name__ == '__main__':
     pytest.main()
-
-
-
-
 

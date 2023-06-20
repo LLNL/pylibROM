@@ -44,6 +44,8 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/pylibROM.cpp
     bindings/pylibROM/linalg/pyMatrix.cpp
     bindings/pylibROM/linalg/pyVector.cpp
+    bindings/pylibROM/linalg/pyBasisGenerator.cpp
+    bindings/pylibROM/linalg/pyOptions.cpp
     bindings/pylibROM/algo/pyDMD.cpp
 )
 message("building pylibROM...")
