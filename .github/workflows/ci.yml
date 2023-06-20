@@ -26,7 +26,7 @@ jobs:
         run: |
             cd extern/libROM
             ./scripts/compile.sh -m
-            echo built libROM
+            echo built pylibROM
             cd ../../
             mkdir build
             cd build
