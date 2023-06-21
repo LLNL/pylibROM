@@ -1,0 +1,10 @@
+# Hashes of file build rules.
+a34b5b53783a755348e7df725aa3b7e1 CMakeFiles/libROM
+32167c72b8d2c2bc00897aeb2287c1ba CMakeFiles/libROM-complete
+fc4376dab2d71ec2c452e28ee4570155 libROM-prefix/src/libROM-stamp/libROM-build
+692344ebe50ba7d81da63f9af6d9d4f9 libROM-prefix/src/libROM-stamp/libROM-configure
+f65ca1ea3d0982859baf8db0caa32931 libROM-prefix/src/libROM-stamp/libROM-download
+2b7af051e6c3cc5f89511e010b0d0b50 libROM-prefix/src/libROM-stamp/libROM-install
+93ddae95df30c746c2a87629bebb0cdc libROM-prefix/src/libROM-stamp/libROM-mkdir
+a4fdc7b643942c5e5e1f13664790a83b libROM-prefix/src/libROM-stamp/libROM-patch
+167446e110bd1f4a1f6c19e57223ba98 libROM-prefix/src/libROM-stamp/libROM-update
