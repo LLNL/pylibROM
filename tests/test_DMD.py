@@ -28,6 +28,14 @@ from mfem.par import intArray, add_vector
 import mfem.par as mfem
 from mpi4py import MPI
 
+#pylibROM
+import os.path as pth
+import numpy as np
+
+sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../"))
+from build.pylibROM.algo import DMD
+
+
 num_procs = MPI.COMM_WORLD.size
 myid = MPI.COMM_WORLD.rank
 
@@ -177,7 +185,7 @@ if myid == 0:
 # 3. Read the serial mesh from the given mesh file on all processors. We can
 #    handle triangular, quadrilateral, tetrahedral and hexahedral meshes
 #    with the same code.
-meshfile = expanduser(join(dirname(__file__), '..', 'data', args.mesh))
+meshfile = expanduser(join(dirname(__file__), 'dmd_data', args.mesh))
 mesh = mfem.Mesh(meshfile, 1, 1)
 dim = mesh.Dimension()
 
@@ -238,6 +246,7 @@ u_gf.ProjectCoefficient(u_0)
 u = mfem.Vector()
 u_gf.GetTrueDofs(u)
 
+
 # 9. Initialize the conduction operator and the visualization.
 oper = ConductionOperator(fespace, alpha, kappa, u)
 u_gf.SetFromTrueDofs(u)
@@ -259,12 +268,22 @@ if visualization:
         print("GLVis visualization paused.")
         print(" Press space (in the GLVis window) to resume it.")
 
-# 8. Perform time-integration (looping over the time iterations, ti, with a
+# 10. Perform time-integration (looping over the time iterations, ti, with a
 #    time-step dt).
 ode_solver.Init(oper)
 t = 0.0
 ti = 1
 last_step = False
+
+# 10.5 Initialize dmd
+dmd = DMD(u.Size(), dt)
+ud = np.array(u.GetData())
+p = u.GetData()
+print(p)
+#p = u.GetData().value()
+dmd.takeSample(ud,t)
+#dmd.takeSample(u.GetData(),t)
+
 while not last_step:
 
     if (t + dt >= t_final - dt/2):
@@ -276,10 +295,16 @@ while not last_step:
         if myid == 0:
             print("step " + str(ti) + ", t = " + "{:g}".format(t))
         u_gf.SetFromTrueDofs(u)
+        
+        #get DMD sample
+        dmd.takeSample(u.GetData(),t)
+        
         if (visualization):
             sout.send_text("parallel " + str(num_procs) + " " + str(myid))
             sout.send_solution(pmesh, u_gf)
             sout.flush()
+
+        
     ti = ti + 1
     oper.SetParameters(u)
 
