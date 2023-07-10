@@ -6,10 +6,13 @@ on:
     branches:
       - main
 jobs:
+  docker-image:
+    uses: ./.github/workflows/docker.yml
   pip-with-librom:
     runs-on: ubuntu-latest
+    needs: [docker-image]
     container:
-      image: ghcr.io/llnl/librom/librom_env:latest
+      image: ghcr.io/michael-barrow-llnl/pylibrom/pylibrom_env:latest
       options: --user 1001 --privileged
       volumes:
         - /mnt:/mnt
