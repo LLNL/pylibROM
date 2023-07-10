@@ -5,7 +5,7 @@ on:
 env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  IMAGE_NAME: michael-barrow-llnl/pylibROM/pylibROM_env
+  IMAGE_NAME: ghcr.io/pylibROM/pylibROM_env:latest
   DOCKERPATH: docker
 
 jobs:
