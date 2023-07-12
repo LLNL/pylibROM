@@ -591,9 +591,11 @@ def test_plus():
     print("call function",matrix.__call__(2,0))
     assert matrix.__call__(2,0) == 3.0 
 
+    # this is not supposed to be a single value!!
     ptr=m1.getData()
     print("The storage for the Matrix's values on this processor",ptr)
-    assert ptr == 2.0  
+    assert(ptr.shape[0] == m1.numRows())
+    assert(ptr.shape[1] == m1.numColumns())
 
     a=libROM.Vector(4,False)
     a.fill(2.0)
