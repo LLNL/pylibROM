@@ -7,12 +7,28 @@
 #include <pybind11/stl.h>
 #include "linalg/Vector.h"
 
-
 namespace py = pybind11;
 using namespace CAROM;
+
+py::buffer_info
+bufferInfo(Vector &self)
+{
+    return py::buffer_info(
+        self.getData(),                         /* Pointer to buffer */
+        sizeof(double),                          /* Size of one scalar */
+        py::format_descriptor<double>::format(), /* Python struct-style format descriptor */
+        1,                                      /* Number of dimensions */
+        { self.dim() },                         /* Buffer dimensions */
+        { sizeof(double) }                       /* Strides (in bytes) for each index */
+    );
+}
+
 void init_vector(pybind11::module_ &m) {
 
-    py::class_<Vector>(m, "Vector") 
+    py::class_<Vector>(m, "Vector", py::buffer_protocol()) 
+        .def_buffer([](Vector &self) -> py::buffer_info {
+            return bufferInfo(self);
+        })
 
         // Constructor
         .def(py::init<>())
@@ -24,7 +40,7 @@ void init_vector(pybind11::module_ &m) {
             int dim = buf_info.shape[0];
             double* data = static_cast<double*>(buf_info.ptr);
             return new Vector(data, dim, distributed, copy_data);
-        }))
+        }), py::arg("vec"), py::arg("distributed"), py::arg("copy_data") = true) // default value needs to be defined here.
 
         // Bind the copy constructor
         .def(py::init<const Vector&>())
@@ -151,9 +167,18 @@ void init_vector(pybind11::module_ &m) {
         .def("write", &Vector::write)
         .def("read", &Vector::read)
         .def("local_read", &Vector::local_read)
-        .def("getData", &Vector::getData)
+        .def("getData", [](Vector& self) {
+            // We provide a view vector, which does not free the memory at its destruction.
+            py::capsule buffer_handle([](){});
+            // Use this if the C++ memory SHOULD be deallocated
+            // once the Python no longer has a reference to it
+            // py::capsule buffer_handle(data_buffer, [](void* p){ free(p); });
+
+            return py::array(bufferInfo(self), buffer_handle);
+        })
         .def("localMin", &Vector::localMin)
 
+        // TODO: this needs re-naming. confusing with getData.
         .def("get_data", [](const Vector& self) {
             std::vector<double> data(self.dim());
             for (int i = 0; i < self.dim(); ++i) {
