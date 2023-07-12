@@ -12,7 +12,37 @@ from os.path import expanduser, join, dirname
 import numpy as np
 from numpy import sin, cos, exp, sqrt, pi, abs, array, floor, log, sum
 # pyMFEM does not provide mfem::StopWatch.
-from stopwatch import Stopwatch
+# there is not really a similar stopwatch package in python.. (seriously?)
+class StopWatch:
+    import time
+    duration = 0.0
+    start_time = 0.0
+    stop_time = 0.0
+    running = False
+
+    def __init__(self):
+        self.Reset()
+        return
+    
+    def Start(self):
+        assert(not self.running)
+        self.start_time = time.time()
+        self.running = True
+        return
+    
+    def Stop(self):
+        assert(self.running)
+        self.stop_time = time.time()
+        self.duration += self.stop_time - self.start_time
+        self.running = False
+        return
+    
+    def Reset(self):
+        self.duration = 0.0
+        self.start_time = 0.0
+        self.stop_time = 0.0
+        self.running = False
+        return
 
 sys.path.append("../..")
 import build.pylibROM.algo as algo
@@ -143,10 +173,10 @@ if __name__ == "__main__":
                         action='store_true', default=False,
                         help="BC switch.")
     parser.add_argument('-vis', '--visualization',
-                        action='store_true', default=True,
+                        action='store_true', default=False,
                         help='Enable GLVis visualization')
     parser.add_argument('-visit', '--visit-datafiles',
-                        action='store_true', default=True,
+                        action='store_true', default=False,
                         help="Save data files for VisIt (visit.llnl.gov) visualization.")
     parser.add_argument("-vs", "--visualization-steps",
                         action='store', default=5,  type=int,
@@ -287,12 +317,12 @@ if __name__ == "__main__":
     # 8. Perform time-integration (looping over the time iterations, ti, with a
     #    time-step dt).
     # mfem::StopWatch is not binded by pyMFEM.
-    fom_timer, dmd_training_timer, dmd_prediction_timer = Stopwatch(5), Stopwatch(5), Stopwatch(5)
-    fom_timer.start()
+    fom_timer, dmd_training_timer, dmd_prediction_timer = StopWatch(), StopWatch(), StopWatch()
+    fom_timer.Start()
     ode_solver.Init(oper)
     t = 0.0
-    fom_timer.stop()
-    dmd_training_timer.start()
+    fom_timer.Stop()
+    dmd_training_timer.Start()
     curr_window = 0
     ts, dmd_u = [], []
     dmd_u += [algo.DMD(u.Size(), dt)]
@@ -315,14 +345,9 @@ if __name__ == "__main__":
     print("id(u[1]): %d =? id(uData[1]): %d" % (id(u[1]), id(uData[1])))
     print("uData type: %s" % type(uData))
 
-    # print(u[1])
-    # uData[1] = 1.0
-    # print(u[1])
-
     dmd_u[curr_window].takeSample(uData, t)
     ts += [t]
-    print("complete")
-    dmd_training_timer.stop()
+    dmd_training_timer.Stop()
 
     last_step = False
     ti = 0
@@ -331,11 +356,11 @@ if __name__ == "__main__":
         if t + dt >= t_final - dt/2:
             last_step = True
 
-        fom_timer.start()
+        fom_timer.Start()
         t, dt = ode_solver.Step(u, dudt, t, dt)
-        fom_timer.stop()
+        fom_timer.Stop()
 
-        dmd_training_timer.start()
+        dmd_training_timer.Start()
         dmd_u[curr_window].takeSample(uData, t)
         
         if (last_step or (ti % windowNumSamples == 0)):
@@ -353,7 +378,7 @@ if __name__ == "__main__":
                 dmd_u += [algo.DMD(u.Size(), dt)]
                 dmd_u[curr_window].takeSample(uData, t)
         ts += [t]
-        dmd_training_timer.stop()
+        dmd_training_timer.Stop()
 
         if last_step or (ti % vis_steps == 0):
             print("step " + str(ti) + ", t = " + "{:g}".format(t))
@@ -382,13 +407,15 @@ if __name__ == "__main__":
     fid.close()
 
     # 10. Predict the state at t_final using DMD.
-    dmd_prediction_timer.start()
     print("Predicting temperature using DMD")
     dmd_visit_dc = mfem.VisItDataCollection("DMD_Wave_Equation", mesh)
     dmd_visit_dc.RegisterField("solution", u_gf)
     curr_window = 0
     if (visit):
+        dmd_prediction_timer.Start()
         result_u = dmd_u[curr_window].predict(ts[0])
+        dmd_prediction_timer.Stop()
+
         # result_u.getData() returns a numpy array, which shares the memory buffer.
         # result_u.getData() does not own the memory.
         initial_dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
@@ -400,30 +427,30 @@ if __name__ == "__main__":
     for i in range(1, len(ts)):
         if ((i == len(ts) - 1) or (i % vis_steps == 0)):
             if (visit):
+                dmd_prediction_timer.Start()
                 result_u = dmd_u[curr_window].predict(ts[i])
+                dmd_prediction_timer.Stop()
+
                 dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
                 u_gf.SetFromTrueDofs(dmd_solution_u)
                 dmd_visit_dc.SetCycle(i)
                 dmd_visit_dc.SetTime(ts[i])
                 dmd_visit_dc.Save()
 
-            if ((i % windowNumSamples == 0) and (i < ts.size()-1)):
+            if ((i % windowNumSamples == 0) and (i < len(ts)-1)):
                 curr_window += 1
 
-    dmd_prediction_timer.stop()
+    dmd_prediction_timer.Start()
     result_u = dmd_u[curr_window].predict(t_final)
+    dmd_prediction_timer.Stop()
 
     # 11. Calculate the relative error between the DMD final solution and the true solution.
     dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
-    print(dmd_solution_u[0])
     
     diff_u = mfem.Vector(u.Size())
     mfem.subtract_vector(dmd_solution_u, u, diff_u)
     tot_diff_norm_u = np.sqrt(mfem.InnerProduct(diff_u, diff_u))
     tot_true_solution_u_norm = np.sqrt(mfem.InnerProduct(u, u))
-    print(mfem.InnerProduct(diff_u, diff_u))
-    print(tot_diff_norm_u)
-    print(tot_true_solution_u_norm)
 
     print("Relative error of DMD solution (u) at t_final: %f is %.3E" % (t_final, tot_diff_norm_u / tot_true_solution_u_norm))
     print("Elapsed time for solving FOM: %e second\n" % fom_timer.duration)
