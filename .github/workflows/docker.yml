@@ -10,6 +10,7 @@ env:
 
 jobs:
   docker-ci:
+    permissions: write-all
     runs-on: ubuntu-latest
     name: "docker env"
     env:
