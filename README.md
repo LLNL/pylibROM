@@ -1,5 +1,7 @@
 # pylibROM
-## Python Interface for LLNL libROM 
+Python Interface for LLNL libROM 
+
+## Installation
 
 1. Pull repository and all sub-module dependencies:
   ```
@@ -15,7 +17,7 @@
   ```
   To speed up the build if libROM has been compiled:
   ```
-  cmake .. -DBUILD_DEPS=OFF #Do not build libROM
+  cmake .. -DLIBROM_DIR=/path/to/pre-installed-libROM
   ```  
   
 3. Test python package (from top-level pylibROM repo):
@@ -24,3 +26,10 @@
   python3.6 testVector.py
   ```
 
+### Using PyMFEM
+`pylibROM` is often used together with [`PyMFEM`](https://github.com/mfem/PyMFEM).
+Check the repository for detailed instruction for `PyMFEM` installation.
+For serial version of `PyMFEM`, the following simple `pip` command works:
+```
+pip install mfem
+```
