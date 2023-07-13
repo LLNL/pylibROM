@@ -1,10 +1,10 @@
 import pytest
 import numpy
-import sys
-import os.path as pth
-sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
+# import sys
+# import os.path as pth
+# sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
 
-import build.pylibROM.linalg as libROM
+import pylibROM.linalg as libROM
 
 # Create two Vector objects
 v1 = libROM.Vector(3, False) 

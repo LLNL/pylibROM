@@ -1,9 +1,9 @@
 import pytest
 import numpy as np
-import sys
-sys.path.append("..")
+# import sys
+# sys.path.append("..")
 
-import build.pylibROM.linalg as libROM
+import pylibROM.linalg as libROM
 
 
 # Create two Matrix objects
