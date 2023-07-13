@@ -6,7 +6,13 @@ import os
 import io
 import sys
 import time
-import mfem.ser as mfem
+try:
+    import mfem.ser as mfem
+except ModuleNotFoundError:
+    msg = "PyMFEM is not installed yet. Install PyMFEM:\n"
+    msg += "\tpip install mfem"
+    raise ModuleNotFoundError(msg)
+
 from mfem.ser import intArray
 from os.path import expanduser, join, dirname
 import numpy as np
