@@ -6,7 +6,7 @@ on:
     branches:
       - main
 jobs:
-  linux:
+  librom-preinstalled:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/llnl/librom/librom_env:latest
@@ -39,3 +39,30 @@ jobs:
             pytest test_pyVector.py
             echo run pyMatrix unit test
             pytest test_pyMatrix.py
+  baseline:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/llnl/librom/librom_env:latest
+      options: --user 1001 --privileged
+      volumes:
+        - /mnt:/mnt
+    steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+      - name: Check out pylibROM
+        uses: actions/checkout@v1
+        with:
+            submodules: 'true'
+      - name: build
+        run: |
+            pip install ./
+      - name: test
+        run: |
+            cd tests
+            echo run pyVector unit test
+            pytest test_pyVector.py
+            echo run pyMatrix unit test
+            pytest test_pyMatrix.py
+    

@@ -53,9 +53,10 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
+        cmake_args = []
         if (librom_dir is not None):
             print("Using pre-installed libROM library: %s" % librom_dir)
-            cmake_args = [f"-DLIBROM_DIR=%s" % librom_dir]
+            cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
