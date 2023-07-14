@@ -50,9 +50,9 @@ class StopWatch:
         self.running = False
         return
 
-sys.path.append("../..")
-import build.pylibROM.algo as algo
-import build.pylibROM.linalg as linalg
+# sys.path.append("../..")
+import pylibROM.algo as algo
+import pylibROM.linalg as linalg
 
 class WaveOperator(mfem.SecondOrderTimeDependentOperator):
     def __init__(self, fespace, ess_bdr, speed):

@@ -61,10 +61,3 @@ pybind11_add_module(pylibROM
 message("building pylibROM...")
 
 target_link_libraries(pylibROM PRIVATE ROM) 
-
-# Add the built python project to PYTHONPATH
-add_custom_command(TARGET pylibROM POST_BUILD
-    COMMAND export PYTHONPATH="${PROJECT_BINARY_DIR}:$PYTHONPATH"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Adding pylibROM to PYTHONPATH..."
-)

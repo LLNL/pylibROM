@@ -28,11 +28,7 @@ jobs:
             ./scripts/compile.sh -m
             echo built pylibROM
             cd ../../
-            mkdir build
-            cd build
-            cmake ..
-            make
-            echo built pylibROM
+            pip install ./
       - name: test
         run: |
             cd tests
