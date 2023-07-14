@@ -10,14 +10,11 @@ Python Interface for LLNL libROM
 
 2. Compile and build pylibROM (from top-level pylibROM repo):
   ```
-  mkdir build
-  cd build
-  cmake ..
-  make
+  pip install ./
   ```
   To speed up the build if libROM has been compiled:
   ```
-  cmake .. -DLIBROM_DIR=/path/to/pre-installed-libROM
+  pip install ./ --global-option="--librom_dir=/path/to/pre-installed-libROM"
   ```  
   
 3. Test python package (from top-level pylibROM repo):
