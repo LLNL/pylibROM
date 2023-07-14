@@ -9,7 +9,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container:
-      image: dreamer2368/librom_env:latest
+      image: ghcr.io/llnl/librom/librom_env:latest
       options: --user 1001 --privileged
       volumes:
         - /mnt:/mnt
@@ -25,10 +25,13 @@ jobs:
       - name: build
         run: |
             cd extern/libROM
-            ./scripts/compile.sh -m
-            echo built pylibROM
-            cd ../../
-            pip install ./
+            mkdir build
+            cd build
+            cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
+            make -j 16
+            echo built libROM
+            cd ../../../
+            pip install ./ --global-option="--librom_dir=./extern/libROM"
       - name: test
         run: |
             cd tests
