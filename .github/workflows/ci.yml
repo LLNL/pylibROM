@@ -24,7 +24,6 @@ jobs:
             submodules: 'true'
       - name: Git Submodules status
         run: |
-            git submodule update --remote
             git submodule status
       - name: build
         run: |
@@ -61,8 +60,11 @@ jobs:
             submodules: 'true'
       - name: Git Submodules status
         run: |
-            git submodule update --remote
             git submodule status
+      - name: libROM compile test
+        run: |
+            cd extern/libROM
+            ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
       - name: build
         run: |
             pip install ./
