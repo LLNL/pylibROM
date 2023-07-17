@@ -23,7 +23,9 @@ jobs:
         with:
             submodules: 'true'
       - name: Git Submodules status
-        run: git submodule status
+        run: |
+            git submodule update --remote
+            git submodule status
       - name: build
         run: |
             cd extern/libROM
@@ -58,7 +60,9 @@ jobs:
         with:
             submodules: 'true'
       - name: Git Submodules status
-        run: git submodule status
+        run: |
+            git submodule update --remote
+            git submodule status
       - name: build
         run: |
             pip install ./
