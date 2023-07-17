@@ -32,8 +32,8 @@ if (BUILD_DEPS)
 endif(BUILD_DEPS)
 
 #setup external dependency build and link paths for libROM
-find_library(LIBROM libROM.so HINTS "${LIBROM_DIR}/build/lib")
-find_path(LIBROM_INCLUDE_DIR librom.h HINTS "${LIBROM_DIR}/lib")
+set(LIBROM_INCLUDE_DIR ${LIBROM_DIR}/lib)
+link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cmake since FetchContent will not work for compile.sh
 
 #===================== pylibROM =============================
 project(pylibROM)
@@ -46,7 +46,6 @@ set(SOURCE_DIR "bindings/pylibROM")
 include_directories(	${SOURCE_DIR} 
 			${LIBROM_INCLUDE_DIR} 
 			${MPI_INCLUDE_PATH}	)
-link_libraries(${LIBROM})
 add_subdirectory("extern/pybind11")
 
 
@@ -60,3 +59,4 @@ pybind11_add_module(pylibROM
 )
 message("building pylibROM...")
 
+target_link_libraries(pylibROM PRIVATE ROM) 
