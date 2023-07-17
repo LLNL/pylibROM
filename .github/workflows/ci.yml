@@ -42,54 +42,54 @@ jobs:
             pytest test_pyVector.py
             echo run pyMatrix unit test
             pytest test_pyMatrix.py
-  baseline:
-    runs-on: ubuntu-latest
-    # container:
-    #   image: ghcr.io/llnl/librom/librom_env:latest
-    #   options: --user 1001 --privileged
-    #   volumes:
-    #     - /mnt:/mnt
-    steps:
-      - name: Set Swap Space
-        uses: pierotofy/set-swap-space@master
-        with:
-          swap-size-gb: 10
-      - name: Install dependencies
-        run: |
-            sudo apt-get -yq update
-            sudo apt-get install -yq git
-            sudo apt-get install --no-install-recommends -yq make gcc gfortran libssl-dev cmake
-            sudo apt-get install -yq libopenblas-dev libmpich-dev libblas-dev liblapack-dev libscalapack-mpi-dev libhdf5-serial-dev
-            sudo apt-get install -yq git-lfs
-            sudo apt-get install -yq valgrind
-            sudo apt-get install -yq wget
-            sudo apt-get install -yq python3 python3-dev python3-pip
-            sudo apt-get clean -q
-            pip3 install --upgrade pip
-            pip3 install numpy
-            pip3 install scipy
-            pip3 install pybind11
-            pip3 install pytest
-            pip3 install mpi4py
-      - name: Check out pylibROM
-        uses: actions/checkout@v1
-        with:
-            submodules: 'true'
-      - name: Git Submodules status
-        run: |
-            git submodule status
-      # - name: libROM compile test
-      #   run: |
-      #       cd extern/libROM
-      #       ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
-      - name: build
-        run: |
-            pip install ./
-      - name: test
-        run: |
-            cd tests
-            echo run pyVector unit test
-            pytest test_pyVector.py
-            echo run pyMatrix unit test
-            pytest test_pyMatrix.py
+  # baseline:
+  #   runs-on: ubuntu-latest
+  #   # container:
+  #   #   image: ghcr.io/llnl/librom/librom_env:latest
+  #   #   options: --user 1001 --privileged
+  #   #   volumes:
+  #   #     - /mnt:/mnt
+  #   steps:
+  #     - name: Set Swap Space
+  #       uses: pierotofy/set-swap-space@master
+  #       with:
+  #         swap-size-gb: 10
+  #     - name: Install dependencies
+  #       run: |
+  #           sudo apt-get -yq update
+  #           sudo apt-get install -yq git
+  #           sudo apt-get install --no-install-recommends -yq make gcc gfortran libssl-dev cmake
+  #           sudo apt-get install -yq libopenblas-dev libmpich-dev libblas-dev liblapack-dev libscalapack-mpi-dev libhdf5-serial-dev
+  #           sudo apt-get install -yq git-lfs
+  #           sudo apt-get install -yq valgrind
+  #           sudo apt-get install -yq wget
+  #           sudo apt-get install -yq python3 python3-dev python3-pip
+  #           sudo apt-get clean -q
+  #           pip3 install --upgrade pip
+  #           pip3 install numpy
+  #           pip3 install scipy
+  #           pip3 install pybind11
+  #           pip3 install pytest
+  #           pip3 install mpi4py
+  #     - name: Check out pylibROM
+  #       uses: actions/checkout@v1
+  #       with:
+  #           submodules: 'true'
+  #     - name: Git Submodules status
+  #       run: |
+  #           git submodule status
+  #     # - name: libROM compile test
+  #     #   run: |
+  #     #       cd extern/libROM
+  #     #       ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
+  #     - name: build
+  #       run: |
+  #           pip install ./
+  #     - name: test
+  #       run: |
+  #           cd tests
+  #           echo run pyVector unit test
+  #           pytest test_pyVector.py
+  #           echo run pyMatrix unit test
+  #           pytest test_pyMatrix.py
     
