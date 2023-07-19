@@ -6,7 +6,7 @@ on:
     branches:
       - main
 jobs:
-  librom-preinstalled:
+  pip-with-librom:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/llnl/librom/librom_env:latest
@@ -35,6 +35,46 @@ jobs:
             echo built libROM
             cd ../../../
             pip install ./ --global-option="--librom_dir=./extern/libROM"
+      - name: test
+        run: |
+            cd tests
+            echo run pyVector unit test
+            pytest test_pyVector.py
+            echo run pyMatrix unit test
+            pytest test_pyMatrix.py
+  cmake-with-librom:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/llnl/librom/librom_env:latest
+      options: --user 1001 --privileged
+      volumes:
+        - /mnt:/mnt
+    steps:
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
+      - name: Check out pylibROM
+        uses: actions/checkout@v1
+        with:
+            submodules: 'true'
+      - name: Git Submodules status
+        run: |
+            git submodule status
+      - name: build
+        run: |
+            cd extern/libROM
+            mkdir build
+            cd build
+            cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
+            make -j 16
+            echo built libROM
+            cd ../../../
+            mkdir build
+            cd build
+            echo ${GITHUB_WORKSPACE}
+            cmake .. -DLIBROM_DIR=${GITHUB_WORKSPACE}/extern/libROM
+            make
       - name: test
         run: |
             cd tests

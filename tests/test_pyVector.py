@@ -3,7 +3,8 @@ import numpy
 # import sys
 # import os.path as pth
 # sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
-
+import sys
+sys.path.append("../build")
 import pylibROM.linalg as libROM
 
 # Create two Vector objects

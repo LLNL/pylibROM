@@ -50,7 +50,7 @@ class StopWatch:
         self.running = False
         return
 
-# sys.path.append("../..")
+sys.path.append("../../build")
 import pylibROM.algo as algo
 import pylibROM.linalg as linalg
 

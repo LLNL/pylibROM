@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
-# import sys
-# sys.path.append("..")
+import sys
+sys.path.append("../build")
 
 import pylibROM.linalg as libROM
 

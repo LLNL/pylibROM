@@ -1,6 +1,6 @@
-# import sys
-# sys.path.append("..")
+import sys
 
+sys.path.append("../../build")
 import pylibROM.linalg as libROM
 import numpy as np 
 
