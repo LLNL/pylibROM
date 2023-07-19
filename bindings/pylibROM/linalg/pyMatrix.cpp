@@ -7,9 +7,26 @@
 namespace py = pybind11;
 using namespace CAROM;
 
+py::buffer_info
+bufferInfo(Matrix &self)
+{
+    return py::buffer_info(
+        self.getData(),                          /* Pointer to buffer */
+        sizeof(double),                          /* Size of one scalar */
+        py::format_descriptor<double>::format(), /* Python struct-style format descriptor */
+        2,                                       /* Number of dimensions */
+        { self.numRows(), self.numColumns() },   /* Buffer dimensions */
+        { sizeof(double) * self.numColumns(),
+          sizeof(double) }                       /* Strides (in bytes) for each index */
+    );
+}
+
 void init_matrix(pybind11::module_ &m) {
 
-    py::class_<Matrix>(m, "Matrix") 
+    py::class_<Matrix>(m, "Matrix", py::buffer_protocol()) 
+        .def_buffer([](Matrix &self) -> py::buffer_info {
+            return bufferInfo(self);
+        })
        
         // Constructor
         .def(py::init<>())
@@ -161,7 +178,6 @@ void init_matrix(pybind11::module_ &m) {
             self.qrcp_pivots_transpose(row_pivot.data(), row_pivot_owner.data(), pivots_requested);
             return std::make_tuple(row_pivot, row_pivot_owner);
         })
-       
 
         .def("orthogonalize", (void (Matrix::*)()) &Matrix::orthogonalize)
 
@@ -180,7 +196,15 @@ void init_matrix(pybind11::module_ &m) {
         .def("write", &Matrix::write)
         .def("read", &Matrix::read)
         .def("local_read", &Matrix::local_read)
-        .def("getData", &Matrix::getData,py::return_value_policy::reference_internal)
+        .def("getData", [](Matrix& self) {
+            // We provide a view vector, which does not free the memory at its destruction.
+            py::capsule buffer_handle([](){});
+            // Use this if the C++ memory SHOULD be deallocated
+            // once the Python no longer has a reference to it
+            // py::capsule buffer_handle(data_buffer, [](void* p){ free(p); });
+
+            return py::array(bufferInfo(self), buffer_handle);
+        })
 
         .def("get_data", [](const Matrix& self) {
            std::vector<std::vector<double>> data(self.numRows(), std::vector<double>(self.numColumns()));

@@ -45,30 +45,19 @@ void init_DMD(pybind11::module_ &m) {
     py::class_<DMD>(m, "DMD")
 	//constructor, default.
 	.def(py::init<string>()) //constructor a
-	.def(py::init([](int dim,
-			double dt,
-			bool alt_output_basis = false,
-			py::array_t<double> vec)	//state_offset
-		{
-			py::buffer_info buf_info = vec.request();
-			int vdim = buf_info.shape[0];
-			double* data = static_cast<double*>(buf_info.ptr);
-			
-			if(data != NULL)
-			{
-				Vector* state_offset = new Vector(data, vdim, 
-								false, 	//TODO?
-								true	//TODO?
-									);
-				return new DMD(dim, dt, alt_output_basis, state_offset);
-			}
-			else
-				return new DMD(dim, dt, alt_output_basis, NULL);
-		}
-					)) 
+    .def(py::init([](int dim,
+                    double dt,
+                    bool alt_output_basis = false,
+                    Vector *vec = nullptr) {
+            return new DMD(dim, dt, alt_output_basis, vec);
+        }), py::arg("dim"), py::arg("dt"), py::arg("alt_output_basis") = false, py::arg("vec") = nullptr)
 
-    //.def("setOffset", &PyDMD::setOffset, py::arg("offset_vector"), py::arg("order"))  //problem if we want to name the wrapper as DMD. Could get rid of the using namespace directive?
-    //.def("takeSample", &PyDMD::takeSample, py::arg("u_in"), py::arg("t"))
+    // .def("setOffset", &PyDMD::setOffset, py::arg("offset_vector"), py::arg("order"))  //problem if we want to name the wrapper as DMD. Could get rid of the using namespace directive?
+    .def("takeSample", [](DMD &self, py::array_t<double> u_in, double t) {
+            py::buffer_info buf_info = u_in.request();
+            double* data = static_cast<double*>(buf_info.ptr);
+            self.takeSample(data, t);
+        })
     .def("train", py::overload_cast<double, const Matrix*, double>(&DMD::train),
             py::arg("energy_fraction"), py::arg("W0") = nullptr, py::arg("linearity_tol") = 0.0)
     .def("train", py::overload_cast<int, const Matrix*, double>(&DMD::train),
