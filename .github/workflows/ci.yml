@@ -17,6 +17,10 @@ jobs:
       volumes:
         - /mnt:/mnt
     steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -30,14 +34,7 @@ jobs:
             git submodule status
       - name: build
         run: |
-            cd extern/libROM
-            mkdir build
-            cd build
-            cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
-            make -j 16
-            echo built libROM
-            cd ../../../
-            pip install ./ --global-option="--librom_dir=./extern/libROM"
+            pip install ./ --global-option="--librom_dir=/env/dependencies/libROM"
       - name: test
         run: |
             cd tests
@@ -48,11 +45,15 @@ jobs:
   cmake-with-librom:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/llnl/librom/librom_env:latest
+      image: ghcr.io/michael-barrow-llnl/pylibrom/pylibrom_env:latest
       options: --user 1001 --privileged
       volumes:
         - /mnt:/mnt
     steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -66,17 +67,9 @@ jobs:
             git submodule status
       - name: build
         run: |
-            cd extern/libROM
             mkdir build
             cd build
-            cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
-            make -j 16
-            echo built libROM
-            cd ../../../
-            mkdir build
-            cd build
-            echo ${GITHUB_WORKSPACE}
-            cmake .. -DLIBROM_DIR=${GITHUB_WORKSPACE}/extern/libROM
+            cmake .. -DLIBROM_DIR=/env/dependencies/libROM
             make
       - name: test
         run: |
