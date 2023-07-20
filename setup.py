@@ -19,6 +19,8 @@ for arg in sys.argv:
     if (arg[:13] == "--librom_dir="):
         librom_dir = arg[13:]
         sys.argv.remove(arg)
+if (librom_dir is None):
+    raise RuntimeError("pip installation requires a pre-installed libROM library!")
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {

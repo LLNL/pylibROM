@@ -111,7 +111,10 @@ jobs:
       #       ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
       - name: build
         run: |
-            pip install ./
+            mkdir build
+            cd build
+            cmake .. -DLIBROM_DIR=/env/dependencies/libROM
+            make
       # - name: test
       #   run: |
       #       cd tests
