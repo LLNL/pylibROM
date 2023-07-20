@@ -105,13 +105,13 @@ jobs:
       - name: Git Submodules status
         run: |
             git submodule status
-      - name: libROM compile test
-        run: |
-            cd extern/libROM
-            ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
-      # - name: build
+      # - name: libROM compile test
       #   run: |
-      #       pip install ./
+      #       cd extern/libROM
+      #       ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
+      - name: build
+        run: |
+            pip install ./
       # - name: test
       #   run: |
       #       cd tests
