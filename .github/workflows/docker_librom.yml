@@ -6,14 +6,12 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: michael-barrow-llnl/pylibROM/pylibROM_env
-  DOCKERPATH: docker
+  DOCKERPATH: docker/librom
 
 jobs:
   docker-ci:
     runs-on: ubuntu-latest
     name: "docker env"
-    env:
-      DOCKERPATH: docker
     steps:
       - uses: actions/checkout@v3
         with:
@@ -23,7 +21,7 @@ jobs:
       - name: DockerPATH configuration
         run: echo "DOCKERPATH=$DOCKERPATH"
       - name: DockerPATH - check if files in docker path changed
-        if: contains(steps.files.outputs.all,env.DOCKERPATH) || contains(steps.files.outputs.all,'docker.yml')
+        if: contains(steps.files.outputs.all,env.DOCKERPATH) || contains(steps.files.outputs.all,'docker_librom.yml')
         run: |
           echo "CI container needs rebuilding..."
           echo "CI_NEEDS_REBUILD=true" >> $GITHUB_ENV
