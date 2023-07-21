@@ -15,10 +15,14 @@ from setuptools.command.build_ext import build_ext
 
 # Take the global option for pre-installed librom directory.
 librom_dir = None
+install_scalapack = False
 for arg in sys.argv:
     if (arg[:13] == "--librom_dir="):
         librom_dir = arg[13:]
         sys.argv.remove(arg)
+if "--install_scalapack" in sys.argv:
+    install_scalapack = True
+    sys.argv.remove("--install_scalapack")
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -53,14 +57,16 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-        global librom_dir
+        global librom_dir, install_scalapack
         if (librom_dir is None):
             print("Installing libROM library: %s" % librom_dir)
             librom_dir = os.path.dirname(os.path.realpath(__file__))
             librom_dir += "/extern/libROM"
+            librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
+            if (install_scalapack): librom_cmd += " -s"
+            print("libROM installation command: %s" % librom_cmd)
             subprocess.run(
-                "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir,
-                shell=True, check=True
+                librom_cmd, shell=True, check=True
             )
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
