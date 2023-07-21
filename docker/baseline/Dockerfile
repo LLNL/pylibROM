@@ -16,6 +16,7 @@ RUN sudo apt-get install -yq git-lfs
 RUN sudo apt-get install -yq valgrind
 RUN sudo apt-get install -yq wget
 RUN sudo apt-get install -yq astyle
+RUN sudo apt-get install -yq chrpath
 
 RUN sudo apt-get clean -q
 
@@ -51,6 +52,10 @@ RUN echo "pytest" >> requirements.txt
 RUN echo "mpi4py" >> requirements.txt
 RUN sudo pip3 install --upgrade pip
 RUN sudo pip3 install -r ./requirements.txt
+
+# install pymfem
+RUN sudo pip3 install swig
+RUN sudo pip3 install mfem
 
 # install lldb and gdb for debugging
 RUN sudo apt-get install -yq lldb gdb

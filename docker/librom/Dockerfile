@@ -1,7 +1,13 @@
 FROM ghcr.io/llnl/librom/librom_env:latest
 
+RUN sudo apt-get -yq update
+RUN sudo apt-get install -yq chrpath
+
 # Add any more dependencies you would like to have in ci test/development environment.
 # RUN python3 -m pip install numpy
+RUN sudo pip3 install --upgrade pip
+RUN sudo pip3 install swig
+RUN sudo pip3 install mfem
 
 # install libROM
 WORKDIR $LIB_DIR
