@@ -19,8 +19,6 @@ for arg in sys.argv:
     if (arg[:13] == "--librom_dir="):
         librom_dir = arg[13:]
         sys.argv.remove(arg)
-if (librom_dir is None):
-    raise RuntimeError("pip installation requires a pre-installed libROM library!")
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -55,10 +53,18 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-        cmake_args = []
-        if (librom_dir is not None):
+        global librom_dir
+        if (librom_dir is None):
+            print("Installing libROM library: %s" % librom_dir)
+            librom_dir = os.path.dirname(os.path.realpath(__file__))
+            librom_dir += "/extern/libROM"
+            subprocess.run(
+                "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir,
+                shell=True, check=True
+            )
+        else:
             print("Using pre-installed libROM library: %s" % librom_dir)
-            cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
+        cmake_args = [f"-DLIBROM_DIR=%s" % librom_dir]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code

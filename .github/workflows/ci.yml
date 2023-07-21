@@ -105,21 +105,14 @@ jobs:
       - name: Git Submodules status
         run: |
             git submodule status
-      # - name: libROM compile test
-      #   run: |
-      #       cd extern/libROM
-      #       ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake
       - name: build
         run: |
-            mkdir build
-            cd build
-            cmake .. -DLIBROM_DIR=/env/dependencies/libROM
-            make
-      # - name: test
-      #   run: |
-      #       cd tests
-      #       echo run pyVector unit test
-      #       pytest test_pyVector.py
-      #       echo run pyMatrix unit test
-      #       pytest test_pyMatrix.py
+            pip install ./
+      - name: test
+        run: |
+            cd tests
+            echo run pyVector unit test
+            pytest test_pyVector.py
+            echo run pyMatrix unit test
+            pytest test_pyMatrix.py
     
