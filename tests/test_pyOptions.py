@@ -52,8 +52,8 @@ def test_plus():
     options = libROM.Options(4, 20)
     assert options.dim == 4
     assert options.max_basis_dimension == 20
-    assert options.samples_per_time_interval == 1
-    assert options.max_time_intervals == 1
+    assert options.samples_per_time_interval == 20
+    assert options.max_time_intervals == -1
     assert not options.update_right_SV 
     assert not options.write_snapshots 
 
