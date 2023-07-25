@@ -94,19 +94,19 @@ def test_plus():
 
     # Test the getSpatialBasis function
     spatial_basis = staticsvd.getSpatialBasis()
-    assert spatial_basis == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731]]
+    assert spatial_basis.get_data() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731]]
 
     # Test the getTemporalBasis function
     temporal_basis = staticsvd.getTemporalBasis()
-    assert temporal_basis == [[-1.0]]
+    assert temporal_basis.get_data() == [[-1.0]]
 
     # Test the getSingularValues function
     singular_values = staticsvd.getSingularValues()
-    assert singular_values == [3.7416573867739418]
+    assert singular_values.get_data() == [3.7416573867739418]
 
     # Test the getSnapshotMatrix function
     snapshot_matrix = staticsvd.getSnapshotMatrix()
-    assert snapshot_matrix == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019]]
+    assert snapshot_matrix.get_data() == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019]]
 
 if __name__ == '__main__':
     pytest.main()
