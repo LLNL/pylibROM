@@ -1,7 +1,7 @@
-import sys
-sys.path.append("..")
+# import sys
+# sys.path.append("..")
 
-import build.pylibROM.linalg as libROM
+import pylibROM.linalg as libROM
 import numpy as np 
 
 #Testing with two arguments

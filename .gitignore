@@ -1,0 +1,6 @@
+build
+*.mfem_root
+*.gf
+examples/dmd/DMD_Wave_Equation_*
+examples/dmd/Wave_Equation_*
+examples/dmd/wave_equation.mesh
