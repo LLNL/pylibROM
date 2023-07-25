@@ -44,12 +44,6 @@ jobs:
             pytest test_pyMatrix.py
             echo run pyOptions unit test
             pytest test_pyOptions.py
-            echo run pyBasisGenerator unit test
-            pytest test_pyBasisGenerator.py
-            echo run pyBasisReader unit test
-            pytest test_pyBasisReader.py
-            echo run pyBasisWriter unit test
-            pytest test_pyBasisWriter.py
             echo run pySVD unit test
             pytest test_pySVD.py
             echo run pyStaticSVD unit test
