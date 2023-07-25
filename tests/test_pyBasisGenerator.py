@@ -1,8 +1,8 @@
 import sys
 import pytest
-sys.path.append("..")
+sys.path.append("../build")
 
-import build.pylibROM.linalg as libROM
+import pylibROM.linalg as libROM
 import numpy as np 
 import h5py
 

@@ -1,9 +1,9 @@
 import sys
 import pytest
-sys.path.append("..")
+sys.path.append("../build")
 
-import build.pylibROM.linalg as libROM
-import build.pylibROM.linalg.svd as SVD 
+import pylibROM.linalg as libROM
+import pylibROM.linalg.svd as SVD 
 import numpy as np 
 
 options = libROM.Options(3, 10, 3, True, True)
