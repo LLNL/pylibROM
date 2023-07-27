@@ -154,13 +154,13 @@ void init_vector(pybind11::module_ &m) {
            self.mult(factor, result);
         })
 
+        .def("item", (const double& (Vector::*)(int) const) &Vector::item)
         .def("__getitem__", [](const Vector& self, int i) { 
-            const double& value=self.item(i); 
-            return value;
-            })
+            return self(i);
+        })
         .def("__setitem__", [](Vector& self, int i, double value) { 
             self.item(i) = value; 
-            })
+        })
         .def("__call__", (const double& (Vector::*)(int) const) &Vector::operator())
         .def("__call__", (double& (Vector::*)(int)) &Vector::operator())
         .def("print", &Vector::print)

@@ -1,5 +1,5 @@
 import pytest
-import numpy
+import numpy as np
 # import sys
 # import os.path as pth
 # sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
@@ -108,7 +108,6 @@ local_min = v1.localMin(0)
 # Print the local minimum value
 print("Local Minimum of v1:", local_min)
 
-
 def test_plus():
     v1 = libROM.Vector(3, False)
     v2 = libROM.Vector(3, False)
@@ -122,9 +121,325 @@ def test_plus():
     print(result)
     assert result == [3.0, 3.0, 3.0]
 
+def test_distributed():
+    v = libROM.Vector(2, False)
+    assert(not v.distributed())
+    w = libROM.Vector(2, True)
+    assert(w.distributed())
+
+def test_dim():
+    v = libROM.Vector(2, False)
+    assert(v.dim() == 2)
+
+def test_setSize():
+    v = libROM.Vector(2, False)
+    assert(v.dim() == 2)
+    v.setSize(3)
+    assert(v.dim() == 3)
+
+def test_call_operator():
+    v_data = np.array([1., 2.])
+    v = libROM.Vector(v_data, False, True)
+    assert(v[0] == 1.)
+    assert(v[1] == 2.)
+
+def test_item():
+    v_data = np.array([1., 2.])
+    v = libROM.Vector(v_data, False, True)
+    assert(v.item(0) == 1.)
+    assert(v.item(1) == 2.)
+
+def test_copy_constructor():
+    v_data = np.array([1., 2.])
+    v = libROM.Vector(v_data, False, True)
+    w = libROM.Vector(v)
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 1.)
+    assert(w[1] == 2.)
+
+def test_copy_assignment_operator():
+    v_data = np.array([1., 2.])
+    v = libROM.Vector(v_data, False, True)
+    w = v
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 1.)
+    assert(w[1] == 2.)
+
+def test_norm():
+    v = libROM.Vector(2, False)
+
+    v[0] = 1.0
+    v[1] = 1.0
+    assert(abs(v.norm() - np.sqrt(2.)) <= 1.0e-15)
+
+    v[0] = -1.0
+    v[1] = 1.0
+    assert(abs(v.norm() - np.sqrt(2.)) <= 1.0e-15)
+
+    v[0] = -3.0
+    v[1] = 4.0
+    assert(abs(v.norm() - 5.) <= 1.0e-15)
+
+    v[0] = 5.0
+    v[1] = -12.0
+    assert(abs(v.norm() - 13.) <= 1.0e-15)
+
+def test_normalize():
+    v = libROM.Vector(2, False)
+    v[0] = 3.0
+    v[1] = 4.0
+
+    assert(abs(v.normalize() - 5.) <= 1.0e-15)
+    assert(v[0] == 0.6)
+    assert(v[1] == 0.8)
+    assert(v.norm() == 1.)
+
+def test_inner_product():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    assert(v.inner_product(v) ==  2.)
+    assert(v.inner_product(w) ==  0.)
+    assert(v.inner_product(x) ==  7.)
+    assert(v.inner_product(y) == 17.)
+    assert(w.inner_product(v) ==  0.)
+    assert(w.inner_product(w) ==  2.)
+    assert(w.inner_product(x) ==  1.)
+    assert(w.inner_product(y) ==  7.)
+    assert(x.inner_product(v) ==  7.)
+    assert(x.inner_product(w) ==  1.)
+    assert(x.inner_product(x) == 25.)
+    assert(x.inner_product(y) == 63.)
+    assert(y.inner_product(v) == 17.)
+    assert(y.inner_product(w) ==  7.)
+    assert(y.inner_product(x) == 63.)
+    assert(y.inner_product(y) ==169.)
+
+def test_plus():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    result = v.plus(v)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 2.)
+    assert(result[1] == 2.)
+    del result
+
+    result = v.plus(w)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 0.)
+    assert(result[1] == 2.)
+    del result
+
+    result = v.plus(x)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 4.)
+    assert(result[1] == 5.)
+    del result
+
+    result = v.plus(y)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 6.)
+    assert(result[1] == 13.)
+    del result
+
+def test_plusAx():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    result = v.plusAx(1.0, v)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 2.)
+    assert(result[1] == 2.)
+    del result
+
+    result = v.plusAx(1.0, w)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 0.)
+    assert(result[1] == 2.)
+    del result
+
+    result = v.plusAx(1.0, x)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 4.)
+    assert(result[1] == 5.)
+    del result
+
+    result = v.plusAx(1.0, y)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 6.)
+    assert(result[1] == 13.)
+    del result
+
+def test_pluxEqAx():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    v.plusEqAx(1.0, v)
+    assert(not v.distributed())
+    assert(v.dim() == 2)
+    assert(v[0] == 2.)
+    assert(v[1] == 2.)
+
+    v[0] = 1.0
+    v[1] = 1.0
+    v.plusEqAx(1.0, w)
+    assert(not v.distributed())
+    assert(v.dim() == 2)
+    assert(v[0] == 0.)
+    assert(v[1] == 2.)
+
+    v[0] = 1.0
+    v[1] = 1.0
+    v.plusEqAx(1.0, x)
+    assert(not v.distributed())
+    assert(v.dim() == 2)
+    assert(v[0] == 4.)
+    assert(v[1] == 5.)
+
+    v[0] = 1.0
+    v[1] = 1.0
+    v.plusEqAx(1.0, y)
+    assert(not v.distributed())
+    assert(v.dim() == 2)
+    assert(v[0] == 6.)
+    assert(v[1] == 13.)
+
+def test_minus():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    result = v.minus(v)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 0.)
+    assert(result[1] == 0.)
+    del result
+
+    result = v.minus(w)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 2.)
+    assert(result[1] == 0.)
+    del result
+
+    result = v.minus(x)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == -2.)
+    assert(result[1] == -3.)
+    del result
+
+    result = v.minus(y)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == -4.)
+    assert(result[1] == -11.)
+    del result
+
+def test_mult():
+    v = libROM.Vector(2, False)
+    v[0] = 1.0
+    v[1] = 1.0
+    w = libROM.Vector(2, False)
+    w[0] = -1.0
+    w[1] = 1.0
+    x = libROM.Vector(2, False)
+    x[0] = 3.0
+    x[1] = 4.0
+    y = libROM.Vector(2, False)
+    y[0] = 5.0
+    y[1] = 12.0
+
+    result = v.mult(2.)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 2.)
+    assert(result[1] == 2.)
+    del result
+
+    result = w.mult(-5.)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 5.)
+    assert(result[1] == -5.)
+    del result
+
+    result = x.mult(3.)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 9.)
+    assert(result[1] == 12.)
+    del result
+
+    result = y.mult(0.5)
+    assert(not result.distributed())
+    assert(result.dim() == 2)
+    assert(result[0] == 2.5)
+    assert(result[1] == 6.)
+    del result
+
 if __name__ == '__main__':
     pytest.main()
-
-
-
-
