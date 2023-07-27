@@ -1,4 +1,5 @@
 build
+*.egg-info
 *.mfem_root
 *.gf
 examples/dmd/DMD_Wave_Equation_*
