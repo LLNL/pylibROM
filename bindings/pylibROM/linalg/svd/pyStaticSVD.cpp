@@ -55,7 +55,7 @@ void init_StaticSVD(pybind11::module& m) {
          double* u_in_data = static_cast<double*>(buf_info.ptr);
          bool result = self.takeSample(u_in_data, time, add_without_increase);
          return result;
-        }, py::arg("u_in"), py::arg("time"),py::arg("add_without_increase") = false)
+        }, py::arg("u_in"),py::arg("time"),py::arg("add_without_increase") = false)
         .def("getSpatialBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getSpatialBasis,py::return_value_policy::reference_internal)
         .def("getTemporalBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getTemporalBasis,py::return_value_policy::reference_internal)
         .def("getSingularValues", (const Vector* (StaticSVD::*)()) &StaticSVD::getSingularValues,py::return_value_policy::reference_internal)
