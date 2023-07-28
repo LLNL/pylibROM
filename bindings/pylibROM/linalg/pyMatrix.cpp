@@ -43,6 +43,14 @@ void init_matrix(pybind11::module_ &m) {
         // Bind the copy constructor
         .def(py::init<const Matrix&>())
 
+        // NOTE (kevin): Having this destructor cause a fatal python memory error
+        //               when defining a derived python class of this Matrix class.
+        //               Valgrind does not show any significant memory leak difference
+        //               whether or not this destructor is defined. Commenting it for now.
+        // .def("__del__", [](Matrix& self) {
+        //     self.~Matrix();
+        // }) // Destructor
+
         // Bind the assignment operator
         .def("__assign__", [](Matrix& self, const Matrix& rhs) { self = rhs; return self; })
 
@@ -171,6 +179,10 @@ void init_matrix(pybind11::module_ &m) {
 
         .def("qr_factorize",(Matrix* (Matrix::*)() const) &Matrix::qr_factorize,py::return_value_policy::take_ownership)
 
+        // TODO (kevin): due to the difference between python and c++, technically we should not take
+        //               row_pivot and row_pivot_owner as input parameters, just returning them in the end as outputs.
+        //               Ideally, these two variables should be instantiated within the libROM function itself,
+        //               which requires a modification on libROM side as well.
         .def("qrcp_pivots_transpose", [](const Matrix& self, std::vector<int>& row_pivot,
                                           std::vector<int>& row_pivot_owner, int pivots_requested) {
             self.qrcp_pivots_transpose(row_pivot.data(), row_pivot_owner.data(), pivots_requested);
@@ -222,8 +234,7 @@ void init_matrix(pybind11::module_ &m) {
                 }
             }
             return data;
-        }) 
-        .def("__del__", [](Matrix& self) { self.~Matrix(); }); // Destructor
+        });
     
     m.def("outerProduct",(Matrix (*)(const Vector&, const Vector&)) &outerProduct);
     m.def("DiagonalMatrixFactory", (Matrix (*)(const Vector&)) &DiagonalMatrixFactory);

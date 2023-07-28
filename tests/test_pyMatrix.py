@@ -926,6 +926,164 @@ def test_pmatrix_inverse():
     assert(asymmetric_matrix_inverse.item(1, 0) == -1.)
     assert(asymmetric_matrix_inverse.item(1, 1) == 1.)
 
+class SecondDifferenceMatrix(libROM.Matrix):
+    def __init__(self, size):
+        mat = np.diag(np.full(size, 2.)) + np.diag(-np.ones(size - 1), 1) + np.diag(-np.ones(size - 1), -1)
+        super().__init__(mat, False, False)
+        return
+    
+class PermutedIdentityMatrix(libROM.Matrix):
+    def __init__(self, permutation, is_inverse=False):
+        super().__init__(len(permutation), len(permutation), False)
+        self.fill(0.)
+
+        if (is_inverse):
+            for k, perm in enumerate(permutation):
+                self[perm, k] = 1
+        else:
+            for k, perm in enumerate(permutation):
+                self[k, perm] = 1
+
+def test_qrcp_pivots_transpose():
+    from mpi4py import MPI
+
+    size = 4
+    permutation = np.array([0, 1, 2, 3])
+    permuted_identity = PermutedIdentityMatrix(permutation, False)
+
+    row_pivot = [0] * size
+    row_pivot_owner = [0] * size
+    row_pivots_requested = size
+    row_pivot, row_pivot_owner = permuted_identity.qrcp_pivots_transpose(row_pivot, row_pivot_owner, row_pivots_requested)
+
+    comm = MPI.COMM_WORLD
+    my_rank = comm.Get_rank()
+    assert(len(row_pivot) == size)
+    for i in range(row_pivots_requested):
+        assert row_pivot_owner[i] == my_rank
+        assert row_pivot[i] < 5
+    permutation=[0,1,2,3] 
+    assert np.array_equal(row_pivot, permutation)
+
+def test_mult_Vector():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    v_data = np.array([2., 4.])
+    v = libROM.Vector(v_data, False, True)
+
+    w = asymmetric_matrix.mult(v)
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 2.)
+    assert(w[1] == 6.)
+
+def test_mult_Vector_arg():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    v_data = np.array([2., 4.])
+    v = libROM.Vector(v_data, False, True)
+    w = libROM.Vector(2, False)
+
+    asymmetric_matrix.mult(v, w)
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 2.)
+    assert(w[1] == 6.)
+
+def test_multPlus():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    v_data = np.array([2., 4.])
+    v = libROM.Vector(v_data, False, True)
+    w_data = np.array([0.5, 1.])
+    w = libROM.Vector(w_data, False, True)
+
+    asymmetric_matrix.multPlus(v, w, 2.0)
+
+    assert(v[0] == 3.)
+    assert(v[1] == 7.)
+
+def test_transposeMult():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    v_data = np.array([2., 4.])
+    v = libROM.Vector(v_data, False, True)
+
+    w = asymmetric_matrix.transposeMult(v)
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 6.)
+    assert(w[1] == 4.)
+
+def test_transposeMult_arg():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    v_data = np.array([2., 4.])
+    v = libROM.Vector(v_data, False, True)
+    w = libROM.Vector(2, False)
+
+    asymmetric_matrix.transposeMult(v, w)
+
+    assert(not w.distributed())
+    assert(w.dim() == 2)
+    assert(w[0] == 6.)
+    assert(w[1] == 4.)
+
+def test_outerProduct_serial():
+    v_data = np.array([1., 2.])
+    w_data = np.array([3., 4., 5.])
+    v = libROM.Vector(v_data, False, True)
+    w = libROM.Vector(w_data, False, True)
+
+    vw = libROM.outerProduct(v, w)
+    assert(vw.numRows() == 2)
+    assert(vw.numColumns() == 3)
+    assert(not vw.distributed())
+    assert(np.array_equal(vw.getData(), [[3., 4., 5.],
+                                         [6., 8., 10.]]))
+
+def test_DiagonalMatrixFactory():
+    w = libROM.Vector([1., 2., 3.], False, True)
+
+    diagonalMatrix = libROM.DiagonalMatrixFactory(w)
+    assert(diagonalMatrix.distributed() == w.distributed())
+    assert(diagonalMatrix.numRows() == w.dim())
+    assert(diagonalMatrix.numColumns() == w.dim())
+    assert(np.array_equal(diagonalMatrix.getData(), [[1., 0., 0.],
+                                                     [0., 2., 0.],
+                                                     [0., 0., 3.]]))
+
+def test_IdentityMatrixFactory():
+    w = libROM.Vector([1., 2., 3.], False, True)
+
+    identityMatrix = libROM.IdentityMatrixFactory(w)
+    assert(identityMatrix.distributed() == w.distributed())
+    assert(identityMatrix.numRows() == w.dim())
+    assert(identityMatrix.numColumns() == w.dim())
+    assert(np.array_equal(identityMatrix.getData(), [[1., 0., 0.],
+                                                     [0., 1., 0.],
+                                                     [0., 0., 1.]]))
+    
+# def test_distribute_and_gather():
+#     from mpi4py import MPI
+#     comm = MPI.COMM_WORLD
+#     my_rank = comm.Get_rank()
+#     num_procs = comm.Get_size()
+
+#     total_rows = 5
+#     answer = libROM.Matrix(total_rows, total_rows, False)
+#     assert(not answer.distributed())
+#     for i in range(total_rows):
+#         for j in range(total_rows):
+#             answer[i, j] = float(i * j)
+
 if __name__ == '__main__':
     pytest.main()
-
