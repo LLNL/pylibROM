@@ -5,7 +5,6 @@ sys.path.append("../build")
 
 import pylibROM.linalg as libROM
 
-
 # Create two Matrix objects
 m1 = libROM.Matrix(3,4, False,True)
 m2 = libROM.Matrix(3,4, False, False)
@@ -152,7 +151,7 @@ m2 = libROM.Matrix(2,2,False,False)
 m2.fill(3.0)
 m2.__setitem__(0, 0,5.0) 
 m2.__setitem__(0, 1,8.0) 
-m2.inverse()
+m2.invert()
 print("Matrix m2 after inverting itself (third overload):")
 print(m2.get_data())
 
@@ -485,16 +484,6 @@ def test_plus():
     print(result_matrix2.get_data())
     assert result_matrix2.get_data() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
 
-    # Compute the inverse of m1 and store it in m1 itself using the third overload
-    m2 = libROM.Matrix(2,2,False,False)
-    m2.fill(3.0)
-    m2.__setitem__(0, 0,5.0) 
-    m2.__setitem__(0, 1,8.0) 
-    m2.inverse()
-    print("Matrix m2 after inverting itself (third overload):")
-    print(m2.get_data())
-    assert m2.get_data() == [[5.0, 8.0], [3.0, 3.0]] 
-
     # Get a column as a Vector
     column = m1.getColumn(1)
     print("column 1 of matrix m1:", column.get_data())  
@@ -685,6 +674,257 @@ def test_plus():
     result = libROM.SpaceTimeProduct(m1, m2, m1, m2,[1.0],False,False,False,True)
     print("SpaceTimeProduct",result.get_data())
     assert result.get_data() == [[450.0, 450.0], [450.0, 450.0]] 
+
+def test_distributed():
+    f = libROM.Matrix(2, 2, False)
+    assert(not f.distributed())
+
+    t = libROM.Matrix(2, 2, True)
+    assert(t.distributed())
+
+def test_balanced():
+    two_by_two = libROM.Matrix(2, 2, False)
+    assert(two_by_two.balanced())
+
+def test_numColumns():
+    two_by_two = libROM.Matrix(2, 2, False)
+    two_by_three = libROM.Matrix(2, 3, False)
+    three_by_two = libROM.Matrix(3, 2, False)
+
+    assert(two_by_two.numColumns() == 2)
+    assert(two_by_three.numColumns() == 3)
+    assert(three_by_two.numColumns() == 2)
+
+def test_setSize():
+    one_by_one = libROM.Matrix(1, 1, False)
+
+    assert(one_by_one.numRows() == 1)
+    assert(one_by_one.numColumns() == 1)
+
+    one_by_one.setSize(2, 2)
+    assert(one_by_one.numRows() == 2)
+    assert(one_by_one.numColumns() == 2)
+
+def test_3arg_constructor_call():
+    symmetric = np.array([[-2., 1.],
+                          [1., -2.]])
+    symmetric_matrix = libROM.Matrix(symmetric, False, True)
+    assert(symmetric_matrix[0, 0] == -2.)
+    assert(symmetric_matrix[0, 1] == 1.)
+    assert(symmetric_matrix[1, 0] == 1.)
+    assert(symmetric_matrix[1, 1] == -2.)
+
+    asymmetric = np.array([[1., 1.],
+                          [0., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    assert(asymmetric_matrix[0, 0] == 1.)
+    assert(asymmetric_matrix[0, 1] == 1.)
+    assert(asymmetric_matrix[1, 0] == 0.)
+    assert(asymmetric_matrix[1, 1] == 1.)
+
+def test_3arg_constructor_item():
+    symmetric = np.array([[-2., 1.],
+                          [1., -2.]])
+    symmetric_matrix = libROM.Matrix(symmetric, False, True)
+    assert(symmetric_matrix.item(0, 0) == -2.)
+    assert(symmetric_matrix.item(0, 1) == 1.)
+    assert(symmetric_matrix.item(1, 0) == 1.)
+    assert(symmetric_matrix.item(1, 1) == -2.)
+
+    asymmetric = np.array([[1., 1.],
+                          [0., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    assert(asymmetric_matrix.item(0, 0) == 1.)
+    assert(asymmetric_matrix.item(0, 1) == 1.)
+    assert(asymmetric_matrix.item(1, 0) == 0.)
+    assert(asymmetric_matrix.item(1, 1) == 1.)
+
+def test_copy_constructor():
+    asymmetric = np.array([[1., 1.],
+                          [0., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix2 = libROM.Matrix(asymmetric_matrix)
+
+    assert(asymmetric_matrix2.numRows() == 2)
+    assert(asymmetric_matrix2.numColumns() == 2)
+    assert(asymmetric_matrix2.item(0, 0) == 1.)
+    assert(asymmetric_matrix2.item(0, 1) == 1.)
+    assert(asymmetric_matrix2.item(1, 0) == 0.)
+    assert(asymmetric_matrix2.item(1, 1) == 1.)
+
+def test_assignment():
+    asymmetric = np.array([[1., 1.],
+                          [0., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix2 = libROM.Matrix()
+    asymmetric_matrix2.__assign__(asymmetric_matrix)
+    
+    assert(asymmetric_matrix2.numRows() == 2)
+    assert(asymmetric_matrix2.numColumns() == 2)
+    assert(asymmetric_matrix2.item(0, 0) == 1.)
+    assert(asymmetric_matrix2.item(0, 1) == 1.)
+    assert(asymmetric_matrix2.item(1, 0) == 0.)
+    assert(asymmetric_matrix2.item(1, 1) == 1.)
+    assert(id(asymmetric_matrix2) is not id(asymmetric_matrix))
+
+def test_get_first_n_columns():
+    d_mat = np.array([[0.0, 1.0, 2.0, 3.0],
+                      [4.0, 5.0, 6.0, 7.0],
+                      [8.0, 9.0, 10.0, 11.0],
+                      [12.0, 13.0, 14.0, 15.0]])
+    matrix = libROM.Matrix(d_mat, False, True)
+    truncated_matrix = matrix.getFirstNColumns(2)
+
+    assert(truncated_matrix.numRows() == 4)
+    assert(truncated_matrix.numColumns() == 2)
+    assert(truncated_matrix.item(0, 0) == 0.)
+    assert(truncated_matrix.item(0, 1) == 1.)
+    assert(truncated_matrix.item(1, 0) == 4.)
+    assert(truncated_matrix.item(1, 1) == 5.)
+    assert(truncated_matrix.item(2, 0) == 8.)
+    assert(truncated_matrix.item(2, 1) == 9.)
+    assert(truncated_matrix.item(3, 0) == 12.)
+    assert(truncated_matrix.item(3, 1) == 13.)
+
+def test_pmatrix_mult():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix2 = libROM.Matrix(asymmetric, False, True)
+    result = asymmetric_matrix.mult(asymmetric_matrix2)
+
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 0.)
+    assert(result.item(1, 0) == 2.)
+    assert(result.item(1, 1) == 1.)
+
+def test_pmatrix_mult_output():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix2 = libROM.Matrix(asymmetric, False, True)
+    result = libROM.Matrix(2, 2, False)
+    asymmetric_matrix.mult(asymmetric_matrix2, result)
+
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 0.)
+    assert(result.item(1, 0) == 2.)
+    assert(result.item(1, 1) == 1.)
+
+def test_pmatrix_transpose_mult_output():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+
+    identity = np.array([[1., 0.],
+                          [0., 1.]])
+    identity_matrix = libROM.Matrix(identity, False, True)
+
+    result = asymmetric_matrix.transposeMult(identity_matrix)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 1.)
+    assert(result.item(1, 0) == 0.)
+    assert(result.item(1, 1) == 1.)
+    del result
+
+    result = identity_matrix.transposeMult(asymmetric_matrix)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 0.)
+    assert(result.item(1, 0) == 1.)
+    assert(result.item(1, 1) == 1.)
+    del result
+
+    result = asymmetric_matrix.transposeMult(asymmetric_matrix)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 2.)
+    assert(result.item(0, 1) == 1.)
+    assert(result.item(1, 0) == 1.)
+    assert(result.item(1, 1) == 1.)
+    del result
+
+def test_void_transpose_mult_output():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+
+    identity = np.array([[1., 0.],
+                          [0., 1.]])
+    identity_matrix = libROM.Matrix(identity, False, True)
+
+    result = libROM.Matrix(2, 2, False)
+
+    asymmetric_matrix.transposeMult(identity_matrix, result)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 1.)
+    assert(result.item(1, 0) == 0.)
+    assert(result.item(1, 1) == 1.)
+
+    identity_matrix.transposeMult(asymmetric_matrix, result)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 1.)
+    assert(result.item(0, 1) == 0.)
+    assert(result.item(1, 0) == 1.)
+    assert(result.item(1, 1) == 1.)
+
+    asymmetric_matrix.transposeMult(asymmetric_matrix, result)
+    assert(result.numRows() == 2)
+    assert(result.numColumns() == 2)
+    assert(result.item(0, 0) == 2.)
+    assert(result.item(0, 1) == 1.)
+    assert(result.item(1, 0) == 1.)
+    assert(result.item(1, 1) == 1.)
+
+def test_void_inverse():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix_inverse = libROM.Matrix(2, 2, False)
+    asymmetric_matrix.inverse(asymmetric_matrix_inverse)
+
+    assert(asymmetric_matrix_inverse.numRows() == 2)
+    assert(asymmetric_matrix_inverse.numColumns() == 2)
+    assert(asymmetric_matrix_inverse.item(0, 0) == 1.)
+    assert(asymmetric_matrix_inverse.item(0, 1) == 0.)
+    assert(asymmetric_matrix_inverse.item(1, 0) == -1.)
+    assert(asymmetric_matrix_inverse.item(1, 1) == 1.)
+
+def test_inverse_in_place():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix.invert()
+
+    assert(asymmetric_matrix.numRows() == 2)
+    assert(asymmetric_matrix.numColumns() == 2)
+    assert(asymmetric_matrix.item(0, 0) == 1.)
+    assert(asymmetric_matrix.item(0, 1) == 0.)
+    assert(asymmetric_matrix.item(1, 0) == -1.)
+    assert(asymmetric_matrix.item(1, 1) == 1.)
+
+def test_pmatrix_inverse():
+    asymmetric = np.array([[1., 0.],
+                          [1., 1.]])
+    asymmetric_matrix = libROM.Matrix(asymmetric, False, True)
+    asymmetric_matrix_inverse = asymmetric_matrix.inverse()
+
+    assert(asymmetric_matrix_inverse.numRows() == 2)
+    assert(asymmetric_matrix_inverse.numColumns() == 2)
+    assert(asymmetric_matrix_inverse.item(0, 0) == 1.)
+    assert(asymmetric_matrix_inverse.item(0, 1) == 0.)
+    assert(asymmetric_matrix_inverse.item(1, 0) == -1.)
+    assert(asymmetric_matrix_inverse.item(1, 1) == 1.)
 
 if __name__ == '__main__':
     pytest.main()
