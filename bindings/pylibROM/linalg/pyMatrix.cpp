@@ -30,7 +30,8 @@ void init_matrix(pybind11::module_ &m) {
        
         // Constructor
         .def(py::init<>())
-        .def(py::init<int, int, bool, bool>())
+        .def(py::init<int, int, bool, bool>(),
+            py::arg("num_rows"), py::arg("num_cols"), py::arg("distributed"), py::arg("randomized") = false)
         .def(py::init([](py::array_t<double> mat, bool distributed, bool copy_data = true) {
             py::buffer_info buf_info = mat.request();
             int num_rows = buf_info.shape[0];     
@@ -146,16 +147,13 @@ void init_matrix(pybind11::module_ &m) {
         })
         .def("transposeMult", (void (Matrix::*)(const Vector&, Vector&) const) &Matrix::transposeMult)
 
-        .def("inverse",[](const Matrix& self) {
-                 Matrix* result = 0;
-                 self.inverse(result);
-                 return result;
-             },py::return_value_policy::take_ownership)
+        .def("inverse", (Matrix* (Matrix::*)() const) &Matrix::inverse, py::return_value_policy::take_ownership)
         .def("inverse",[](const Matrix& self,Matrix* result){
              self.inverse(*result);
         })
         .def("inverse", (void (Matrix::*)(Matrix&) const) &Matrix::inverse)
-        .def("inverse",(void (Matrix::*)()) &Matrix::inverse) 
+        // NOTE: this cannot be discerned with Matrix* inverse() in python realm. Changing the name is inevitable.
+        .def("invert",(void (Matrix::*)()) &Matrix::inverse) 
 
         .def("getColumn",[](const Matrix& self, int column) {
                  Vector* result = new Vector();
@@ -181,13 +179,23 @@ void init_matrix(pybind11::module_ &m) {
 
         .def("orthogonalize", (void (Matrix::*)()) &Matrix::orthogonalize)
 
+        .def("item", (const double& (Matrix::*)(int, int) const) &Matrix::item)
         .def("__getitem__", [](Matrix& self, int row, int col) { 
-            const double& value=self.item(row, col); 
-            return value;
-            })
+            return self(row, col);
+        })
+        .def("__getitem__", [](Matrix& self, py::tuple indexes) {
+            // TODO: raise python-type error
+            assert(indexes.size() == 2);
+            return self(py::cast<int>(indexes[0]), py::cast<int>(indexes[1]));
+        })
         .def("__setitem__", [](Matrix& self, int row, int col, double value) { 
-            self.item(row, col) = value; 
-            })
+            self(row, col) = value; 
+        })
+        .def("__setitem__", [](Matrix& self, py::tuple indexes, double value) {
+            // TODO: raise python-type error
+            assert(indexes.size() == 2);
+            self(py::cast<int>(indexes[0]), py::cast<int>(indexes[1])) = value;
+        })
 
         .def("__call__", (const double& (Matrix::*)(int,int) const) &Matrix::operator())
         .def("__call__", (double& (Matrix::*)(int,int)) &Matrix::operator())
