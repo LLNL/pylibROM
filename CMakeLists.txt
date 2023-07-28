@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+project(pylibROM)
+
 set(CMAKE_BUILD_TYPE Debug)
 set(PYBIND11_FINDPYTHON ON)
 
@@ -21,12 +23,21 @@ cmake_print_variables(LIBROM_DIR)
 cmake_print_variables(LIBROM_SCRIPTS_DIR)
 
 if (BUILD_DEPS)
+	# add_custom_command(
+	# 	OUTPUT LIBROM_BUILD
+	# 	WORKING_DIRECTORY ${LIBROM_DIR}
+	# 	COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh
+	# 	ARGS -m -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
+	# 	COMMENT "Building libROM..."
+	# )
+	# add_custom_target(RUN_LIBROM_BUILD ALL DEPENDS LIBROM_BUILD)
+
 	ExternalProject_Add(
         	libROM
         	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
         	CONFIGURE_COMMAND ""
-        	BINARY_DIR ${LIBROM_SCRIPTS_DIR}
-        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -m -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
+        	BINARY_DIR ${LIBROM_DIR}
+        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
         	INSTALL_COMMAND ""
 	)	
 	message("Building libROM dependency...")
@@ -37,7 +48,7 @@ set(LIBROM_INCLUDE_DIR ${LIBROM_DIR}/lib)
 link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cmake since FetchContent will not work for compile.sh
 
 #===================== pylibROM =============================
-project(pylibROM)
+
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -56,7 +67,7 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/pyVector.cpp
     bindings/pylibROM/linalg/pyBasisGenerator.cpp
     bindings/pylibROM/linalg/pyBasisReader.cpp
-	  bindings/pylibROM/linalg/pyBasisWriter.cpp
+	bindings/pylibROM/linalg/pyBasisWriter.cpp
     bindings/pylibROM/linalg/pyOptions.cpp
     bindings/pylibROM/linalg/svd/pySVD.cpp
     bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
@@ -65,5 +76,4 @@ pybind11_add_module(pylibROM
 )
 message("building pylibROM...")
 
-target_link_libraries(pylibROM PRIVATE ROM) 
-
+target_link_libraries(pylibROM PRIVATE ROM)
