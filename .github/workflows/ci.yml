@@ -78,9 +78,9 @@ jobs:
         run: |
             cd tests
             echo run pyVector unit test
-            pytest test_pyVector.py
+            pytest test_pyVector.py --verbose
             echo run pyMatrix unit test
-            pytest test_pyMatrix.py
+            pytest test_pyMatrix.py --verbose
   baseline:
     runs-on: ubuntu-latest
     needs: [docker-base-image]
@@ -112,7 +112,7 @@ jobs:
         run: |
             cd tests
             echo run pyVector unit test
-            pytest test_pyVector.py
+            pytest test_pyVector.py --verbose
             echo run pyMatrix unit test
-            pytest test_pyMatrix.py
+            pytest test_pyMatrix.py --verbose
     
