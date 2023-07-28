@@ -40,22 +40,23 @@ time = 0.5
 add_without_increase = False
 result = staticsvd.takeSample(u_in, time, add_without_increase)
 print("takeSample() result:", result)
-
+    
 # Test the getSpatialBasis function
 spatial_basis = staticsvd.getSpatialBasis()
-print("getSpatialBasis():", spatial_basis.get_data())
+print("getSpatialBasis():", spatial_basis.getData())
 
 # Test the getTemporalBasis function
 temporal_basis = staticsvd.getTemporalBasis()
-print("getTemporalBasis():", temporal_basis.get_data())
+print("getTemporalBasis():", temporal_basis.getData())
 
 # Test the getSingularValues function
 singular_values = staticsvd.getSingularValues()
-print("getSingularValues():", singular_values.get_data())
+print("getSingularValues():", singular_values.getData())
 
 # Test the getSnapshotMatrix function
 snapshot_matrix = staticsvd.getSnapshotMatrix()
-print("getSnapshotMatrix():", snapshot_matrix.get_data())
+print("getSnapshotMatrix():", snapshot_matrix.getData())
+
 
 def test_plus():
     options = libROM.Options(3, 10, 3, True, True)
@@ -91,22 +92,23 @@ def test_plus():
     add_without_increase = False
     result = staticsvd.takeSample(u_in, time, add_without_increase)
     assert result == True
-
+   
     # Test the getSpatialBasis function
     spatial_basis = staticsvd.getSpatialBasis()
-    assert spatial_basis.get_data() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731]]
+    assert spatial_basis.getData() == [[-0.26726124],[-0.53452248],[-0.80178373]]
 
     # Test the getTemporalBasis function
     temporal_basis = staticsvd.getTemporalBasis()
-    assert temporal_basis.get_data() == [[-1.0]]
+    assert temporal_basis.getData() == [[-1.0]]
 
     # Test the getSingularValues function
     singular_values = staticsvd.getSingularValues()
-    assert singular_values.get_data() == [3.7416573867739418]
+    assert singular_values.getData() == [3.74165739]
 
     # Test the getSnapshotMatrix function
     snapshot_matrix = staticsvd.getSnapshotMatrix()
-    assert snapshot_matrix.get_data() == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019]]
+    assert snapshot_matrix.getData() == [[-3.74165739],[ 0.42179344],[ 0.63269017]]
+
 
 if __name__ == '__main__':
     pytest.main()

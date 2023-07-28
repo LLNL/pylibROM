@@ -38,43 +38,43 @@ print("isNewBasis: ",is_new_basis)
 
 # Test getSpatialBasis function
 spatial_basis1 = basis_reader.getSpatialBasis(0.5)
-print("Spatial Basis1: ", spatial_basis1.get_data())
+print("Spatial Basis1: ", spatial_basis1.getData())
 
 # Test getSpatialBasis function
 spatial_basis2 = basis_reader.getSpatialBasis(0.5,1)
-print("Spatial Basis2: ", spatial_basis2.get_data())
+print("Spatial Basis2: ", spatial_basis2.getData())
 
 # Test getSpatialBasis function
 spatial_basis3 = basis_reader.getSpatialBasis(0.5,1,1)
-print("Spatial Basis3: ", spatial_basis3.get_data())
+print("Spatial Basis3: ", spatial_basis3.getData())
 
 # Test getSpatialBasis function
 spatial_basis4 = basis_reader.getSpatialBasis(0.5,0.7)
-print("Spatial Basis4: ", spatial_basis4.get_data())
+print("Spatial Basis4: ", spatial_basis4.getData())
 
 # Test getTemporalBasis function
 temporal_basis1 = basis_reader.getTemporalBasis(0.5)
-print("Temporal Basis1:", temporal_basis1.get_data())
+print("Temporal Basis1:", temporal_basis1.getData())
 
 # Test getTemporalBasis function
 temporal_basis2 = basis_reader.getTemporalBasis(0.5, 1)
-print("Temporal Basis2:",temporal_basis2.get_data())
+print("Temporal Basis2:",temporal_basis2.getData())
 
 # Test getTemporalBasis function
 temporal_basis3 = basis_reader.getTemporalBasis(0.5, 1, 1)
-print("Temporal Basis3:",temporal_basis3.get_data())
+print("Temporal Basis3:",temporal_basis3.getData())
 
 # Test getTemporalBasis function
 temporal_basis4 = basis_reader.getTemporalBasis(0.5, 0.7)
-print("Temporal Basis4:",temporal_basis4.get_data())
+print("Temporal Basis4:",temporal_basis4.getData())
 
 # Test getSingularValues function
 singular_values1 = basis_reader.getSingularValues(0.5)
-print("Singular Values1:", singular_values1.get_data())
+print("Singular Values1:", singular_values1.getData())
 
 # Test getSingularValues function
 singular_values2 = basis_reader.getSingularValues(0.5, 0.7)
-print("Singular Values2:", singular_values2.get_data())
+print("Singular Values2:", singular_values2.getData())
 
 # Test getDim function
 dim = basis_reader.getDim("basis", 0.5)
@@ -89,15 +89,15 @@ basis_reader1 = libROM.BasisReader("basis.h5_snapshot", libROM.Formats.HDF5)
 
 # Test getSnapshotMatrix function
 snapshot_matrix1 = basis_reader1.getSnapshotMatrix(0.5)
-print("Snapshot Matrix1:", snapshot_matrix1.get_data())
+print("Snapshot Matrix1:", snapshot_matrix1.getData())
 
 # Test getSnapshotMatrix function
 snapshot_matrix2 = basis_reader1.getSnapshotMatrix(0.5, 1)
-print("Snapshot Matrix2:", snapshot_matrix2.get_data())
+print("Snapshot Matrix2:", snapshot_matrix2.getData())
 
 # Test getSnapshotMatrix function
 snapshot_matrix3 = basis_reader1.getSnapshotMatrix(0.5, 1, 1)
-print("Snapshot Matrix3:", snapshot_matrix3.get_data())
+print("Snapshot Matrix3:", snapshot_matrix3.getData())
 
 
 def test_plus():
@@ -130,47 +130,47 @@ def test_plus():
 
     # Test isNewBasis function
     is_new_basis = basis_reader.isNewBasis(0.5)
-    assert is_new_basis.get_data() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]   
+    assert is_new_basis.getData() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]   
 
     # Test getSpatialBasis function
     spatial_basis1 = basis_reader.getSpatialBasis(0.5)
-    assert spatial_basis1.get_data() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]  
+    assert spatial_basis1.getData() == [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]  
 
     # Test getSpatialBasis function
     spatial_basis2 = basis_reader.getSpatialBasis(0.5, 1)
-    assert spatial_basis2.get_data() ==  [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]
+    assert spatial_basis2.getData() ==  [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]]
 
     # Test getSpatialBasis function
     spatial_basis3 = basis_reader.getSpatialBasis(0.5, 1, 1)
-    assert spatial_basis3.get_data() ==  [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]] 
+    assert spatial_basis3.getData() ==  [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.4e-323]] 
 
     # Test getSpatialBasis function
     spatial_basis4 = basis_reader.getSpatialBasis(0.5, 0.7)
-    assert spatial_basis4.get_data() ==  [[-1.0]]
+    assert spatial_basis4.getData() ==  [[-1.0]]
 
     # Test getTemporalBasis function
     temporal_basis1 = basis_reader.getTemporalBasis(0.5)
-    assert temporal_basis1.get_data() == [[-1.0]]  
+    assert temporal_basis1.getData() == [[-1.0]]  
 
     # Test getTemporalBasis function
     temporal_basis2 = basis_reader.getTemporalBasis(0.5, 1)
-    assert temporal_basis2.get_data() ==  [[-1.0]] 
+    assert temporal_basis2.getData() ==  [[-1.0]] 
 
     # Test getTemporalBasis function
     temporal_basis3 = basis_reader.getTemporalBasis(0.5, 1, 1)
-    assert temporal_basis3.get_data() ==  [[-1.0]]
+    assert temporal_basis3.getData() ==  [[-1.0]]
 
     # Test getTemporalBasis function
     temporal_basis4 = basis_reader.getTemporalBasis(0.5, 0.7)
-    assert temporal_basis4.get_data() ==  [[-1.0]] 
+    assert temporal_basis4.getData() ==  [[-1.0]] 
 
     # Test getSingularValues function
     singular_values1 = basis_reader.getSingularValues(0.5)
-    assert singular_values1.get_data() ==  [3.7416573867739418] 
+    assert singular_values1.getData() ==  [3.7416573867739418] 
 
     # Test getSingularValues function
     singular_values2 = basis_reader.getSingularValues(0.5, 0.7)
-    assert singular_values2.get_data() == [3.7416573867739418]  
+    assert singular_values2.getData() == [3.7416573867739418]  
 
     # Test getDim function
     dim = basis_reader.getDim("basis", 0.5)
@@ -185,15 +185,15 @@ def test_plus():
 
     # Test getSnapshotMatrix function
     snapshot_matrix1 = basis_reader1.getSnapshotMatrix(0.5)
-    assert snapshot_matrix1.get_data()== [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]] 
+    assert snapshot_matrix1.getData()== [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]] 
 
     # Test getSnapshotMatrix function
     snapshot_matrix2 = basis_reader1.getSnapshotMatrix(0.5, 1)
-    assert snapshot_matrix2.get_data() == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]
+    assert snapshot_matrix2.getData() == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]
 
     # Test getSnapshotMatrix function
     snapshot_matrix3 = basis_reader1.getSnapshotMatrix(0.5, 1, 1)
-    assert snapshot_matrix3.get_data == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]
+    assert snapshot_matrix3.getData() == [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]
 
 if __name__ == "__main__":
     pytest.main()

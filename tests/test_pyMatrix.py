@@ -14,14 +14,14 @@ m1.fill(2.0)
 m2.__assign__(m1)
 
 # Print the initial data for m1 and m2
-print("Initial data for m1:", m1.get_data())
-print("Initial data for m2:", m2.get_data())
+print("Initial data for m1:", m1.getData())
+print("Initial data for m2:", m2.getData())
 
 # Use the addition operator
 m1 += m2
 
 # Print the updated data for v1
-print("Updated data for m1 after addition:", m1.get_data())
+print("Updated data for m1 after addition:", m1.getData())
 
 #set size 
 m1.setSize(4,5)
@@ -38,66 +38,66 @@ print("number of columns in m1:", m1.numColumns())
 print("number of Distributed Rows in m1:", m1.numDistributedRows())
 
 m1.fill(3.0)
-print("Initial data for m1:", m1.get_data())
+print("Initial data for m1:", m1.getData())
 
 # Call the getFirstNColumns method with return type Matrix*
 result1 = m1.getFirstNColumns(3)
-print("Get First 3 columns of m1",result1.get_data())  
+print("Get First 3 columns of m1",result1.getData())  
 
 # Call the getFirstNColumns method with input parameters of n,matrix*
 m3 = libROM.Matrix()
 m1.getFirstNColumns(3, m3)
-print("Get first 3 columns of m1 to m3",m3.get_data()) 
+print("Get first 3 columns of m1 to m3",m3.getData()) 
 
 # Multiply matrix1 with matrix2
 result_matrix1 = m2.mult(m1)
-print("Matrix multiplication of m1 and m2",result_matrix1.get_data())
+print("Matrix multiplication of m1 and m2",result_matrix1.getData())
 
 # Multiply matrix1 with matrix2 
 result_matrix2 =  libROM.Matrix()
 m2.mult(m1,result_matrix2)
-print("The product Matrix of m1 and m2",result_matrix2.get_data())
+print("The product Matrix of m1 and m2",result_matrix2.getData())
 
 
 # Multiply matrix1 with vector2
 v1 = libROM.Vector(5, False)
 v1.fill(2.0)
 result_vector1 = m1.mult(v1)
-print("Matrix multiplication of m1 and vector v1",result_vector1.get_data())
+print("Matrix multiplication of m1 and vector v1",result_vector1.getData())
 
 # Multiply matrix1 with matrix2 
 result_vector2 =  libROM.Vector()
 m1.mult(v1,result_vector2)
-print("The product vector of m1 and vector v1",result_vector2.get_data())
+print("The product vector of m1 and vector v1",result_vector2.getData())
 
 # Test the first pointwise_mult function
 v2 = libROM.Vector(5, False)
 v2.fill(2.0)
 result_vector3 =  libROM.Vector(5,False)
 m1.pointwise_mult(1, v2, result_vector3)
-print("The result vector of  pointwise_multiplication of 2nd row of m1 and vector v1", result_vector3.get_data())
+print("The result vector of  pointwise_multiplication of 2nd row of m1 and vector v1", result_vector3.getData())
 
 # Test the second pointwise_mult function
 m1.pointwise_mult(1, v1)
-print("The product vector v1 after pointwise_multiplication with 2nd row of m1", v1.get_data())
+print("The product vector v1 after pointwise_multiplication with 2nd row of m1", v1.getData())
 
 #Multiplies two matrices element-wise
 result_matrix=m1.elementwise_mult(m1)
-print("Result matrix of Element wise Matrix multiplication of m1 with m1",result_matrix.get_data())
+print("Result matrix of Element wise Matrix multiplication of m1 with m1",result_matrix.getData())
 
 #Multiplies two matrices element-wise and fills result with the answer
 m3=libROM.Matrix(4,5, False,True)
 m3.fill(2.0)
 m3.elementwise_mult(m1,m3)
-print("Element wise Matrix multiplication of m3 with m1",m3.get_data())
+print("Element wise Matrix multiplication of m3 with m1",m3.getData())
 
 #Square every element in the matrix
 result_matrix = m1.elementwise_square()
-print("Result matrix of element wise Square multiplication of matrix m1 ",result_matrix.get_data())
+print("Result matrix of element wise Square multiplication of matrix m1 ",result_matrix.getData())
 
 #Square every element in the matrix
 m1.elementwise_square(m1)
-print("Square every element in the matrix m1 ",m1.get_data())
+print("Square every element in the matrix m1 ",m1.getData())
 
 #Computes a += this*b*c
 a=libROM.Vector(4,False)
@@ -106,17 +106,17 @@ b=libROM.Vector(5,False)
 b.fill(3.0)
 c=3.0
 m3.multPlus(a,b,c)
-print("multPlus function of m3",a.get_data())
+print("multPlus function of m3",a.getData())
 
 # Multiplies the transpose of a Matrix with other and returns the product
 m1=m2
 result_matrix1 = m1.transposeMult(m2)
-print("Matrix multiplication of transpose of m1 and m2",result_matrix1.get_data())
+print("Matrix multiplication of transpose of m1 and m2",result_matrix1.getData())
 
 # Multiplies the transpose of a Matrix with other and returns the product
 result_matrix2 =  libROM.Matrix()
 m2.transposeMult(m1,result_matrix2)
-print("The product Matrix of transpose multiplication of m2 and m1",result_matrix2.get_data())
+print("The product Matrix of transpose multiplication of m2 and m1",result_matrix2.getData())
 
 
 # Multiplies the transpose of a Matrix with other vector and returns the product
@@ -125,12 +125,12 @@ v2 = libROM.Vector(3, False)
 m1.fill(2.0)
 v2.fill(2.0)
 result_vector1 = m1.transposeMult(v2)
-print("Matrix multiplication of transpose of m1 and vector v2",result_vector1.get_data())
+print("Matrix multiplication of transpose of m1 and vector v2",result_vector1.getData())
 
 # Multiplies the transpose of a Matrix with other vector and returns the product
 result_vector2 =  libROM.Vector()
 m1.transposeMult(v2,result_vector2) 
-print("The product vector of transpose multiplication of m1 and vector v2",result_vector2.get_data())
+print("The product vector of transpose multiplication of m1 and vector v2",result_vector2.getData())
 
 #Computes and returns the inverse of this
 m2 = libROM.Matrix(2,2,False,False)
@@ -139,13 +139,13 @@ m2.__setitem__(0, 0,5.0)
 m2.__setitem__(0, 1,8.0) 
 result_matrix1 = m2.inverse()
 print("Inverse of matrix m2 (first overload):")
-print(result_matrix1.get_data())
+print(result_matrix1.getData())
 
 # Compute and store the inverse of m1 in the result_matrix using the second overload
 result_matrix2 = libROM.Matrix(2,2,False,False)
 m2.inverse(result_matrix2)
 print("Result matrix of inverse of matrix m2 (second overload):")
-print(result_matrix2.get_data())
+print(result_matrix2.getData())
 
 # Compute the inverse of m1 and store it in m1 itself using the third overload
 m2 = libROM.Matrix(2,2,False,False)
@@ -154,16 +154,16 @@ m2.__setitem__(0, 0,5.0)
 m2.__setitem__(0, 1,8.0) 
 m2.inverse()
 print("Matrix m2 after inverting itself (third overload):")
-print(m2.get_data())
+print(m2.getData())
 
 # Get a column as a Vector
 column = m1.getColumn(1)
-print("column 1 of matrix m1:", column.get_data())  
+print("column 1 of matrix m1:", column.getData())  
 
 #Get a column as a vector
 result_vector1=libROM.Vector()
 m1.getColumn(1,result_vector1)
-print("column 1 of matrix m1 as a vector",result_vector1.get_data())
+print("column 1 of matrix m1 as a vector",result_vector1.getData())
 
 # Transpose the matrix
 print("matrix m2")
@@ -206,7 +206,7 @@ m2 = libROM.Matrix(4,4,False,False)
 for i in range(4):
     for j in range(4): 
             m2.__setitem__(i,j,j) 
-print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
+print("qrcp_pivots_transpose to the matrix m2",m2.getData())
 row_pivot = [0,0,0,0]
 row_pivot_owner = [0,0,0,0]
 row_pivots_requested = 4 
@@ -235,7 +235,7 @@ for i in range(m2.numRows()):
 matrix = libROM.Matrix(3, 3,False,False)
 matrix.fill(3.0)
 matrix.__setitem__(0, 0,2.0) 
-print("Set Item (0,0) of matrix to 2.0 ",matrix.get_data())
+print("Set Item (0,0) of matrix to 2.0 ",matrix.getData())
 print("Get Item (0,0)",matrix.__getitem__(0, 0) )
 value= matrix(0, 0)
 print("value",value)
@@ -249,13 +249,13 @@ a.fill(2.0)
 b=libROM.Vector(5,False)
 b.fill(3.0)
 result_matrix=libROM.outerProduct(a,b)
-print("outerProduct",result_matrix.get_data())
+print("outerProduct",result_matrix.getData())
 
 result_matrix=libROM.DiagonalMatrixFactory(a)
-print("DiagonalMatrixFactory",result_matrix.get_data())
+print("DiagonalMatrixFactory",result_matrix.getData())
 
 result_matrix=libROM.IdentityMatrixFactory(a)
-print("IdentityMatrixFactory",result_matrix.get_data())
+print("IdentityMatrixFactory",result_matrix.getData())
 
 
 
@@ -266,18 +266,18 @@ m1.__setitem__(1, 0, 3)
 m1.__setitem__(1, 1, -5)
 
 serialsvd1=libROM.SerialSVD(m1)
-print("U",serialsvd1.U.get_data())
-print("S",serialsvd1.S.get_data())
-print("V",serialsvd1.V.get_data())
+print("U",serialsvd1.U.getData())
+print("S",serialsvd1.S.getData())
+print("V",serialsvd1.V.getData())
 
 
 U=libROM.Matrix(2,2,False,False)
 S=libROM.Vector(2,False)
 V=libROM.Matrix(2,2,False,False)
 libROM.SerialSVD(m1,U,S,V)
-print("U",U.get_data())
-print("S",S.get_data())
-print("V",V.get_data())
+print("U",U.getData())
+print("S",S.getData())
+print("V",V.getData())
 
 
 m1=libROM.Matrix(3,3,False,False)
@@ -291,12 +291,12 @@ m1.__setitem__(2,0,0.0)
 m1.__setitem__(2,1,2.0)
 m1.__setitem__(2,2,4.0)
 eigenpair=libROM.SymmetricRightEigenSolve(m1)
-print("Eigen pair ev",eigenpair.ev.get_data())
+print("Eigen pair ev",eigenpair.ev.getData())
 print("Eigen pair eigs",eigenpair.eigs)
 
 complexeigenpair=libROM.NonSymmetricRightEigenSolve(m1)
-print("Complex Eigen pair ev",complexeigenpair.ev_real.get_data())
-print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.get_data())
+print("Complex Eigen pair ev",complexeigenpair.ev_real.getData())
+print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.getData())
 print("Complex Eigen pair eigs",complexeigenpair.eigs)
 
 # Create the input arguments
@@ -318,7 +318,7 @@ m1.fill(5.0)
 v= libROM.Vector()
 # result = libROM.SpaceTimeProduct(As, At, Bs, Bt)
 result = libROM.SpaceTimeProduct(m1, m2, m1, m2,[1.0],False,False,False,True)
-print("SpaceTimeProduct",result.get_data())
+print("SpaceTimeProduct",result.getData())
 
 def test_plus():
     m1 = libROM.Matrix(3,4, False,True)
@@ -328,18 +328,18 @@ def test_plus():
     m2.__assign__(m1)
 
     # Print the initial data for m1 and m2
-    print("Initial data for m1:", m1.get_data())
-    print("Initial data for m2:", m2.get_data())
+    print("Initial data for m1:", m1.getData())
+    print("Initial data for m2:", m2.getData())
 
-    result = m2.get_data()
+    result = m2.getData()
     assert result == [[2.0, 2.0, 2.0, 2.0], [2.0, 2.0, 2.0, 2.0], [2.0, 2.0, 2.0, 2.0]]
     
     # Use the addition operator
     m1 += m2
 
     # Print the updated data for v1
-    print("Updated data for m1 after addition:", m1.get_data())
-    assert m1.get_data() == [[4.0, 4.0, 4.0, 4.0], [4.0, 4.0, 4.0, 4.0], [4.0, 4.0, 4.0, 4.0]]
+    print("Updated data for m1 after addition:", m1.getData())
+    assert m1.getData() == [[4.0, 4.0, 4.0, 4.0], [4.0, 4.0, 4.0, 4.0], [4.0, 4.0, 4.0, 4.0]]
 
     #set size 
     m1.setSize(4,5)
@@ -358,78 +358,78 @@ def test_plus():
     assert m1.numDistributedRows() == 4
     
     m1.fill(3.0)
-    print("Initial data for m1:", m1.get_data())
-    assert m1.get_data() == [[3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0]]
+    print("Initial data for m1:", m1.getData())
+    assert m1.getData() == [[3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0], [3.0, 3.0, 3.0, 3.0, 3.0]]
     
     # Call the getFirstNColumns method with return type Matrix*
     result1 = m1.getFirstNColumns(3)
-    print("Get First 3 columns of m1",result1.get_data())  
-    assert result1.get_data() == [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
+    print("Get First 3 columns of m1",result1.getData())  
+    assert result1.getData() == [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
 
     # Call the getFirstNColumns method with input parameters of n,matrix*
     m3 = libROM.Matrix()
     m1.getFirstNColumns(3, m3)
-    print("Get first 3 columns of m1 to m3",m3.get_data()) 
-    assert result1.get_data() == [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
+    print("Get first 3 columns of m1 to m3",m3.getData()) 
+    assert result1.getData() == [[3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
 
     # Multiply matrix1 with matrix2
     result_matrix1 = m2.mult(m1)
-    print("Matrix multiplication of m1 and m2",result_matrix1.get_data())
-    assert result_matrix1.get_data() == [[24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0]]
+    print("Matrix multiplication of m1 and m2",result_matrix1.getData())
+    assert result_matrix1.getData() == [[24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0]]
 
     # Multiply matrix1 with matrix2 
     result_matrix2 =  libROM.Matrix()
     m2.mult(m1,result_matrix2)
-    print("The product Matrix of m1 and m2",result_matrix2.get_data())
-    assert result_matrix2.get_data() == [[24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0]]
+    print("The product Matrix of m1 and m2",result_matrix2.getData())
+    assert result_matrix2.getData() == [[24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0], [24.0, 24.0, 24.0, 24.0, 24.0]]
 
     # Multiply matrix1 with vector2
     v1 = libROM.Vector(5, False)
     v1.fill(2.0)
     result_vector1 = m1.mult(v1)
-    print("Matrix multiplication of m1 and vector v1",result_vector1.get_data())
-    assert result_vector1.get_data() == [30.0, 30.0, 30.0, 30.0] 
+    print("Matrix multiplication of m1 and vector v1",result_vector1.getData())
+    assert result_vector1.getData() == [30.0, 30.0, 30.0, 30.0] 
 
     # Multiply matrix1 with matrix2 
     result_vector2 =  libROM.Vector()
     m1.mult(v1,result_vector2)
-    print("The product vector of m1 and vector v1",result_vector2.get_data())
-    assert result_vector2.get_data() == [30.0, 30.0, 30.0, 30.0]
+    print("The product vector of m1 and vector v1",result_vector2.getData())
+    assert result_vector2.getData() == [30.0, 30.0, 30.0, 30.0]
 
     # Test the first pointwise_mult function
     v2 = libROM.Vector(5, False)
     v2.fill(2.0)
     result_vector3 =  libROM.Vector(5,False)
     m1.pointwise_mult(1, v2, result_vector3)
-    print("The result vector of  pointwise_multiplication of 2nd row of m1 and vector v1", result_vector3.get_data())
-    assert result_vector3.get_data() == [6.0, 6.0, 6.0, 6.0, 6.0] 
+    print("The result vector of  pointwise_multiplication of 2nd row of m1 and vector v1", result_vector3.getData())
+    assert result_vector3.getData() == [6.0, 6.0, 6.0, 6.0, 6.0] 
 
     # Test the second pointwise_mult function
     m1.pointwise_mult(1, v1)
-    print("The product vector v1 after pointwise_multiplication with 2nd row of m1", v1.get_data())
-    assert v1.get_data() == [6.0, 6.0, 6.0, 6.0, 6.0]
+    print("The product vector v1 after pointwise_multiplication with 2nd row of m1", v1.getData())
+    assert v1.getData() == [6.0, 6.0, 6.0, 6.0, 6.0]
 
     #Multiplies two matrices element-wise
     result_matrix=m1.elementwise_mult(m1)
-    print("Result matrix of Element wise Matrix multiplication of m1 with m1",result_matrix.get_data())
-    assert result_matrix.get_data() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]] 
+    print("Result matrix of Element wise Matrix multiplication of m1 with m1",result_matrix.getData())
+    assert result_matrix.getData() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]] 
 
     #Multiplies two matrices element-wise and fills result with the answer
     m3=libROM.Matrix(4,5, False,True)
     m3.fill(2.0)
     m3.elementwise_mult(m1,m3)
-    print("Element wise Matrix multiplication of m3 with m1",m3.get_data())
-    assert m3.get_data() == [[6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0]]
+    print("Element wise Matrix multiplication of m3 with m1",m3.getData())
+    assert m3.getData() == [[6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0]]
 
     #Square every element in the matrix
     result_matrix = m1.elementwise_square()
-    print("Result matrix of element wise Square multiplication of matrix m1 ",result_matrix.get_data())
-    assert result_matrix.get_data() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]]
+    print("Result matrix of element wise Square multiplication of matrix m1 ",result_matrix.getData())
+    assert result_matrix.getData() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]]
 
     #Square every element in the matrix
     m1.elementwise_square(m1)
-    print("Square every element in the matrix m1 ",m1.get_data())
-    assert m1.get_data() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]]
+    print("Square every element in the matrix m1 ",m1.getData())
+    assert m1.getData() == [[9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0], [9.0, 9.0, 9.0, 9.0, 9.0]]
 
     #Computes a += this*b*c
     a=libROM.Vector(4,False)
@@ -438,20 +438,20 @@ def test_plus():
     b.fill(3.0)
     c=3.0
     m3.multPlus(a,b,c)
-    print("multPlus function of m3",a.get_data())
-    assert a.get_data() == [272.0, 272.0, 272.0, 272.0]
+    print("multPlus function of m3",a.getData())
+    assert a.getData() == [272.0, 272.0, 272.0, 272.0]
 
     # Multiplies the transpose of a Matrix with other and returns the product
     m1=m2
     result_matrix1 = m1.transposeMult(m2)
-    print("Matrix multiplication of transpose of m1 and m2",result_matrix1.get_data())
-    assert result_matrix1.get_data() == [[12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0]]
+    print("Matrix multiplication of transpose of m1 and m2",result_matrix1.getData())
+    assert result_matrix1.getData() == [[12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0]]
 
     # Multiplies the transpose of a Matrix with other and returns the product
     result_matrix2 =  libROM.Matrix()
     m2.transposeMult(m1,result_matrix2)
-    print("The product Matrix of transpose multiplication of m2 and m1",result_matrix2.get_data())
-    assert result_matrix2.get_data() == [[12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0]]
+    print("The product Matrix of transpose multiplication of m2 and m1",result_matrix2.getData())
+    assert result_matrix2.getData() == [[12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0], [12.0, 12.0, 12.0, 12.0]]
 
     # Multiplies the transpose of a Matrix with other vector and returns the product
     m1 = libROM.Matrix(3, 4,False,False)
@@ -459,14 +459,14 @@ def test_plus():
     m1.fill(2.0)
     v2.fill(2.0)
     result_vector1 = m1.transposeMult(v2)
-    print("Matrix multiplication of transpose of m1 and vector v2",result_vector1.get_data())
-    assert result_vector1.get_data() == [12.0, 12.0, 12.0, 12.0] 
+    print("Matrix multiplication of transpose of m1 and vector v2",result_vector1.getData())
+    assert result_vector1.getData() == [12.0, 12.0, 12.0, 12.0] 
 
     # Multiplies the transpose of a Matrix with other vector and returns the product
     result_vector2 =  libROM.Vector()
     m1.transposeMult(v2,result_vector2) 
-    print("The product vector of transpose multiplication of m1 and vector v2",result_vector2.get_data())
-    assert result_vector2.get_data() == [12.0, 12.0, 12.0, 12.0]
+    print("The product vector of transpose multiplication of m1 and vector v2",result_vector2.getData())
+    assert result_vector2.getData() == [12.0, 12.0, 12.0, 12.0]
 
     #Computes and returns the inverse of this
     m2 = libROM.Matrix(2,2,False,False)
@@ -475,15 +475,15 @@ def test_plus():
     m2.__setitem__(0, 1,8.0) 
     result_matrix1 = m2.inverse()
     print("Inverse of matrix m2 (first overload):")
-    print(result_matrix1.get_data())
-    assert result_matrix1.get_data() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
+    print(result_matrix1.getData())
+    assert result_matrix1.getData() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
 
     # Compute and store the inverse of m1 in the result_matrix using the second overload
     result_matrix2 = libROM.Matrix(2,2,False,False)
     m2.inverse(result_matrix2)
     print("Result matrix of inverse of matrix m2 (second overload):")
-    print(result_matrix2.get_data())
-    assert result_matrix2.get_data() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
+    print(result_matrix2.getData())
+    assert result_matrix2.getData() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
 
     # Compute the inverse of m1 and store it in m1 itself using the third overload
     m2 = libROM.Matrix(2,2,False,False)
@@ -492,19 +492,19 @@ def test_plus():
     m2.__setitem__(0, 1,8.0) 
     m2.inverse()
     print("Matrix m2 after inverting itself (third overload):")
-    print(m2.get_data())
-    assert m2.get_data() == [[5.0, 8.0], [3.0, 3.0]] 
+    print(m2.getData())
+    assert m2.getData() == [[5.0, 8.0], [3.0, 3.0]] 
 
     # Get a column as a Vector
     column = m1.getColumn(1)
-    print("column 1 of matrix m1:", column.get_data())  
-    assert column.get_data() == [2.0, 2.0, 2.0]
+    print("column 1 of matrix m1:", column.getData())  
+    assert column.getData() == [2.0, 2.0, 2.0]
 
     #Get a column as a vector
     result_vector1=libROM.Vector()
     m1.getColumn(1,result_vector1)
-    print("column 1 of matrix m1 as a vector",result_vector1.get_data())
-    assert result_vector1.get_data() == [2.0, 2.0, 2.0] 
+    print("column 1 of matrix m1 as a vector",result_vector1.getData())
+    assert result_vector1.getData() == [2.0, 2.0, 2.0] 
 
     # Transpose the matrix
     print("matrix m2")
@@ -519,7 +519,7 @@ def test_plus():
         for j in range(m2.numColumns()):
             print(m2(i, j), end=" ")
         print() 
-    assert m2.get_data() == [[5.0, 3.0], [8.0, 3.0]] 
+    assert m2.getData() == [[5.0, 3.0], [8.0, 3.0]] 
 
 
     # Print the transposePseudoinverse matrix
@@ -529,7 +529,7 @@ def test_plus():
         for j in range(m2.numColumns()):
             print(m2(i, j), end=" ")
         print()
-    assert m2.get_data() == [[-0.3333333333333333, 0.3333333333333333], [0.8888888888888888, -0.5555555555555556]]
+    assert m2.getData() == [[-0.3333333333333333, 0.3333333333333333], [0.8888888888888888, -0.5555555555555556]]
 
     # Apply qr_factorize to the matrix
     m2 = libROM.Matrix(2,2,False,False)
@@ -550,7 +550,7 @@ def test_plus():
     for i in range(4):
      for j in range(4): 
             m2.__setitem__(i,j,j) 
-    print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
+    print("qrcp_pivots_transpose to the matrix m2",m2.getData())
     row_pivot = [0,0,0,0]
     row_pivot_owner = [0,0,0,0]
     row_pivots_requested = 4 
@@ -575,14 +575,14 @@ def test_plus():
         for j in range(m2.numColumns()):
             print(m2(i, j), end=" ")
         print()
-    assert m2.get_data() == [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]]
+    assert m2.getData() == [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]]
 
     # Set and get values using __setitem__ and __getitem__
     matrix = libROM.Matrix(3, 3,False,False)
     matrix.fill(3.0)
     matrix.__setitem__(0, 0,2.0) 
-    print("Set Item (0,0) of matrix to 2.0 ",matrix.get_data())
-    assert matrix.get_data() == [[2.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
+    print("Set Item (0,0) of matrix to 2.0 ",matrix.getData())
+    assert matrix.getData() == [[2.0, 3.0, 3.0], [3.0, 3.0, 3.0], [3.0, 3.0, 3.0]] 
     print("Get Item (0,0)",matrix.__getitem__(0, 0) )
     assert matrix.__getitem__(0, 0) == 2.0 
     value= matrix(0, 0) 
@@ -602,16 +602,16 @@ def test_plus():
     b=libROM.Vector(5,False)
     b.fill(3.0)
     result_matrix=libROM.outerProduct(a,b)
-    print("outerProduct",result_matrix.get_data())
-    assert result_matrix.get_data() == [[6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0]]  
+    print("outerProduct",result_matrix.getData())
+    assert result_matrix.getData() == [[6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0], [6.0, 6.0, 6.0, 6.0, 6.0]]  
 
     result_matrix=libROM.DiagonalMatrixFactory(a)
-    print("DiagonalMatrixFactory",result_matrix.get_data())
-    assert result_matrix.get_data() == [[2.0, 0.0, 0.0, 0.0], [0.0, 2.0, 0.0, 0.0], [0.0, 0.0, 2.0, 0.0], [0.0, 0.0, 0.0, 2.0]]
+    print("DiagonalMatrixFactory",result_matrix.getData())
+    assert result_matrix.getData() == [[2.0, 0.0, 0.0, 0.0], [0.0, 2.0, 0.0, 0.0], [0.0, 0.0, 2.0, 0.0], [0.0, 0.0, 0.0, 2.0]]
 
     result_matrix=libROM.IdentityMatrixFactory(a)
-    print("IdentityMatrixFactory",result_matrix.get_data())
-    assert result_matrix.get_data() == [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]] 
+    print("IdentityMatrixFactory",result_matrix.getData())
+    assert result_matrix.getData() == [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]] 
 
     m1=libROM.Matrix(2,2,False,False)
     m1.__setitem__(0, 0, 4)
@@ -620,23 +620,23 @@ def test_plus():
     m1.__setitem__(1, 1, -5)
 
     serialsvd1=libROM.SerialSVD(m1)
-    print("U",serialsvd1.U.get_data())
-    print("S",serialsvd1.S.get_data())
-    print("V",serialsvd1.V.get_data())
-    assert serialsvd1.U.get_data() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
-    assert serialsvd1.S.get_data() == [6.324555320336759, 3.162277660168379]
-    assert serialsvd1.V.get_data() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
+    print("U",serialsvd1.U.getData())
+    print("S",serialsvd1.S.getData())
+    print("V",serialsvd1.V.getData())
+    assert serialsvd1.U.getData() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
+    assert serialsvd1.S.getData() == [6.324555320336759, 3.162277660168379]
+    assert serialsvd1.V.getData() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
 
     U=libROM.Matrix(2,2,False,False)
     S=libROM.Vector(2,False)
     V=libROM.Matrix(2,2,False,False)
     libROM.SerialSVD(m1,U,S,V)
-    print("U",U.get_data())
-    print("S",S.get_data())
-    print("V",V.get_data())
-    assert U.get_data() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
-    assert S.get_data() == [6.324555320336759, 3.162277660168379]
-    assert V.get_data() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
+    print("U",U.getData())
+    print("S",S.getData())
+    print("V",V.getData())
+    assert U.getData() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
+    assert S.getData() == [6.324555320336759, 3.162277660168379]
+    assert V.getData() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
 
 
     m1=libROM.Matrix(3,3,False,False)
@@ -650,17 +650,17 @@ def test_plus():
     m1.__setitem__(2,1,2.0)
     m1.__setitem__(2,2,4.0)
     eigenpair=libROM.SymmetricRightEigenSolve(m1)
-    print("Eigen pair ev",eigenpair.ev.get_data())
+    print("Eigen pair ev",eigenpair.ev.getData())
     print("Eigen pair eigs",eigenpair.eigs)
-    assert eigenpair.ev.get_data() == [[0.5932333119173844, 0.7864356987513784, -0.17202653679290808], [0.6793130619863368, -0.3743619547830712, 0.6311789687764829], [-0.4319814827585531, 0.4912962635115681, 0.756320024865991]]
+    assert eigenpair.ev.getData() == [[0.5932333119173844, 0.7864356987513784, -0.17202653679290808], [0.6793130619863368, -0.3743619547830712, 0.6311789687764829], [-0.4319814827585531, 0.4912962635115681, 0.756320024865991]]
     assert eigenpair.eigs == [0.8548973087995777, 2.4760236029181337, 5.669079088282289] 
 
     complexeigenpair=libROM.NonSymmetricRightEigenSolve(m1)
-    print("Complex Eigen pair ev",complexeigenpair.ev_real.get_data())
-    print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.get_data())
+    print("Complex Eigen pair ev",complexeigenpair.ev_real.getData())
+    print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.getData())
     print("Complex Eigen pair eigs",complexeigenpair.eigs)
-    assert complexeigenpair.ev_real.get_data() == [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.37436195478307094, 0.6311789687764832], [0.43198148275855325, 0.4912962635115682, 0.7563200248659911]]
-    assert complexeigenpair.ev_imaginary.get_data() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] 
+    assert complexeigenpair.ev_real.getData() == [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.37436195478307094, 0.6311789687764832], [0.43198148275855325, 0.4912962635115682, 0.7563200248659911]]
+    assert complexeigenpair.ev_imaginary.getData() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] 
     assert complexeigenpair.eigs == [(0.8548973087995788+0j), (2.4760236029181346+0j), (5.669079088282289+0j)] 
 
 
@@ -683,8 +683,8 @@ def test_plus():
     v= libROM.Vector()
     # result = libROM.SpaceTimeProduct(As, At, Bs, Bt)
     result = libROM.SpaceTimeProduct(m1, m2, m1, m2,[1.0],False,False,False,True)
-    print("SpaceTimeProduct",result.get_data())
-    assert result.get_data() == [[450.0, 450.0], [450.0, 450.0]] 
+    print("SpaceTimeProduct",result.getData())
+    assert result.getData() == [[450.0, 450.0], [450.0, 450.0]] 
 
 if __name__ == '__main__':
     pytest.main()

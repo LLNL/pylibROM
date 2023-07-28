@@ -60,19 +60,19 @@ print("computeNextSampleTime",next_sample_time)
 
 # Get the spatial basis
 spatial_basis = generator.getSpatialBasis()
-print("spatial_basis",spatial_basis.get_data())
+print("spatial_basis",spatial_basis.getData())
 
 # Get the temporal basis
 temporal_basis = generator.getTemporalBasis()
-print("temporal_basis",temporal_basis.get_data())
+print("temporal_basis",temporal_basis.getData())
 
 # Get the singular values
 singular_values = generator.getSingularValues()
-print("singular_values",singular_values.get_data())
+print("singular_values",singular_values.getData())
 
 # Get the snapshot matrix
 snapshot_matrix = generator.getSnapshotMatrix()
-print("snapshot_matrix",snapshot_matrix.get_data())
+print("snapshot_matrix",snapshot_matrix.getData())
 
 # Get the number of basis time intervals
 num_intervals = generator.getNumBasisTimeIntervals()
@@ -143,19 +143,19 @@ def test_plus():
 
     # Get the spatial basis
     spatial_basis = generator.getSpatialBasis()
-    assert spatial_basis.get_data() == [[-0.2672612419124242, 0.9561828874675146], [-0.5345224838248487, -0.04390192218731964], [-0.8017837257372731, -0.2894596810309584], [-4.4e-323, -4.975416402579816e-309]]
+    assert spatial_basis.getData() == [[-0.2672612419124242, 0.9561828874675146], [-0.5345224838248487, -0.04390192218731964], [-0.8017837257372731, -0.2894596810309584], [-4.4e-323, -4.975416402579816e-309]]
 
     # Get the temporal basis
     temporal_basis = generator.getTemporalBasis()
-    assert temporal_basis.get_data() == [[-0.7071067811865476, 0.7071067811865474], [0.7071067811865474, 0.7071067811865476]]
+    assert temporal_basis.getData() == [[-0.7071067811865476, 0.7071067811865474], [0.7071067811865474, 0.7071067811865476]]
 
     # Get the singular values
     singular_values = generator.getSingularValues()
-    assert singular_values.get_data() == [5.2915026221291805, 7.021666937153404e-16]
+    assert singular_values.getData() == [5.2915026221291805, 7.021666937153404e-16]
 
     # Get the snapshot matrix
     snapshot_matrix = generator.getSnapshotMatrix()
-    assert snapshot_matrix.get_data() == [[-3.7416573867739418, 3.74165738677394], [0.4217934441190679, 9.930136612989092e-16], [0.6326901661786019, 0.6180339887498948], [3.5e-323, 3.43792818009081e-309]]
+    assert snapshot_matrix.getData() == [[-3.7416573867739418, 3.74165738677394], [0.4217934441190679, 9.930136612989092e-16], [0.6326901661786019, 0.6180339887498948], [3.5e-323, 3.43792818009081e-309]]
 
     # Get the number of basis time intervals
     num_intervals = generator.getNumBasisTimeIntervals()
