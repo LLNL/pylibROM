@@ -66,3 +66,4 @@ pybind11_add_module(pylibROM
 message("building pylibROM...")
 
 target_link_libraries(pylibROM PRIVATE ROM) 
+
