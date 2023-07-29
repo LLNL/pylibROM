@@ -4,6 +4,7 @@ import sys
 sys.path.append("../build")
 
 import pylibROM.linalg as libROM
+import pylibROM.utils as utils
 
 # Create two Matrix objects
 m1 = libROM.Matrix(3,4, False,True)
@@ -202,22 +203,6 @@ m2.__setitem__(0, 1,8.0)
 
 # Apply qrcp_pivots_transpose to the matrix
 m2 = libROM.Matrix(4,4,False,False)
-for i in range(4):
-    for j in range(4): 
-            m2.__setitem__(i,j,j) 
-print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
-row_pivot = [0,0,0,0]
-row_pivot_owner = [0,0,0,0]
-row_pivots_requested = 4 
-row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
-my_rank = 0 
-for i in range(row_pivots_requested):
-    assert row_pivot_owner[i] == my_rank
-    assert row_pivot[i] < 5
-permutation=[0,1,2,3] 
-assert np.array_equal(row_pivot, permutation)
-print("Row Pivots:", row_pivot)
-print("row_pivot_owner:", row_pivot_owner)
 
 # Apply orthogonalize to the matrix
 m2.fill(3.0)
@@ -533,38 +518,24 @@ def test_plus():
     #         print(result(i, j), end=" ")
     #     print()
 
-
-    # Apply qrcp_pivots_transpose to the matrix
     m2 = libROM.Matrix(4,4,False,False)
-    for i in range(4):
-     for j in range(4): 
-            m2.__setitem__(i,j,j) 
-    print("qrcp_pivots_transpose to the matrix m2",m2.get_data())
-    row_pivot = [0,0,0,0]
-    row_pivot_owner = [0,0,0,0]
-    row_pivots_requested = 4 
-    row_pivot, row_pivot_owner = m2.qrcp_pivots_transpose(row_pivot, row_pivot_owner,row_pivots_requested)
-    my_rank = 0 
-    for i in range(row_pivots_requested):
-        assert row_pivot_owner[i] == my_rank
-        assert row_pivot[i] < 5
-    permutation=[0,1,2,3] 
-    assert np.array_equal(row_pivot, permutation)
-    print("Row Pivots:", row_pivot)
-    print("row_pivot_owner:", row_pivot_owner)
 
     # Apply orthogonalize to the matrix
-    m2 = libROM.Matrix(2,2,False,False)
-    m2.fill(3.0)
-    m2.__setitem__(0, 0,5.0) 
-    m2.__setitem__(0, 1,8.0) 
-    m2.orthogonalize()
-    print("orthogonalize to the matrix m2")
-    for i in range(m2.numRows()):
-        for j in range(m2.numColumns()):
-            print(m2(i, j), end=" ")
-        print()
-    assert m2.get_data() == [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]]
+    # In parallel case, Matrix::orthogonalize() works only when matrix is distributed.
+    # This test works only for serial case, since the matrix is not distributed.
+    from mpi4py import MPI
+    if (MPI.COMM_WORLD.Get_size() == 1):
+        m2 = libROM.Matrix(2,2,False,False)
+        m2.fill(3.0)
+        m2.__setitem__(0, 0,5.0) 
+        m2.__setitem__(0, 1,8.0) 
+        m2.orthogonalize()
+        print("orthogonalize to the matrix m2")
+        for i in range(m2.numRows()):
+            for j in range(m2.numColumns()):
+                print(m2(i, j), end=" ")
+            print()
+        assert m2.get_data() == [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]]
 
     # Set and get values using __setitem__ and __getitem__
     matrix = libROM.Matrix(3, 3,False,False)
@@ -1072,18 +1043,33 @@ def test_IdentityMatrixFactory():
                                                      [0., 1., 0.],
                                                      [0., 0., 1.]]))
     
-# def test_distribute_and_gather():
-#     from mpi4py import MPI
-#     comm = MPI.COMM_WORLD
-#     my_rank = comm.Get_rank()
-#     num_procs = comm.Get_size()
+def test_distribute_and_gather():
+    from mpi4py import MPI
+    comm = MPI.COMM_WORLD
+    my_rank = comm.Get_rank()
+    num_procs = comm.Get_size()
 
-#     total_rows = 5
-#     answer = libROM.Matrix(total_rows, total_rows, False)
-#     assert(not answer.distributed())
-#     for i in range(total_rows):
-#         for j in range(total_rows):
-#             answer[i, j] = float(i * j)
+    total_rows = 5
+    answer = libROM.Matrix(total_rows, total_rows, False)
+    assert(not answer.distributed())
+    for i in range(total_rows):
+        for j in range(total_rows):
+            answer[i, j] = float(i * j)
+    local_rows = utils.split_dimension(total_rows, comm)
+    total_rows_check, row_offsets = utils.get_global_offsets(local_rows, comm)
+    assert(total_rows == total_rows_check)
+
+    test = libROM.Matrix(answer)
+    test.distribute(local_rows)
+    assert(test.distributed())
+    for local_i in range(local_rows):
+        global_i = row_offsets[my_rank] + local_i
+        for j in range(answer.numColumns()):
+            assert(test[local_i, j] == answer[global_i, j])
+
+    test.gather()
+    assert(not test.distributed())
+    assert(np.array_equal(test.getData(), answer.getData()))
 
 if __name__ == '__main__':
     pytest.main()

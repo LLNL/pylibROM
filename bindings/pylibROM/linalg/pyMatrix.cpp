@@ -234,9 +234,12 @@ void init_matrix(pybind11::module_ &m) {
                 }
             }
             return data;
-        });
+        })
+
+        .def("distribute", &Matrix::distribute)
+        .def("gather", &Matrix::gather);
     
-    m.def("outerProduct",(Matrix (*)(const Vector&, const Vector&)) &outerProduct);
+    m.def("outerProduct", (Matrix (*)(const Vector&, const Vector&)) &outerProduct);
     m.def("DiagonalMatrixFactory", (Matrix (*)(const Vector&)) &DiagonalMatrixFactory);
     m.def("IdentityMatrixFactory", (Matrix (*)(const Vector&)) &IdentityMatrixFactory);
    
