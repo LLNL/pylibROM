@@ -7,7 +7,7 @@ RUN sudo apt-get install -yq chrpath
 # RUN python3 -m pip install numpy
 RUN sudo pip3 install --upgrade pip
 RUN sudo pip3 install swig
-RUN sudo pip3 install mfem
+RUN sudo pip3 install mfem==4.5.2.0
 
 # install libROM
 WORKDIR $LIB_DIR

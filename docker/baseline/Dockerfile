@@ -55,7 +55,7 @@ RUN sudo pip3 install -r ./requirements.txt
 
 # install pymfem
 RUN sudo pip3 install swig
-RUN sudo pip3 install mfem
+RUN sudo pip3 install mfem==4.5.2.0
 
 # install lldb and gdb for debugging
 RUN sudo apt-get install -yq lldb gdb
