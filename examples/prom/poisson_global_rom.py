@@ -124,6 +124,10 @@ def run():
     coef            = args.coefficient
     pa              = args.partial_assembly
     static_cond     = args.static_condensation
+    visit           = args.visit_datafiles
+    visualization   = args.visualization
+
+    precision       = 8
 
     # ref_levels       = args.refine
     # ode_solver_type  = args.ode_solver
@@ -376,249 +380,100 @@ def run():
         spatialbasis.mult(reducedSol, X_carom)
         del spatialbasis
         del reducedRHS
-
-    # if ((rdim <= 0) and (rdim != -1)):
-    #     raise ValueError("rdim is set to %d, rdim can only be a positive integer or -1" % rdim)
-
-    # if (ef <= 0.0):
-    #     raise ValueError("ef must be a positive, it is %f" % ef)
-    # elif (rdim != -1):
-    #     print("rdim is set to %d" % rdim)
-
-    # mesh = mfem.Mesh(mesh_file, 1, 1)
-    # dim = mesh.Dimension()
-
-    # # 3. Define the ODE solver used for time integration. Several second order
-    # #    time integrators are available.
-    # if ode_solver_type <= 10:
-    #     ode_solver = mfem.GeneralizedAlpha2Solver(ode_solver_type / 10.)
-    # elif ode_solver_type == 11:
-    #     ode_solver = mfem.AverageAccelerationSolver()
-    # elif ode_solver_type == 12:
-    #     ode_solver = mfem.LinearAccelerationSolver()
-    # elif ode_solver_type == 13:
-    #     ode_solver = mfem.CentralDifferenceSolver()
-    # elif ode_solver_type == 14:
-    #     ode_solver = mfem.FoxGoodwinSolver()
-    # else:
-    #     print("Unknown ODE solver type: " + str(ode_solver_type))
-
-    # # 4. Refine the mesh to increase the resolution. In this example we do
-    # #    'ref_levels' of uniform refinement, where 'ref_levels' is a
-    # #    command-line parameter.
-    # for lev in range(ref_levels):
-    #     mesh.UniformRefinement()
-
-    # # 5. Define the vector finite element space representing the current and the
-    # #    initial temperature, u_ref.
-    # fe_coll = mfem.H1_FECollection(order, dim)
-    # fespace = mfem.FiniteElementSpace(mesh, fe_coll)
-
-    # fe_size = fespace.GetTrueVSize()
-    # print("Number of temperature unknowns: " + str(fe_size))
-
-    # u_gf = mfem.GridFunction(fespace)
-    # dudt_gf = mfem.GridFunction(fespace)
-
-    # # 6. Set the initial conditions for u. All boundaries are considered
-    # #    natural.
-    # u_0 = InitialSolution()
-    # dudt_0 = InitialRate()
-
-    # u_gf.ProjectCoefficient(u_0)
-    # u = mfem.Vector()
-    # u_gf.GetTrueDofs(u)
-
-    # dudt_gf.ProjectCoefficient(dudt_0)
-    # dudt = mfem.Vector()
-    # dudt_gf.GetTrueDofs(dudt)
-
-    # # 7. Initialize the conduction operator and the visualization.
-    # ess_bdr = mfem.intArray()
-    # if mesh.bdr_attributes.Size():
-    #     ess_bdr.SetSize(mesh.bdr_attributes.Max())
-    #     if (dirichlet):
-    #         ess_bdr.Assign(1)
-    #     else:
-    #         ess_bdr.Assigne(0)
-
-    # oper = WaveOperator(fespace, ess_bdr, speed)
-
-    # u_gf.SetFromTrueDofs(u)
-
-    # mesh.Print("wave_equation.mesh", 8)
-    # output = io.StringIO()
-    # output.precision = 8
-    # u_gf.Save(output)
-    # dudt_gf.Save(output)
-    # fid = open("wave_equation-init.gf", 'w')
-    # fid.write(output.getvalue())
-    # fid.close()
-
-    # if visit:
-    #     visit_dc = mfem.VisItDataCollection("Wave_Equation", mesh)
-    #     visit_dc.RegisterField("solution", u_gf)
-    #     visit_dc.RegisterField("rate", dudt_gf)
-    #     visit_dc.SetCycle(0)
-    #     visit_dc.SetTime(0.0)
-    #     visit_dc.Save()
-
-    # if visualization:
-    #     sout = mfem.socketstream("localhost", 19916)
-    #     if not sout.good():
-    #         print("Unable to connect to GLVis server at localhost:19916")
-    #         visualization = False
-    #         print("GLVis visualization disabled.")
-    #     else:
-    #         sout.precision(precision)
-    #         sout << "solution\n" << mesh << dudt_gf
-    #         sout << "pause\n"
-    #         sout.flush()
-    #         print(
-    #             "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
-            
-    # # 8. Perform time-integration (looping over the time iterations, ti, with a
-    # #    time-step dt).
-    # # mfem::StopWatch is not binded by pyMFEM.
-    # fom_timer, dmd_training_timer, dmd_prediction_timer = StopWatch(), StopWatch(), StopWatch()
-    # fom_timer.Start()
-    # ode_solver.Init(oper)
-    # t = 0.0
-    # fom_timer.Stop()
-    # dmd_training_timer.Start()
-    # curr_window = 0
-    # ts, dmd_u = [], []
-    # dmd_u += [algo.DMD(u.Size(), dt)]
-
-    # # NOTE: mfem Vector::GetData returns a SWIG Object of type double *.
-    # # To make it compatible with pybind11, we use ctypes to read data from the memory address.
-    # from ctypes import *
-    # uData = (c_double * u.Size()).from_address(int(u.GetData())) # this does not copy the data.
-    # # uData = list(uData) # this copies the data.
-    # uData = np.array(uData, copy=False)
-
-    # # Showing the memory address info
-    # print("All of these memory addresses are different.")
-    # print("id(uData[0]): %d" % id(uData[0]))
-    # print("int(u.GetData()): %d" % (int(u.GetData()))) # this is not the same as u[0], yet still points to the data.
-    # print("id(uData): %d" % id(uData))              # this is not the same as u[0], yet still points to the data.
-
-    # print("But uData[*] points to the right memory.")
-    # print("id(u[0]): %d =? id(uData[0]): %d" % (id(u[0]), id(uData[0])))
-    # print("id(u[1]): %d =? id(uData[1]): %d" % (id(u[1]), id(uData[1])))
-    # print("uData type: %s" % type(uData))
-
-    # dmd_u[curr_window].takeSample(uData, t)
-    # ts += [t]
-    # dmd_training_timer.Stop()
-
-    # last_step = False
-    # ti = 0
-    # while not last_step:
-    #     ti += 1
-    #     if t + dt >= t_final - dt/2:
-    #         last_step = True
-
-    #     fom_timer.Start()
-    #     t, dt = ode_solver.Step(u, dudt, t, dt)
-    #     fom_timer.Stop()
-
-    #     dmd_training_timer.Start()
-    #     dmd_u[curr_window].takeSample(uData, t)
-        
-    #     if (last_step or (ti % windowNumSamples == 0)):
-    #         print("step %d, t= %f" % (ti, t))
-
-    #         if (rdim != -1):
-    #             print("Creating DMD with rdim %d at window index: %d" % (rdim, curr_window))
-    #             dmd_u[curr_window].train(rdim)
-    #         else:
-    #             print("Creating DMD with energy fraction: %f at window index: %d" % (ef, curr_window))
-    #             dmd_u[curr_window].train(ef)
-
-    #         if (not last_step):
-    #             curr_window += 1
-    #             dmd_u += [algo.DMD(u.Size(), dt)]
-    #             dmd_u[curr_window].takeSample(uData, t)
-    #     ts += [t]
-    #     dmd_training_timer.Stop()
-
-    #     if last_step or (ti % vis_steps == 0):
-    #         print("step " + str(ti) + ", t = " + "{:g}".format(t))
-
-    #         u_gf.SetFromTrueDofs(u)
-    #         dudt_gf.SetFromTrueDofs(dudt)
-    #         if visualization:
-    #             sout << "solution\n" << mesh << u_gf
-    #             sout.flush()
-
-    #         if visit:
-    #             visit_dc.SetCycle(ti)
-    #             visit_dc.SetTime(t)
-    #             visit_dc.Save()
-
-    #     oper.SetParameters(u)
-
-    # # 9. Save the final solution. This output can be viewed later using GLVis:
-    # #    "glvis -m wave_equation.mesh -g wave_equation-final.gf".
-    # output = io.StringIO()
-    # output.precision = 8
-    # u_gf.Save(output)
-    # dudt_gf.Save(output)
-    # fid = open("wave_equation-final.gf", 'w')
-    # fid.write(output.getvalue())
-    # fid.close()
-
-    # # 10. Predict the state at t_final using DMD.
-    # print("Predicting temperature using DMD")
-    # dmd_visit_dc = mfem.VisItDataCollection("DMD_Wave_Equation", mesh)
-    # dmd_visit_dc.RegisterField("solution", u_gf)
-    # curr_window = 0
-    # if (visit):
-    #     dmd_prediction_timer.Start()
-    #     result_u = dmd_u[curr_window].predict(ts[0])
-    #     dmd_prediction_timer.Stop()
-
-    #     # result_u.getData() returns a numpy array, which shares the memory buffer.
-    #     # result_u.getData() does not own the memory.
-    #     initial_dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
-    #     u_gf.SetFromTrueDofs(initial_dmd_solution_u)
-    #     dmd_visit_dc.SetCycle(0)
-    #     dmd_visit_dc.SetTime(0.0)
-    #     dmd_visit_dc.Save()
-
-    # for i in range(1, len(ts)):
-    #     if ((i == len(ts) - 1) or (i % vis_steps == 0)):
-    #         if (visit):
-    #             dmd_prediction_timer.Start()
-    #             result_u = dmd_u[curr_window].predict(ts[i])
-    #             dmd_prediction_timer.Stop()
-
-    #             dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
-    #             u_gf.SetFromTrueDofs(dmd_solution_u)
-    #             dmd_visit_dc.SetCycle(i)
-    #             dmd_visit_dc.SetTime(ts[i])
-    #             dmd_visit_dc.Save()
-
-    #         if ((i % windowNumSamples == 0) and (i < len(ts)-1)):
-    #             curr_window += 1
-
-    # dmd_prediction_timer.Start()
-    # result_u = dmd_u[curr_window].predict(t_final)
-    # dmd_prediction_timer.Stop()
-
-    # # 11. Calculate the relative error between the DMD final solution and the true solution.
-    # dmd_solution_u = mfem.Vector(result_u.getData(), result_u.dim())
     
-    # diff_u = mfem.Vector(u.Size())
-    # mfem.subtract_vector(dmd_solution_u, u, diff_u)
-    # tot_diff_norm_u = np.sqrt(mfem.InnerProduct(diff_u, diff_u))
-    # tot_true_solution_u_norm = np.sqrt(mfem.InnerProduct(u, u))
+    # 24. Recover the parallel grid function corresponding to X. This is the
+    #     local finite element solution on each processor.
+    a.RecoverFEMSolution(X, b, x)
 
-    # print("Relative error of DMD solution (u) at t_final: %f is %.3E" % (t_final, tot_diff_norm_u / tot_true_solution_u_norm))
-    # print("Elapsed time for solving FOM: %e second\n" % fom_timer.duration)
-    # print("Elapsed time for training DMD: %e second\n" % dmd_training_timer.duration)
-    # print("Elapsed time for predicting DMD: %e second\n" % dmd_prediction_timer.duration)
+    # 25. Calculate the relative error of the ROM prediction compared to FOM
+    # ostringstream sol_dofs_name, sol_dofs_name_fom;
+    if (fom or offline):
+        sol_dofs_name = "sol_dofs_fom.%06d" % myid
+    if (online):
+        sol_dofs_name = "sol_dofs.%06d" % myid
+        sol_dofs_name_fom = "sol_dofs_fom.%06d" % myid
+
+    if (online):
+        # Initialize FOM solution
+        x_fom = mfem.Vector(x.Size())
+
+        # Open and load file
+        x_fom.Load(sol_dofs_name_fom, x_fom.Size())
+
+        diff_x = mfem.Vector(x.Size())
+
+        mfem.subtract(x, x_fom, diff_x)
+
+        # Get norms
+        # TODO(kevin): figure out mfem parallel install
+        # tot_diff_norm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_x, diff_x))
+        # tot_fom_norm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, x_fom, x_fom))
+        tot_diff_norm = np.sqrt(mfem.InnerProduct(diff_x, diff_x))
+        tot_fom_norm = np.sqrt(mfem.InnerProduct(x_fom, x_fom))
+
+        if (myid == 0):
+            print("Relative error of ROM solution = %.5E" % (tot_diff_norm / tot_fom_norm))
+
+    # 26. Save the refined mesh and the solution in parallel. This output can
+    #     be viewed later using GLVis: "glvis -np <np> -m mesh -g sol".
+    mesh_name  = "mesh.%06d" % myid
+    sol_name = "sol.%06d" % myid
+
+    pmesh.Print(mesh_name, precision)
+
+    output = io.StringIO()
+    output.precision = precision
+    x.Save(output)
+    fid = open(sol_name, 'w')
+    fid.write(output.getvalue())
+    fid.close()
+
+    xData = np.array((c_double * X.Size()).from_address(int(X.GetData())), copy=False)
+    np.savetxt(sol_dofs_name, xData, fmt='%.16f')
+
+    # 27. Save data in the VisIt format.
+    if (visit):
+        if (offline):
+            dc = mfem.VisItDataCollection("Example1", pmesh)
+        elif (fom):
+            dc = mfem.VisItDataCollection("Example1_fom", pmesh)
+        elif (online):
+            dc = mfem.VisItDataCollection("Example1_rom", pmesh)
+        dc.SetPrecision(precision)
+        dc.RegisterField("solution", x)
+        dc.Save()
+        del dc
+
+    # 28. Send the solution by socket to a GLVis server.
+    if visualization:
+        sol_sock = mfem.socketstream("localhost", 19916)
+        if not sol_sock.good():
+            print("Unable to connect to GLVis server at localhost:19916")
+            visualization = False
+            print("GLVis visualization disabled.")
+        else:
+            sol_sock << "parallel " << num_procs << " " << myid << "\n"
+            sol_sock.precision(precision)
+            sol_sock << "solution\n" << pmesh << x
+            sol_sock << "pause\n"
+            sol_sock.flush()
+            print(
+                "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
+            
+    # # 29. print timing info
+    # if (myid == 0):
+    #     if (fom or offline):
+    #         print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.RealTime())
+    #         print("Elapsed time for solving FOM: %e second\n" % solveTimer.RealTime())
+        
+    #     if(online):
+    #         print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.RealTime())
+    #         print("Elapsed time for solving ROM: %e second\n" % solveTimer.RealTime())
+
+    # 30. Free the used memory.
+    if (delete_fec):
+        del fec
+    MPI.Finalize()
 
 if __name__ == "__main__":
     run()
