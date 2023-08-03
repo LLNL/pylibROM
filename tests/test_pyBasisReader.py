@@ -5,6 +5,16 @@ import pylibROM.linalg as libROM
 import numpy as np 
 
 def test_isNewBasis():
+    options = libROM.Options(4, 20, 3, True, True)
+    generator = libROM.BasisGenerator(options, False, "basis.h5", libROM.Formats.HDF5)
+    result = generator.takeSample(np.array([1.0, 2.0, 3.0]), 0.5, 0.5)
+    base_file_name = "test_basisreader_file"
+    basis_writer = libROM.BasisWriter(generator, base_file_name, libROM.Formats.HDF5)
+    basis_writer.writeBasis("basis")
+    del basis_writer
+    generator.writeSnapshot()
+    generator.endSamples()
+    del generator
     basis_reader = libROM.BasisReader("test_basisreader_file", libROM.Formats.HDF5)
     is_new_basis = basis_reader.isNewBasis(0.5)
     assert is_new_basis
