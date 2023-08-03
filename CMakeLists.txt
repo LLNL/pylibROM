@@ -50,6 +50,15 @@ link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cma
 #include mpi4py directory
 execute_process(COMMAND python3 -c "import mpi4py; print(mpi4py.get_include())" OUTPUT_VARIABLE MPI4PY)
 
+# MFEM is required.
+find_library(MFEM mfem "$ENV{MFEM_DIR}/lib" "${LIBROM_DIR}/dependencies/mfem/lib")
+find_library(HYPRE HYPRE "$ENV{HYPRE_DIR}/lib" "${LIBROM_DIR}/dependencies/hypre/lib")
+find_library(PARMETIS parmetis "$ENV{PARMETIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis/lib")
+find_library(METIS metis "$ENV{METIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis/lib")
+find_path(MFEM_INCLUDES mfem.hpp "$ENV{MFEM_DIR}/include" "${LIBROM_DIR}/dependencies/mfem/include")
+find_path(HYPRE_INCLUDES HYPRE.h "$ENV{HYPRE_DIR}/include" "${LIBROM_DIR}/dependencies/hypre/include")
+find_path(PARMETIS_INCLUDES metis.h "$ENV{PARMETIS_DIR}/metis/include" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis/metis/include")
+
 #===================== pylibROM =============================
 
 
@@ -58,12 +67,24 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(MPI REQUIRED)
 
 set(SOURCE_DIR "bindings/pylibROM") 
-include_directories(	${SOURCE_DIR} 
-			${LIBROM_INCLUDE_DIR} 
-			${MPI_INCLUDE_PATH}
-			${MPI4PY})
-add_subdirectory("extern/pybind11")
+include_directories(
+	${SOURCE_DIR} 
+	${LIBROM_INCLUDE_DIR} 
+	${MPI_INCLUDE_PATH}
+	${MPI4PY}
+	${MFEM_INCLUDES}
+	${HYPRE_INCLUDES}
+	${PARMETIS_INCLUDES}
+	${MFEM_C_INCLUDE_DIRS}
+)
+link_libraries(
+	${MFEM}
+	${HYPRE}
+	${PARMETIS}
+	${METIS}
+)
 
+add_subdirectory("extern/pybind11")
 
 pybind11_add_module(pylibROM
     bindings/pylibROM/pylibROM.cpp
@@ -80,6 +101,8 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/algo/pyDMD.cpp 
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.cpp
+
+	bindings/pylibROM/mfem/Utilities.cpp
 )
 message("building pylibROM...")
 
