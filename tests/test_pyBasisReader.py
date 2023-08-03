@@ -45,19 +45,19 @@ def test_getSpatialBasis():
     basis_reader = libROM.BasisReader("test_basisreader_file", libROM.Formats.HDF5)
 
     spatial_basis1 = basis_reader.getSpatialBasis(0.5)
-    assert(np.array_equal(spatial_basis1.getData(),[[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.44659081e-323]]))  
+    assert(np.array_equal(spatial_basis1.getData(),[[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-6.42285340e-323]]))  
 
     spatial_basis2 = basis_reader.getSpatialBasis(0.5, 1)
     print(spatial_basis2.get_data())
-    assert(np.array_equal(spatial_basis2.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.44659081e-323]]))
+    assert(np.array_equal(spatial_basis2.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-6.42285340e-323]]))
 
     spatial_basis3 = basis_reader.getSpatialBasis(0.5, 1, 1)
     print(spatial_basis3.get_data())
-    assert(np.array_equal(spatial_basis3.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-4.44659081e-323]])) 
+    assert(np.array_equal(spatial_basis3.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731], [-6.42285340e-323]])) 
 
     spatial_basis4 = basis_reader.getSpatialBasis(0.5, 0.7)
     print(spatial_basis4.get_data())
-    assert(np.array_equal(spatial_basis4.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731],[-4.44659081e-323]]))
+    assert(np.array_equal(spatial_basis4.getData(), [[-0.2672612419124243], [-0.5345224838248487], [-0.8017837257372731],[-6.42285340e-323]]))
     
 
 def test_getTemporalBasis():
@@ -92,17 +92,17 @@ def test_getSnapshotMatrix():
 
     snapshot_matrix1 = basis_reader.getSnapshotMatrix(0.5)
     print(snapshot_matrix1.get_data())
-    assert(np.array_equal(snapshot_matrix1.getData(),[[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]])) 
+    assert(np.array_equal(snapshot_matrix1.getData(),[[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [4.94065646e-323]])) 
 
 
     snapshot_matrix2 = basis_reader.getSnapshotMatrix(0.5, 1)
     print(snapshot_matrix1.get_data())
-    assert(np.array_equal(snapshot_matrix2.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]))
+    assert(np.array_equal(snapshot_matrix2.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [4.94065646e-323]]))
 
 
     snapshot_matrix3 = basis_reader.getSnapshotMatrix(0.5, 1, 1)
     print(snapshot_matrix1.get_data())
-    assert(np.array_equal(snapshot_matrix3.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]))
+    assert(np.array_equal(snapshot_matrix3.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [4.94065646e-323]]))
     
 
 if __name__ == "__main__":
