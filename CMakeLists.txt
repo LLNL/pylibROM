@@ -47,6 +47,9 @@ endif(BUILD_DEPS)
 set(LIBROM_INCLUDE_DIR ${LIBROM_DIR}/lib)
 link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cmake since FetchContent will not work for compile.sh
 
+#include mpi4py directory
+execute_process(COMMAND python3 -c "import mpi4py; print(mpi4py.get_include())" OUTPUT_VARIABLE MPI4PY)
+
 #===================== pylibROM =============================
 
 
@@ -57,12 +60,14 @@ find_package(MPI REQUIRED)
 set(SOURCE_DIR "bindings/pylibROM") 
 include_directories(	${SOURCE_DIR} 
 			${LIBROM_INCLUDE_DIR} 
-			${MPI_INCLUDE_PATH}	)
+			${MPI_INCLUDE_PATH}
+			${MPI4PY})
 add_subdirectory("extern/pybind11")
 
 
 pybind11_add_module(pylibROM
     bindings/pylibROM/pylibROM.cpp
+
     bindings/pylibROM/linalg/pyMatrix.cpp
     bindings/pylibROM/linalg/pyVector.cpp
     bindings/pylibROM/linalg/pyBasisGenerator.cpp
@@ -73,6 +78,7 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
     bindings/pylibROM/algo/pyDMD.cpp 
+	bindings/pylibROM/utils/mpi_utils.cpp
 )
 message("building pylibROM...")
 

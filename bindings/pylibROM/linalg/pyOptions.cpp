@@ -37,7 +37,15 @@ void init_Options(pybind11::module_ &m) {
         .def("setSingularValueTol", &Options::setSingularValueTol, py::arg("singular_value_tol_"))
         .def("setDebugMode", &Options::setDebugMode,  py::arg("debug_algorithm_"))
         .def("setRandomizedSVD", &Options::setRandomizedSVD, py::arg("randomized_"), py::arg("randomized_subspace_dim_") = -1, py::arg("random_seed_") = 1)
-        .def("setIncrementalSVD", &Options::setIncrementalSVD, py::arg("linearity_tol_"), py::arg("initial_dt_"), py::arg("sampling_tol_"), py::arg("max_time_between_samples_"), py::arg("fast_update_") = false, py::arg("skip_linearly_dependent_") = false)
+        .def("setIncrementalSVD", &Options::setIncrementalSVD,
+                py::arg("linearity_tol_"),
+                py::arg("initial_dt_"),
+                py::arg("sampling_tol_"),
+                py::arg("max_time_between_samples_"),
+                py::arg("fast_update_") = false,
+                py::arg("fast_update_brand_") = false,
+                py::arg("skip_linearly_dependent_") = false
+            )
         .def("setStateIO", &Options::setStateIO,py::arg("save_state_"),py::arg("restore_state_"))
         .def("setSamplingTimeStepScale", &Options::setSamplingTimeStepScale,py::arg("min_sampling_time_step_scale_"),py::arg("sampling_time_step_scale_"),py::arg("max_sampling_time_step_scale_"));
 }
