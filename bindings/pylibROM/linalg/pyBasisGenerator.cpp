@@ -9,12 +9,15 @@ namespace py = pybind11;
 using namespace CAROM;
 
 void init_BasisGenerator(pybind11::module_ &m) {
-    py::enum_<Database::formats>(m, "Formats")
-        .value("HDF5", Database::formats::HDF5);
 
     py::class_<BasisGenerator>(m, "BasisGenerator")
         // .def(py::init<Options, bool, const std::string&, Database::formats>())
-        .def(py::init<const Options&, bool, const std::string&, Database::formats>(),py::arg("options"),py::arg("incremental"),py::arg("basis_file_name") = "",py::arg("file_format") = static_cast<int>(Database::formats::HDF5))
+        .def(py::init<const Options&, bool, const std::string&, Database::formats>(),
+            py::arg("options"),
+            py::arg("incremental"),
+            py::arg("basis_file_name") = "",
+            py::arg("file_format") = Database::formats::HDF5
+        )
         .def("isNextSample", (bool (BasisGenerator::*)(double)) &BasisGenerator::isNextSample)
         .def("updateRightSV", (bool (BasisGenerator::*)()) &BasisGenerator::updateRightSV)
         .def("takeSample", [](BasisGenerator& self, py::array_t<double> u_in, double time, double dt, bool add_without_increase = false) {
@@ -27,7 +30,12 @@ void init_BasisGenerator(pybind11::module_ &m) {
         }, py::arg("u_in"), py::arg("time"), py::arg("dt"), py::arg("add_without_increase") = false)
         .def("endSamples", &BasisGenerator::endSamples, py::arg("kind") = "basis")
         .def("writeSnapshot", (void (BasisGenerator::*)()) &BasisGenerator::writeSnapshot)
-        .def("loadSamples", &BasisGenerator::loadSamples, py::arg("base_file_name"), py::arg("kind") = "basis", py::arg("cut_off") = 1e9, py::arg("db_format") = static_cast<int>(Database::formats::HDF5))
+        .def("loadSamples", (void (BasisGenerator::*)(const std::string&, const std::string&, int, Database::formats)) &BasisGenerator::loadSamples,
+            py::arg("base_file_name"),
+            py::arg("kind") = "basis",
+            py::arg("cut_off") = static_cast<int>(1e9),
+            py::arg("db_format") = Database::formats::HDF5
+        )
         .def("computeNextSampleTime", [](BasisGenerator& self, py::array_t<double> u_in, py::array_t<double> rhs_in, double time) {
              py::buffer_info buf_info_u = u_in.request();
              py::buffer_info buf_info_rhs = rhs_in.request();

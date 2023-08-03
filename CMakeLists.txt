@@ -79,6 +79,7 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
     bindings/pylibROM/algo/pyDMD.cpp 
 	bindings/pylibROM/utils/mpi_utils.cpp
+	bindings/pylibROM/utils/pyDatabase.cpp
 )
 message("building pylibROM...")
 
