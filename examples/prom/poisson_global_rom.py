@@ -53,6 +53,7 @@ class StopWatch:
 
 sys.path.append("../../build")
 import pylibROM.linalg as libROM
+from pylibROM.mfem import ComputeCtAB
 
 def run():
     from mpi4py import MPI
@@ -359,7 +360,7 @@ def run():
 
         # 21. form inverse ROM operator
         invReducedA = libROM.Matrix(numColumnRB, numColumnRB, False)
-        libROM.ComputeCtAB(A, spatialbasis, spatialbasis, invReducedA)
+        ComputeCtAB(A, spatialbasis, spatialbasis, invReducedA)
         invReducedA.inverse()
 
         bData = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
