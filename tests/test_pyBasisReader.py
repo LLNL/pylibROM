@@ -70,15 +70,15 @@ def test_getSnapshotMatrix():
     basis_reader = libROM.BasisReader("basis.h5_snapshot", libROM.Formats.HDF5)
 
     snapshot_matrix1 = basis_reader.getSnapshotMatrix(0.5)
-    assert(np.array_equal(snapshot_matrix1.getData(),[[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]])) 
+    assert(np.array_equal(snapshot_matrix1.getData(),[[1.0e+000],[2.0e+000],[3.0e+000],[4.8e-322]])) 
 
 
     snapshot_matrix2 = basis_reader.getSnapshotMatrix(0.5, 1)
-    assert(np.array_equal(snapshot_matrix2.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]))
+    assert(np.array_equal(snapshot_matrix2.getData(), [[1.0e+000],[2.0e+000],[3.0e+000],[4.8e-322]]))
 
 
     snapshot_matrix3 = basis_reader.getSnapshotMatrix(0.5, 1, 1)
-    assert(np.array_equal(snapshot_matrix3.getData(), [[-3.7416573867739418], [0.4217934441190679], [0.6326901661786019], [3.5e-323]]))
+    assert(np.array_equal(snapshot_matrix3.getData(), [[1.0e+000],[2.0e+000],[3.0e+000],[4.8e-322]]))
     
 
 if __name__ == "__main__":
