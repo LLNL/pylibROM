@@ -77,8 +77,6 @@ void init_IncrementalSVD(pybind11::module_ &m) {
         py::buffer_info buf_info = u_in.request();
         if (buf_info.ndim != 1)
         throw std::runtime_error("Input array must be 1-dimensional");
-
-
         double* u_in_data = static_cast<double*>(buf_info.ptr);
         bool result = self.takeSample(u_in_data, time, add_without_increase);
         return result;

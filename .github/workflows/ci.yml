@@ -52,6 +52,12 @@ jobs:
             pytest test_pyStaticSVD.py
             echo run pyIncrementalSVD unit test
             pytest test_pyIncrementalSVD.py
+            echo run pyBasisGenerator unit test
+            pytest test_pyBasisGenerator.py
+            echo run pyBasisReader unit test
+            pytest test_pyBasisReader.py
+            echo run pyBasisWriter unit test
+            pytest test_pyBasisWriter.py
   cmake-with-librom:
     runs-on: ubuntu-latest
     needs: [docker-librom-image]
