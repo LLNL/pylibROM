@@ -132,4 +132,18 @@ jobs:
             echo run pyMatrix unit test
             pytest test_pyMatrix.py --verbose
             mpirun -n 2 pytest test_pyMatrix.py --verbose
+            echo run pyOptions unit test
+            pytest test_pyOptions.py --verbose
+            echo run pySVD unit test
+            pytest test_pySVD.py --verbose
+            echo run pyStaticSVD unit test
+            pytest test_pyStaticSVD.py --verbose
+            echo run pyIncrementalSVD unit test
+            pytest test_pyIncrementalSVD.py --verbose
+            echo run pyBasisGenerator unit test
+            pytest test_pyBasisGenerator.py --verbose
+            echo run pyBasisReader unit test
+            pytest test_pyBasisReader.py --verbose
+            echo run pyBasisWriter unit test
+            pytest test_pyBasisWriter.py --verbose
     
