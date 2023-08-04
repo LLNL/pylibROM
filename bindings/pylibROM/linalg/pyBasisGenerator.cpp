@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include "linalg/BasisGenerator.h"
-
+#include "python_utils/cpp_utils.hpp"
 
 namespace py = pybind11;
 using namespace CAROM;

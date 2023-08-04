@@ -103,6 +103,8 @@ pybind11_add_module(pylibROM
 	bindings/pylibROM/utils/pyDatabase.cpp
 
 	bindings/pylibROM/mfem/Utilities.cpp
+
+	bindings/pylibROM/python_utils/cpp_utils.hpp
 )
 message("building pylibROM...")
 
