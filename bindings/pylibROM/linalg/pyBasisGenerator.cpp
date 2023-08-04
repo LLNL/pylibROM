@@ -20,7 +20,7 @@ void init_BasisGenerator(pybind11::module_ &m) {
         )
         .def("isNextSample", (bool (BasisGenerator::*)(double)) &BasisGenerator::isNextSample)
         .def("updateRightSV", (bool (BasisGenerator::*)()) &BasisGenerator::updateRightSV)
-        .def("takeSample", [](BasisGenerator& self, py::array_t<double> u_in, double time, double dt, bool add_without_increase = false) {
+        .def("takeSample", [](BasisGenerator& self, py::array_t<double> &u_in, double time, double dt, bool add_without_increase = false) {
             py::buffer_info buf_info = u_in.request();
             if (buf_info.ndim != 1)
                 throw std::runtime_error("Input array must be 1-dimensional");
@@ -36,7 +36,7 @@ void init_BasisGenerator(pybind11::module_ &m) {
             py::arg("cut_off") = static_cast<int>(1e9),
             py::arg("db_format") = Database::formats::HDF5
         )
-        .def("computeNextSampleTime", [](BasisGenerator& self, py::array_t<double> u_in, py::array_t<double> rhs_in, double time) {
+        .def("computeNextSampleTime", [](BasisGenerator& self, py::array_t<double> &u_in, py::array_t<double> &rhs_in, double time) {
              py::buffer_info buf_info_u = u_in.request();
              py::buffer_info buf_info_rhs = rhs_in.request();
     

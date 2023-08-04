@@ -73,7 +73,7 @@ class PyIncrementalSVD : public IncrementalSVD {
 void init_IncrementalSVD(pybind11::module_ &m) {
     py::class_<IncrementalSVD,PyIncrementalSVD>(m, "IncrementalSVD")
         .def(py::init<Options, const std::string&>())
-        .def("takeSample", [](IncrementalSVD& self, py::array_t<double> u_in, double time,bool add_without_increase = false) {
+        .def("takeSample", [](IncrementalSVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
         py::buffer_info buf_info = u_in.request();
         if (buf_info.ndim != 1)
         throw std::runtime_error("Input array must be 1-dimensional");

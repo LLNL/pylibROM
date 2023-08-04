@@ -50,7 +50,7 @@ public:
 void init_StaticSVD(pybind11::module& m) {
     py::class_<StaticSVD, PyStaticSVD>(m, "StaticSVD")
         .def(py::init(&PyStaticSVD::create), py::arg("options"))
-        .def("takeSample", [](StaticSVD& self, py::array_t<double> u_in, double time,bool add_without_increase = false) {
+        .def("takeSample", [](StaticSVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
          py::buffer_info buf_info = u_in.request();
          double* u_in_data = static_cast<double*>(buf_info.ptr);
          bool result = self.takeSample(u_in_data, time, add_without_increase);
