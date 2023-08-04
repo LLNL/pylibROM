@@ -51,13 +51,13 @@ link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cma
 execute_process(COMMAND python3 -c "import mpi4py; print(mpi4py.get_include())" OUTPUT_VARIABLE MPI4PY)
 
 # MFEM is required.
-find_library(MFEM mfem "$ENV{MFEM_DIR}/lib" "${LIBROM_DIR}/dependencies/mfem/lib")
-find_library(HYPRE HYPRE "$ENV{HYPRE_DIR}/lib" "${LIBROM_DIR}/dependencies/hypre/lib")
-find_library(PARMETIS parmetis "$ENV{PARMETIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis/lib")
-find_library(METIS metis "$ENV{METIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis/lib")
-find_path(MFEM_INCLUDES mfem.hpp "$ENV{MFEM_DIR}/include" "${LIBROM_DIR}/dependencies/mfem/include")
-find_path(HYPRE_INCLUDES HYPRE.h "$ENV{HYPRE_DIR}/include" "${LIBROM_DIR}/dependencies/hypre/include")
-find_path(PARMETIS_INCLUDES metis.h "$ENV{PARMETIS_DIR}/metis/include" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis/metis/include")
+find_library(MFEM mfem "$ENV{MFEM_DIR}/lib" "${LIBROM_DIR}/dependencies/mfem")
+find_library(HYPRE HYPRE "$ENV{HYPRE_DIR}/lib" "${LIBROM_DIR}/dependencies/hypre/src/hypre/lib")
+find_library(PARMETIS parmetis "$ENV{PARMETIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
+find_library(METIS metis "$ENV{METIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
+find_path(MFEM_INCLUDES mfem.hpp "$ENV{MFEM_DIR}/include" "${LIBROM_DIR}/dependencies/mfem")
+find_path(HYPRE_INCLUDES HYPRE.h "$ENV{HYPRE_DIR}/include" "${LIBROM_DIR}/dependencies/hypre/src/hypre/include")
+find_path(PARMETIS_INCLUDES metis.h "$ENV{PARMETIS_DIR}/metis/include" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
 
 #===================== pylibROM =============================
 
