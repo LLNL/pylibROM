@@ -71,10 +71,13 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/pyMatrix.cpp
     bindings/pylibROM/linalg/pyVector.cpp
     bindings/pylibROM/linalg/pyBasisGenerator.cpp
+    bindings/pylibROM/linalg/pyBasisReader.cpp
+	bindings/pylibROM/linalg/pyBasisWriter.cpp
     bindings/pylibROM/linalg/pyOptions.cpp
-
-    bindings/pylibROM/algo/pyDMD.cpp
-
+    bindings/pylibROM/linalg/svd/pySVD.cpp
+    bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
+    bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
+    bindings/pylibROM/algo/pyDMD.cpp 
 	bindings/pylibROM/utils/mpi_utils.cpp
 )
 message("building pylibROM...")

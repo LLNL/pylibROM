@@ -16,33 +16,33 @@ v1.fill(1.0)
 v2.fill(2.0)
 
 # Print the initial data for v1 and v2
-print("Initial data for v1:", v1.get_data())
-print("Initial data for v2:", v2.get_data())
+print("Initial data for v1:", v1.getData())
+print("Initial data for v2:", v2.getData())
 
 # Use the addition operator
 v1 += v2
 
 # Print the updated data for v1
-print("Updated data for v1 after addition:", v1.get_data())
+print("Updated data for v1 after addition:", v1.getData())
 
 #set every element to a scalar
 v1.__set_scalar__(2)
 
 # Print the updated data for v1
-print("Updated data for v1 after setting every element to a scalar:", v1.get_data())
+print("Updated data for v1 after setting every element to a scalar:", v1.getData())
 
 #scaling every element by a scalar
 v1.__scale__(3)
 
 # Print the updated data for v1
-print("Updated data for v1 after scaling every element by a scalar:", v1.get_data())
+print("Updated data for v1 after scaling every element by a scalar:", v1.getData())
 
 #set size 
 v1.setSize(5)
 v1.__set_scalar__(2)
 
 # Print the updated data for v1
-print("Updated data for v1 after setting the size:", v1.get_data())
+print("Updated data for v1 after setting the size:", v1.getData())
 
 #tranformers
 # Define the transformer function
@@ -50,7 +50,7 @@ def transformer(size, vector):
     for i in range(size):
         vector[i] = vector[i] ** 2 
 v1.transform(transformer)
-print("Updated data for v1 after tranforming:", v1.get_data())
+print("Updated data for v1 after tranforming:", v1.getData())
 
 
 print("distributed:", v1.distributed())
@@ -72,34 +72,34 @@ print("Norm squared:", norm2)
 
 # Call the normalize function
 v1.normalize()
-normalized_data = v1.get_data()
+normalized_data = v1.getData()
 print("Normalized data:", normalized_data)
 
 #add two vectors
 #Test the first version of plus
 result=v1.plus(v2)
-print("Result vector after addition of v1 and v2 ", result.get_data())
+print("Result vector after addition of v1 and v2 ", result.getData())
 
 # Test the third version of plus
 v1.plus(v2,v1)
-print("Updated data for v1 after addition of v1 and v2 ", v1.get_data())
+print("Updated data for v1 after addition of v1 and v2 ", v1.getData())
 
 #Test the first version of plusAx
 result1 = v1.plusAx(2.0, v2)
-print("Result vector", result1.get_data())
+print("Result vector", result1.getData())
 
 
 #Test the first version of plusEqAx
 v1.plusEqAx(2.0, v2)
-print("Updated data for v1 after plusEqAx", v1.get_data())
+print("Updated data for v1 after plusEqAx", v1.getData())
 
 #Test the first version of minus
 result=v1.minus(v2)
-print("Result vector after subtraction of v1 and v2 ", result.get_data())
+print("Result vector after subtraction of v1 and v2 ", result.getData())
 
 # Test the third version of minus
 v1.minus(v2,v1)
-print("Updated data for v1 after subtraction of v1 and v2 ", v1.get_data())
+print("Updated data for v1 after subtraction of v1 and v2 ", v1.getData())
 
 
 # Test the 'localMin' function
@@ -117,7 +117,7 @@ def test_plus():
     v2.fill(2.0)
 
     v1 += v2
-    result = v1.get_data()
+    result = v1.getData()
     print(result)
     assert result == [3.0, 3.0, 3.0]
 
