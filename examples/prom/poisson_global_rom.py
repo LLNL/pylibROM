@@ -53,7 +53,31 @@ class StopWatch:
 
 sys.path.append("../../build")
 import pylibROM.linalg as libROM
-from pylibROM.mfem import ComputeCtAB
+# from pylibROM.mfem import ComputeCtAB
+def ComputeCtAB(A, B, C, CtAB):
+    assert((not B.distributed()) and (not C.distributed()) and (not CtAB.distributed()))
+
+    num_rows = B.numRows()
+    num_cols = B.numColumns()
+    num_rows_A = A.NumRows()
+
+    assert(C.numRows() == num_rows_A)
+
+    Bvec =  mfem.Vector(num_rows)
+    ABvec = mfem.Vector(num_rows_A)
+
+    AB = libROM.Matrix(num_rows_A, num_cols, True)
+    ABdata = AB.getData()
+
+    for i in range(num_cols):
+        B.getColumn(i, Bvec)
+        A.Mult(Bvec, ABvec)
+        ABdata[:, i] = ABvec
+        # for j in range(num_rows_A):
+        #     AB[j, i] = ABvec[j]
+
+    C.transposeMult(AB, CtAB)
+    return
 
 def run():
     from mpi4py import MPI
