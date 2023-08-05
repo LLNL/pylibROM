@@ -12,6 +12,6 @@ using namespace CAROM;
 
 void init_mfem_Utilities(pybind11::module_ &m) {
     
-    m.def("ComputeCtAB", (void ()(const HypreParMatrix&, const Matrix& B, const Matrix& C, Matrix&)) &ComputeCtAB);
-    m.def("ComputeCtAB", (void ()(const Operator&, const Matrix& B, const Matrix& C, Matrix&)) &ComputeCtAB);
+    m.def("ComputeCtAB", (void ()(const HypreParMatrix&, const CAROM::Matrix& B, const CAROM::Matrix& C, Matrix&)) &ComputeCtAB);
+    m.def("ComputeCtAB", (void ()(const Operator&, const CAROM::Matrix& B, const CAROM::Matrix& C, Matrix&)) &ComputeCtAB);
 }
