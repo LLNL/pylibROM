@@ -255,7 +255,7 @@ def run():
     # CAROM::Options* options;
     # CAROM::BasisGenerator *generator;
     # int numRowRB, numColumnRB;
-    # StopWatch solveTimer, assembleTimer, mergeTimer;
+    solveTimer, assembleTimer, mergeTimer = StopWatch(), StopWatch(), StopWatch()
 
     # 10. Set BasisGenerator if offline
     if (offline):
@@ -265,7 +265,7 @@ def run():
 
     # 11. The merge phase
     if (merge):
-        # mergeTimer.Start();
+        mergeTimer.Start()
         options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
                                 update_right_SV)
         generator = libROM.BasisGenerator(options, isIncremental, basisName)
@@ -274,10 +274,10 @@ def run():
             generator.loadSamples(snapshot_filename,"snapshot", 5)
 
         generator.endSamples() # save the merged basis file
-        # mergeTimer.Stop();
-        # if (myid == 0):
-        #     print("Elapsed time for merging and building ROM basis: %e second\n" %
-        #            mergeTimer.RealTime())
+        mergeTimer.Stop()
+        if (myid == 0):
+            print("Elapsed time for merging and building ROM basis: %e second\n" %
+                   mergeTimer.duration)
         del generator
         del options
         MPI.Finalize()
@@ -287,7 +287,7 @@ def run():
     #     right-hand side of the FEM linear system, which in this case is
     #     (f,phi_i) where f is given by the function f_exact and phi_i are the
     #     basis functions in the finite element fespace.
-    # assembleTimer.Start();
+    assembleTimer.Start()
     # TODO(kevin): figure out mfem parallel install
     # b = mfem.ParLinearForm(fespace)
     class RightHandSide(mfem.PyCoefficient):
@@ -332,7 +332,7 @@ def run():
     B = mfem.Vector()
     X = mfem.Vector()
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B)
-    # assembleTimer.Stop();
+    assembleTimer.Stop()
 
     # 16. The offline phase
     if (fom or offline):
@@ -354,9 +354,9 @@ def run():
         if (prec is not None):
             cg.SetPreconditioner(prec)
         cg.SetOperator(A.Ptr())
-        # solveTimer.Start();
+        solveTimer.Start()
         cg.Mult(B, X)
-        # solveTimer.Stop();
+        solveTimer.Stop()
         if (prec is not None):
             del prec
 
@@ -373,7 +373,7 @@ def run():
     # 19. The online phase
     if (online):
         # 20. read the reduced basis
-        # assembleTimer.Start();
+        assembleTimer.Start()
         reader = libROM.BasisReader(basisName)
         spatialbasis = reader.getSpatialBasis(0.0)
         numRowRB = spatialbasis.numRows()
@@ -395,12 +395,12 @@ def run():
         X_carom = libROM.Vector(xData, True, False)
         reducedRHS = spatialbasis.transposeMult(B_carom)
         reducedSol = libROM.Vector(numColumnRB, False)
-        # assembleTimer.Stop();
+        assembleTimer.Stop()
 
         # 22. solve ROM
-        # solveTimer.Start();
+        solveTimer.Start()
         invReducedA.mult(reducedRHS, reducedSol)
-        # solveTimer.Stop();
+        solveTimer.Stop()
 
         # 23. reconstruct FOM state
         spatialbasis.mult(reducedSol, X_carom)
@@ -486,15 +486,15 @@ def run():
             print(
                 "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
 
-    # # 29. print timing info
-    # if (myid == 0):
-    #     if (fom or offline):
-    #         print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.RealTime())
-    #         print("Elapsed time for solving FOM: %e second\n" % solveTimer.RealTime())
+    # 29. print timing info
+    if (myid == 0):
+        if (fom or offline):
+            print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.duration)
+            print("Elapsed time for solving FOM: %e second\n" % solveTimer.duration)
 
-    #     if(online):
-    #         print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.RealTime())
-    #         print("Elapsed time for solving ROM: %e second\n" % solveTimer.RealTime())
+        if(online):
+            print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.duration)
+            print("Elapsed time for solving ROM: %e second\n" % solveTimer.duration)
 
     # 30. Free the used memory.
     if (delete_fec):
