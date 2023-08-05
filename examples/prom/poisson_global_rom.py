@@ -1,6 +1,6 @@
 '''
    MFEM example 23
-      See c++ version in the MFEM library for more detail 
+      See c++ version in the MFEM library for more detail
 '''
 import os
 import io
@@ -30,20 +30,20 @@ class StopWatch:
     def __init__(self):
         self.Reset()
         return
-    
+
     def Start(self):
         assert(not self.running)
         self.start_time = time.time()
         self.running = True
         return
-    
+
     def Stop(self):
         assert(self.running)
         self.stop_time = time.time()
         self.duration += self.stop_time - self.start_time
         self.running = False
         return
-    
+
     def Reset(self):
         self.duration = 0.0
         self.start_time = 0.0
@@ -55,7 +55,8 @@ sys.path.append("../../build")
 import pylibROM.linalg as libROM
 # from pylibROM.mfem import ComputeCtAB
 def ComputeCtAB(A, B, C, CtAB):
-    assert((not B.distributed()) and (not C.distributed()) and (not CtAB.distributed()))
+    # spatial basis is always distributed regardless of actual MPI initialization.
+    assert((B.distributed()) and (C.distributed()) and (not CtAB.distributed()))
 
     num_rows = B.numRows()
     num_cols = B.numColumns()
@@ -63,7 +64,8 @@ def ComputeCtAB(A, B, C, CtAB):
 
     assert(C.numRows() == num_rows_A)
 
-    Bvec =  mfem.Vector(num_rows)
+    Bvec = libROM.Vector(num_rows, False)
+    BvecData = Bvec.getData()
     ABvec = mfem.Vector(num_rows_A)
 
     AB = libROM.Matrix(num_rows_A, num_cols, True)
@@ -71,8 +73,8 @@ def ComputeCtAB(A, B, C, CtAB):
 
     for i in range(num_cols):
         B.getColumn(i, Bvec)
-        A.Mult(Bvec, ABvec)
-        ABdata[:, i] = ABvec
+        A.Mult(mfem.Vector(BvecData, num_rows), ABvec)
+        ABdata[:, i] = (c_double * ABvec.Size()).from_address(int(ABvec.GetData()))
         # for j in range(num_rows_A):
         #     AB[j, i] = ABvec[j]
 
@@ -178,7 +180,7 @@ def run():
                 or ((not offline) and (not merge) and online)
         if (not check):
             raise ValueError("only one of offline, merge, or online must be true!")
-        
+
     # 3. Enable hardware devices such as GPUs, and programming models such as
     #    CUDA, OCCA, RAJA and OpenMP based on command line options.
     device = mfem.Device(device_config)
@@ -270,7 +272,7 @@ def run():
         for paramID in range(nsets):
             snapshot_filename = "%s%d_snapshot" % (basisName, paramID)
             generator.loadSamples(snapshot_filename,"snapshot", 5)
-        
+
         generator.endSamples() # save the merged basis file
         # mergeTimer.Stop();
         # if (myid == 0):
@@ -280,7 +282,7 @@ def run():
         del options
         MPI.Finalize()
         return
-    
+
     # 12. Set up the parallel linear form b(.) which corresponds to the
     #     right-hand side of the FEM linear system, which in this case is
     #     (f,phi_i) where f is given by the function f_exact and phi_i are the
@@ -385,12 +387,12 @@ def run():
         # 21. form inverse ROM operator
         invReducedA = libROM.Matrix(numColumnRB, numColumnRB, False)
         ComputeCtAB(A, spatialbasis, spatialbasis, invReducedA)
-        invReducedA.inverse()
+        invReducedA.invert()
 
         bData = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
-        B_carom = libROM.Vector(bData, B.Size(), True, False)
-        bData = np.array((c_double * X.Size()).from_address(int(X.GetData())), copy=False)
-        X_carom = libROM.Vector(xData, X.Size(), True, False)
+        B_carom = libROM.Vector(bData, True, False)
+        xData = np.array((c_double * X.Size()).from_address(int(X.GetData())), copy=False)
+        X_carom = libROM.Vector(xData, True, False)
         reducedRHS = spatialbasis.transposeMult(B_carom)
         reducedSol = libROM.Vector(numColumnRB, False)
         # assembleTimer.Stop();
@@ -404,7 +406,7 @@ def run():
         spatialbasis.mult(reducedSol, X_carom)
         del spatialbasis
         del reducedRHS
-    
+
     # 24. Recover the parallel grid function corresponding to X. This is the
     #     local finite element solution on each processor.
     a.RecoverFEMSolution(X, b, x)
@@ -426,7 +428,7 @@ def run():
 
         diff_x = mfem.Vector(x.Size())
 
-        mfem.subtract(x, x_fom, diff_x)
+        mfem.subtract_vector(x, x_fom, diff_x)
 
         # Get norms
         # TODO(kevin): figure out mfem parallel install
@@ -483,13 +485,13 @@ def run():
             sol_sock.flush()
             print(
                 "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
-            
+
     # # 29. print timing info
     # if (myid == 0):
     #     if (fom or offline):
     #         print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.RealTime())
     #         print("Elapsed time for solving FOM: %e second\n" % solveTimer.RealTime())
-        
+
     #     if(online):
     #         print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.RealTime())
     #         print("Elapsed time for solving ROM: %e second\n" % solveTimer.RealTime())
