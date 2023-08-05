@@ -5,3 +5,4 @@
 [submodule "extern/libROM"]
 	path = extern/libROM
 	url = https://github.com/LLNL/libROM.git
+	branch = mfem_ser_utils
