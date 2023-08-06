@@ -21,8 +21,11 @@ void init_DMD(pybind11::module_ &);
 //utils
 void init_mpi_utils(pybind11::module_ &m);
 void init_Database(pybind11::module_ &m);
+
 //mfem
-void init_mfem_Utilities(pybind11::module_ &m);
+// TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
+//              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
+// void init_mfem_Utilities(pybind11::module_ &m);
 
 PYBIND11_MODULE(pylibROM, m) {
     py::module utils = m.def_submodule("utils");
@@ -44,8 +47,10 @@ PYBIND11_MODULE(pylibROM, m) {
     py::module algo = m.def_submodule("algo");
     init_DMD(algo);
 
-    py::module mfem = m.def_submodule("mfem");
-    init_mfem_Utilities(mfem);
+    // py::module mfem = m.def_submodule("mfem");
+    // init_mfem_Utilities(mfem);
+
+    // py::module python_utils = m.def_submodule("python_utils");
 }
 
 /*

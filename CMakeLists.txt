@@ -50,14 +50,35 @@ link_directories(${LIBROM_DIR}/build/lib) #this hack is the best way for non-cma
 #include mpi4py directory
 execute_process(COMMAND python3 -c "import mpi4py; print(mpi4py.get_include())" OUTPUT_VARIABLE MPI4PY)
 
-# MFEM is required.
-find_library(MFEM mfem "$ENV{MFEM_DIR}/lib" "${LIBROM_DIR}/dependencies/mfem")
-find_library(HYPRE HYPRE "$ENV{HYPRE_DIR}/lib" "${LIBROM_DIR}/dependencies/hypre/src/hypre/lib")
-find_library(PARMETIS parmetis "$ENV{PARMETIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
-find_library(METIS metis "$ENV{METIS_DIR}/lib" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
-find_path(MFEM_INCLUDES mfem.hpp "$ENV{MFEM_DIR}/include" "${LIBROM_DIR}/dependencies/mfem")
-find_path(HYPRE_INCLUDES HYPRE.h "$ENV{HYPRE_DIR}/include" "${LIBROM_DIR}/dependencies/hypre/src/hypre/include")
-find_path(PARMETIS_INCLUDES metis.h "$ENV{PARMETIS_DIR}/metis/include" "${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
+# # MFEM is required.
+# # TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
+# #              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
+
+# find_library(MFEM mfem
+# 	"$ENV{MFEM_DIR}/lib"
+# 	"$ENV{MFEM_DIR}"
+# 	"${LIBROM_DIR}/dependencies/mfem")
+# find_library(HYPRE HYPRE
+# 	"$ENV{HYPRE_DIR}/lib"
+# 	"${LIBROM_DIR}/dependencies/hypre/src/hypre/lib")
+# find_library(PARMETIS parmetis
+# 	"$ENV{PARMETIS_DIR}/lib"
+# 	"$ENV{PARMETIS_DIR}/build/lib/libparmetis"
+# 	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
+# find_library(METIS metis
+# 	"$ENV{METIS_DIR}/lib"
+# 	"$ENV{PARMETIS_DIR}/build/lib/libmetis"
+# 	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
+# find_path(MFEM_INCLUDES mfem.hpp
+# 	"$ENV{MFEM_DIR}/include"
+# 	"$ENV{MFEM_DIR}"
+# 	"${LIBROM_DIR}/dependencies/mfem")
+# find_path(HYPRE_INCLUDES HYPRE.h
+# 	"$ENV{HYPRE_DIR}/include"
+# 	"${LIBROM_DIR}/dependencies/hypre/src/hypre/include")
+# find_path(PARMETIS_INCLUDES metis.h
+# 	"$ENV{PARMETIS_DIR}/metis/include"
+# 	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
 
 #===================== pylibROM =============================
 
@@ -72,17 +93,17 @@ include_directories(
 	${LIBROM_INCLUDE_DIR} 
 	${MPI_INCLUDE_PATH}
 	${MPI4PY}
-	${MFEM_INCLUDES}
-	${HYPRE_INCLUDES}
-	${PARMETIS_INCLUDES}
-	${MFEM_C_INCLUDE_DIRS}
+	# ${MFEM_INCLUDES}
+	# ${HYPRE_INCLUDES}
+	# ${PARMETIS_INCLUDES}
+	# ${MFEM_C_INCLUDE_DIRS}
 )
-link_libraries(
-	${MFEM}
-	${HYPRE}
-	${PARMETIS}
-	${METIS}
-)
+# link_libraries(
+# 	${MFEM}
+# 	${HYPRE}
+# 	${PARMETIS}
+# 	${METIS}
+# )
 
 add_subdirectory("extern/pybind11")
 
@@ -102,7 +123,9 @@ pybind11_add_module(pylibROM
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.cpp
 
-	bindings/pylibROM/mfem/Utilities.cpp
+	# TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
+	#              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
+	# bindings/pylibROM/mfem/Utilities.cpp
 
 	bindings/pylibROM/python_utils/cpp_utils.hpp
 )
