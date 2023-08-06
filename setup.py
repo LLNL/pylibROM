@@ -58,19 +58,22 @@ class CMakeBuild(build_ext):
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
         global librom_dir, install_scalapack
+        cmake_args = []
         if (librom_dir is None):
-            print("Installing libROM library: %s" % librom_dir)
             librom_dir = os.path.dirname(os.path.realpath(__file__))
             librom_dir += "/extern/libROM"
-            librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
-            if (install_scalapack): librom_cmd += " -s"
-            print("libROM installation command: %s" % librom_cmd)
-            subprocess.run(
-                librom_cmd, shell=True, check=True
-            )
+            print("Installing libROM library: %s" % librom_dir)
+            if (install_scalapack):
+                cmake_args += [f"-DBUILD_SCALAPACK=ON"]
+            # librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
+            # if (install_scalapack): librom_cmd += " -s"
+            # print("libROM installation command: %s" % librom_cmd)
+            # subprocess.run(
+            #     librom_cmd, shell=True, check=True
+            # )
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
-        cmake_args = [f"-DLIBROM_DIR=%s" % librom_dir]
+            cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code

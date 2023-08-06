@@ -5,15 +5,30 @@ project(_pylibROM)
 set(CMAKE_BUILD_TYPE Debug)
 set(PYBIND11_FINDPYTHON ON)
 
+#=================== ScaLAPACK (optional) ==================
+option(BUILD_SCALAPACK "Build static ScaLAPACK for libROM" OFF)
+
+if (BUILD_SCALAPACK)
+	set(WORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern)
+	add_custom_command(
+		OUTPUT SLPK_BUILD
+		WORKING_DIRECTORY ${WORK_DIR}
+		COMMAND ${WORK_DIR}/librom_scalapack.sh
+		COMMENT "Building Static ScaLAPACK..."
+	)
+	add_custom_target(RUN_SLPK_BUILD ALL DEPENDS SLPK_BUILD)
+endif(BUILD_SCALAPACK)
+
 #=================== libROM ================================
 
 #It is tedious to build libROM. option to not build
 set(LIBROM_DIR "" CACHE STRING "absolute path to the pre-installed libROM")
-set(BUILD_DEPS OFF)
+
+set(BUILD_LIBROM OFF)
 if (NOT LIBROM_DIR)
   set(LIBROM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/libROM)
   set(LIBROM_SCRIPTS_DIR ${LIBROM_DIR}/scripts)
-  set(BUILD_DEPS ON)
+  set(BUILD_LIBROM ON)
 endif()
 
 include(ExternalProject)
@@ -22,7 +37,7 @@ include(CMakePrintHelpers)
 cmake_print_variables(LIBROM_DIR)
 cmake_print_variables(LIBROM_SCRIPTS_DIR)
 
-if (BUILD_DEPS)
+if (BUILD_LIBROM)
 	# add_custom_command(
 	# 	OUTPUT LIBROM_BUILD
 	# 	WORKING_DIRECTORY ${LIBROM_DIR}
@@ -41,7 +56,7 @@ if (BUILD_DEPS)
         	INSTALL_COMMAND ""
 	)	
 	message("Building libROM dependency...")
-endif(BUILD_DEPS)
+endif(BUILD_LIBROM)
 
 #setup external dependency build and link paths for libROM
 set(LIBROM_INCLUDE_DIR ${LIBROM_DIR}/lib)
