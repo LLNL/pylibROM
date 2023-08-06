@@ -1,8 +1,16 @@
 import sys
 import pytest
-sys.path.append("../build")
-import pylibROM.linalg as libROM
-from pylibROM.utils import Database
+try:
+    # import pip-installed package
+    import pylibROM
+    import pylibROM.linalg as libROM
+    from pylibROM.utils import Database
+except ModuleNotFoundError:
+    # If pip-installed package is not found, import cmake-built package
+    sys.path.append("../build")
+    import _pylibROM as pylibROM
+    import _pylibROM.linalg as libROM
+    from _pylibROM.utils import Database
 import numpy as np 
 
 options = libROM.Options(4, 20, 3, True, True)

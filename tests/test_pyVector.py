@@ -1,11 +1,15 @@
 import pytest
 import numpy as np
-# import sys
-# import os.path as pth
-# sys.path.append(pth.join(pth.dirname(pth.abspath(__file__)), "../")) #sys.path.append("..")
 import sys
-sys.path.append("../build")
-import pylibROM.linalg as libROM
+try:
+    # import pip-installed package
+    import pylibROM
+    import pylibROM.linalg as libROM 
+except ModuleNotFoundError:
+    # If pip-installed package is not found, import cmake-built package
+    sys.path.append("../build")
+    import _pylibROM as pylibROM
+    import _pylibROM.linalg as libROM
 
 # Create two Vector objects
 v1 = libROM.Vector(3, False) 

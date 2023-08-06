@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(pylibROM)
+project(_pylibROM)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(PYBIND11_FINDPYTHON ON)
@@ -107,7 +107,7 @@ include_directories(
 
 add_subdirectory("extern/pybind11")
 
-pybind11_add_module(pylibROM
+pybind11_add_module(_pylibROM
     bindings/pylibROM/pylibROM.cpp
 
     bindings/pylibROM/linalg/pyMatrix.cpp
@@ -131,4 +131,4 @@ pybind11_add_module(pylibROM
 )
 message("building pylibROM...")
 
-target_link_libraries(pylibROM PRIVATE ROM)
+target_link_libraries(_pylibROM PRIVATE ROM)

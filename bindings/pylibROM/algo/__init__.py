@@ -1,1 +1,0 @@
-from .pyDMD import DMD

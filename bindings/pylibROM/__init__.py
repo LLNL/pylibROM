@@ -1,4 +1,1 @@
-from . import linalg
-from . import algo
-from . import utils
-from . import mfem
+from _pylibROM import *

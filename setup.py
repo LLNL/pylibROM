@@ -10,7 +10,7 @@ from pathlib import Path
 import pkg_resources
 pkg_resources.require(['pip < 23.3.0'])
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 
 # Take the global option for pre-installed librom directory.
@@ -157,13 +157,16 @@ class CMakeBuild(build_ext):
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="pylibrom",
+    name="pylibROM",
     # version="0.0.1",
     # author="Dean Moldovan",
     # author_email="dean0x7d@gmail.com",
     description="Python Interface for LLNL libROM",
     long_description="",
-    ext_modules=[CMakeExtension("pylibrom")],
+    packages=find_packages(where='bindings'),
+    package_dir={"":"bindings"},
+    # packages=['bindings/pylibROM'],
+    ext_modules=[CMakeExtension("_pylibROM")],
     cmdclass={
         "build_ext": CMakeBuild,
     },

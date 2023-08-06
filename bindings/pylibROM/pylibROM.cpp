@@ -27,7 +27,7 @@ void init_Database(pybind11::module_ &m);
 //              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
 // void init_mfem_Utilities(pybind11::module_ &m);
 
-PYBIND11_MODULE(pylibROM, m) {
+PYBIND11_MODULE(_pylibROM, m) {
     py::module utils = m.def_submodule("utils");
     init_mpi_utils(utils);
     init_Database(utils);
