@@ -4,8 +4,7 @@ import numpy as np
 np.set_printoptions(precision=4)
 from mpi4py import MPI
 import sys
-sys.path.append('..')
-import build.pylibROM.linalg as la
+import pylibROM.linalg as la
 
 #- parallelization setup
 comm = MPI.COMM_WORLD

@@ -4,4 +4,5 @@ from .pyBasisWriter import BasisWriter
 from .pyBasisReader import BasisReader
 from .pyBasisGenerator import BasisGenerator 
 from .pyOptions import  Options 
+from .pyNNLS import NNLSSolver
 from . import svd 

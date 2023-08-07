@@ -74,6 +74,7 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/pyBasisReader.cpp
 	bindings/pylibROM/linalg/pyBasisWriter.cpp
     bindings/pylibROM/linalg/pyOptions.cpp
+    bindings/pylibROM/linalg/pyNNLS.cpp
     bindings/pylibROM/linalg/svd/pySVD.cpp
     bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
