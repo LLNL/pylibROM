@@ -5,7 +5,7 @@ Python Interface for LLNL libROM
 
 1. Pull repository and all sub-module dependencies:
   ```
-  git clone --recurse-submodules https://github.com/michael-barrow-llnl/pylibROM.git
+  git clone --recurse-submodules https://github.com/llnl/pylibROM.git
   ```
 
 2. Compile and build pylibROM (from top-level pylibROM repo):
