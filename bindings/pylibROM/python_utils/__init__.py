@@ -1,4 +1,6 @@
-# __init__.py is needed only for pure python routines.
+# To add pure python routines to this module,
+# either define/import the python routine in this file.
+# This will combine both c++ bindings/pure python routines into this module.
 
 def swigdouble2numpyarray(u_swig, u_size):
     from ctypes import c_double
