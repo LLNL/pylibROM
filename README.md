@@ -34,6 +34,6 @@ pip install mfem
 
 ## License
 gLaSDI is distributed under the terms of the MIT license. All new contributions must be made under the MIT. See
-[LICENSE-MIT](https://github.com/LLNL/libROM/blob/master/LICENSE-MIT)
+[LICENSE-MIT](https://github.com/LLNL/pylibROM/blob/main/LICENSE)
 
 LLNL Release Nubmer: LLNL-CODE- 852921
