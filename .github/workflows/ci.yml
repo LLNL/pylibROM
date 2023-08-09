@@ -5,9 +5,9 @@ on:
     types: [opened, labeled, synchronize]
     branches:
       - main
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
 jobs:
   docker-librom-image:
