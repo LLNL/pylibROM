@@ -40,9 +40,9 @@ def test_normalize_constraints():
         An[i] = A[i]*s[i]
         rhs_lbn, rhs_ubn = b*s - halfgap_target, b*s + halfgap_target
 
-    assert np.allclose(At_lr.getData(),An.T)
-    assert np.allclose(lb_lr.getData(),rhs_lbn)
-    assert np.allclose(ub_lr.getData(),rhs_ubn)
+    assert np.allclose(At_lr.getData(),An.T,rtol=1e-10)
+    assert np.allclose(lb_lr.getData(),rhs_lbn,rtol=1e-10)
+    assert np.allclose(ub_lr.getData(),rhs_ubn,rtol=1e-10)
 
 
 def test_solve_parallel_with_scalapack():
@@ -52,5 +52,5 @@ def test_solve_parallel_with_scalapack():
 
     nnls.solve_parallel_with_scalapack(At_lr,lb_lr,ub_lr,x_lr)
     
-    assert np.allclose(sol,x_lr.getData())
+    assert np.allclose(sol,x_lr.getData(),rtol=1e-10)
 
