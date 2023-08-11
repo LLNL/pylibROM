@@ -34,6 +34,17 @@ For serial version of `PyMFEM`, the following simple `pip` command works:
 ```
 pip install mfem
 ```
+For parallel version, a manual installation is required:
+```
+git clone https://github.com/mfem/PyMFEM.git
+cd PyMFEM
+python3 setup.py install --with-parallel
+```
+On LC quartz, use `--user` flag:
+```
+python3 setup.py install --with-parallel --user
+```
+Make sure [`swig`](https://pypi.org/project/swig) is installed first. Also, the binary file must be located in `PATH` environment variable.
 
 
 ## License
