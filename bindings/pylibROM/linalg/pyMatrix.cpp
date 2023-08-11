@@ -32,7 +32,7 @@ void init_matrix(pybind11::module_ &m) {
         .def(py::init<>())
         .def(py::init<int, int, bool, bool>(),
             py::arg("num_rows"), py::arg("num_cols"), py::arg("distributed"), py::arg("randomized") = false)
-        .def(py::init([](py::array_t<double> mat, bool distributed, bool copy_data = true) {
+        .def(py::init([](py::array_t<double> &mat, bool distributed, bool copy_data = true) {
             py::buffer_info buf_info = mat.request();
             int num_rows = buf_info.shape[0];     
             int num_cols = buf_info.shape[1];     

@@ -1,7 +1,14 @@
 import sys
 import pytest
-sys.path.append("../build")
-import pylibROM.linalg as libROM
+try:
+    # import pip-installed package
+    import pylibROM
+    import pylibROM.linalg as libROM
+except ModuleNotFoundError:
+    # If pip-installed package is not found, import cmake-built package
+    sys.path.append("../build")
+    import _pylibROM as pylibROM
+    import _pylibROM.linalg as libROM
 import numpy as np 
 
 def test_options_constructor_two_args():

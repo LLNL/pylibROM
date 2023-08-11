@@ -1,3 +1,6 @@
-from .pySVD import SVD
-from .pyStaticSVD import StaticSVD 
-from .pyIncrementalSVD import IncrementalSVD
+# To add pure python routines to this module,
+# either define/import the python routine in this file.
+# This will combine both c++ bindings/pure python routines into this module.
+
+# For other c++ binding modules, change the module name accordingly.
+from _pylibROM.linalg.svd import *

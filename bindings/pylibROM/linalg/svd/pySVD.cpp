@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include "linalg/svd/SVD.h"
-
+#include "python_utils/cpp_utils.hpp"
 
 namespace py = pybind11;
 using namespace CAROM;
@@ -45,14 +45,8 @@ class PySVD : public SVD {
 void init_SVD(pybind11::module_ &m) {
     py::class_<SVD, PySVD>(m, "SVD")
         .def(py::init<Options>())
-        .def("takeSample", [](SVD& self, py::array_t<double> u_in, double time,bool add_without_increase = false) {
-        py::buffer_info buf_info = u_in.request();
-        // if (buf_info.ndim != 1)
-        // throw std::runtime_error("Input array must be 1-dimensional");
-
-        double* u_in_data = static_cast<double*>(buf_info.ptr);
-        bool result = self.takeSample(u_in_data, time, add_without_increase);
-        return result;
+        .def("takeSample", [](SVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
+            return self.takeSample(getVectorPointer(u_in), time, add_without_increase);
         }, py::arg("u_in"), py::arg("time"),py::arg("add_without_increase") = false)
         .def("getDim", (int (SVD::*)() const) &SVD::getDim)
         .def("getSpatialBasis", (const Matrix* (SVD::*)()) &SVD::getSpatialBasis)
