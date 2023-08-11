@@ -7,7 +7,13 @@ RUN sudo apt-get install -yq chrpath
 # RUN python3 -m pip install numpy
 RUN sudo pip3 install --upgrade pip
 RUN sudo pip3 install swig
-RUN sudo pip3 install mfem
+
+WORKDIR $LIB_DIR
+RUN sudo git clone https://github.com/mfem/PyMFEM.git
+WORKDIR ./PyMFEM
+# We need to use this hack until we can submit a pull request to PyMFEM.
+RUN sudo wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
+RUN sudo python3 setup.py install --with-parallel
 
 # install libROM
 WORKDIR $LIB_DIR

@@ -55,7 +55,13 @@ RUN sudo pip3 install -r ./requirements.txt
 
 # install pymfem
 RUN sudo pip3 install swig
-RUN sudo pip3 install mfem
+
+WORKDIR $LIB_DIR
+RUN git clone https://github.com/mfem/PyMFEM.git
+WORKDIR ./PyMFEM
+# We need to use this hack until we can submit a pull request to PyMFEM.
+RUN wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
+RUN sudo python3 setup.py install --with-parallel
 
 # install lldb and gdb for debugging
 RUN sudo apt-get install -yq lldb gdb
