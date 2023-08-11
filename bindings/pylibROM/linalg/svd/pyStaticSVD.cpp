@@ -3,7 +3,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include "linalg/svd/StaticSVD.h"
-
+#include "python_utils/cpp_utils.hpp"
 
 namespace py = pybind11;
 using namespace CAROM;
@@ -50,11 +50,9 @@ public:
 void init_StaticSVD(pybind11::module& m) {
     py::class_<StaticSVD, PyStaticSVD>(m, "StaticSVD")
         .def(py::init(&PyStaticSVD::create), py::arg("options"))
-        .def("takeSample", [](StaticSVD& self, py::array_t<double> u_in, double time,bool add_without_increase = false) {
-         py::buffer_info buf_info = u_in.request();
-         double* u_in_data = static_cast<double*>(buf_info.ptr);
-         bool result = self.takeSample(u_in_data, time, add_without_increase);
-         return result;
+        .def("takeSample", [](StaticSVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
+            bool result = self.takeSample(getVectorPointer(u_in), time, add_without_increase);
+            return result;
         }, py::arg("u_in"),py::arg("time"),py::arg("add_without_increase") = false)
         .def("getSpatialBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getSpatialBasis,py::return_value_policy::reference_internal)
         .def("getTemporalBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getTemporalBasis,py::return_value_policy::reference_internal)

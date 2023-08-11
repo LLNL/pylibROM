@@ -2,13 +2,14 @@ import sys
 
 sys.path.append("../../build")
 import pylibROM.linalg as libROM
+from pylibROM.utils import Database
 import numpy as np 
 
 # Create an instance of BasisGenerator
 options = libROM.Options(4, 20, 3, True, True)
 incremental =   False
 basis_file_name = "basis.h5"
-file_format = libROM.Formats.HDF5
+file_format = Database.formats.HDF5
 generator = libROM.BasisGenerator(options, incremental, basis_file_name,file_format)
 
 
@@ -35,7 +36,7 @@ generator.writeSnapshot()
 # base_file_name = "basis.h5_snapshot"
 # kind = "snapshot"
 # cut_off = 10
-# db_format = libROM.Formats.HDF5
+# db_format = Database.formats.HDF5
 # generator.loadSamples(base_file_name, kind, cut_off, db_format)
 
 # Call the computeNextSampleTime function

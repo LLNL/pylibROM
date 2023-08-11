@@ -35,7 +35,7 @@ void init_vector(pybind11::module_ &m) {
         .def(py::init<int, bool>())
 
         // Constructor
-        .def(py::init([](py::array_t<double> vec, bool distributed, bool copy_data = true) {
+        .def(py::init([](py::array_t<double> &vec, bool distributed, bool copy_data = true) {
             py::buffer_info buf_info = vec.request();
             int dim = buf_info.shape[0];
             double* data = static_cast<double*>(buf_info.ptr);

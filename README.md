@@ -5,7 +5,7 @@ Python Interface for LLNL libROM
 
 1. Pull repository and all sub-module dependencies:
   ```
-  git clone --recurse-submodules https://github.com/sullan2/pylibROM.git
+  git clone --recurse-submodules https://github.com/llnl/pylibROM.git
   ```
 
 2. Compile and build pylibROM (from top-level pylibROM repo):
@@ -16,11 +16,15 @@ Python Interface for LLNL libROM
   ```
   pip install ./ --global-option="--librom_dir=/path/to/pre-installed-libROM"
   ```  
+  If you want to build static ScaLAPACK for libROM,
+  ```
+  pip install ./ --global-option="--install_scalapack"
+  ```
   
 3. Test python package (from top-level pylibROM repo):
   ```
   cd tests
-  python3.6 testVector.py
+  pytest test_pyVector.py
   ```
 
 ### Using PyMFEM

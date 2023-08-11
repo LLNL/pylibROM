@@ -1,10 +1,17 @@
 import pytest
 import numpy as np
-import sys
-sys.path.append("../build")
-
-import pylibROM.linalg as libROM
-import pylibROM.utils as utils
+try:
+    # import pip-installed package
+    import pylibROM
+    import pylibROM.linalg as libROM
+    import pylibROM.utils as utils
+except ModuleNotFoundError:
+    # If pip-installed package is not found, import cmake-built package
+    import sys
+    sys.path.append("../build")
+    import _pylibROM as pylibROM
+    import _pylibROM.linalg as libROM
+    import _pylibROM.utils as utils
 
 # Create two Matrix objects
 m1 = libROM.Matrix(3,4, False,True)
