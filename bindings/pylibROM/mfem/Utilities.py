@@ -1,7 +1,17 @@
 def ComputeCtAB(A, B, C, CtAB):
     import _pylibROM.linalg as libROM
-    import mfem.ser as mfem
     from ctypes import c_double
+
+    # determine the mfem module to import.
+    import inspect, importlib
+    A_mod_name = inspect.getmodule(A).__name__
+    mfem_mode = A_mod_name.split('.')[1][1:]
+    if (mfem_mode == "ser"):
+        import mfem.ser as mfem
+    elif (mfem_mode == "par"):
+        import mfem.par as mfem
+    else:
+        raise ImportError("Matrix A should be from either mfem.ser or mfem.par! A module: %s" % A_mod_name)
 
     # spatial basis is always distributed regardless of actual MPI initialization.
     assert((B.distributed()) and (C.distributed()) and (not CtAB.distributed()))
