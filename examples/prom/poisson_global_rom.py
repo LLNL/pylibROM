@@ -1,6 +1,34 @@
 '''
-   MFEM example 23
-      See c++ version in the MFEM library for more detail
+//               pylibROM PyMFEM Example: parametric ROM for Poisson problem (adapted from ex1p.cpp)
+//
+// Description:  This example code demonstrates the use of PyMFEM and pylibROM to
+//               define a simple projection-based reduced order model of the
+//               Poisson problem -Delta u = f(x) with homogeneous Dirichlet
+//               boundary conditions and spatially varying right hand side f.
+//
+//               The example highlights three distinct ROM processes, i.e.,
+//               offline, merge, and online. The offline phase runs the full
+//               order model and stores the snapshot data in an HDF file. You
+//               can run as many offline phases as you wish to sample the
+//               parameter space. The merge phase reads all the snapshot files,
+//               builds a global reduced basis, and stores the basis in an HDF
+//               file. The online phase reads the basis, builds the ROM
+//               operator, solves the reduced order system, and lifts the
+//               solution to the full order space.
+//
+// Offline phase: python3 poisson_global_rom.py -offline -f 1.0 -id 0
+//                python3 poisson_global_rom.py -offline -f 1.1 -id 1
+//                python3 poisson_global_rom.py -offline -f 1.2 -id 2
+//
+// Merge phase:   python3 poisson_global_rom.py -merge -ns 3
+//
+// FOM run for error calculation:
+//                python3 poisson_global_rom.py -fom -f 1.15
+//
+// Online phase:  python3 poisson_global_rom.py -online -f 1.15
+//
+// This example runs in parallel with MPI, by using the same number of MPI ranks
+// in all phases (offline, merge, fom, online).
 '''
 import os
 import io
@@ -111,7 +139,7 @@ def run():
                         help="Enable or disable the merge phase.")
 
     args = parser.parse_args()
-    parser.print_options(args)
+    if (myid == 0): parser.print_options(args)
 
     mesh_file       = expanduser(join(os.path.dirname(__file__),
                                       '..', 'data', args.mesh))
@@ -417,17 +445,19 @@ def run():
     if visualization:
         sol_sock = mfem.socketstream("localhost", 19916)
         if not sol_sock.good():
-            print("Unable to connect to GLVis server at localhost:19916")
             visualization = False
-            print("GLVis visualization disabled.")
+            if (myid == 0):
+                print("Unable to connect to GLVis server at localhost:19916")
+                print("GLVis visualization disabled.")
         else:
             sol_sock << "parallel " << num_procs << " " << myid << "\n"
             sol_sock.precision(precision)
             sol_sock << "solution\n" << pmesh << x
             sol_sock << "pause\n"
             sol_sock.flush()
-            print(
-                "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
+            if (myid == 0):
+                print(
+                    "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
 
     # 29. print timing info
     if (myid == 0):
