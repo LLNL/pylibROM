@@ -9,6 +9,8 @@ void init_BasisGenerator(pybind11::module_ &);
 void init_BasisWriter(pybind11::module_ &);
 void init_BasisReader(pybind11::module_ &);
 void init_Options(pybind11::module_ &m);
+void init_NNLSSolver(pybind11::module_ &m);
+
 
 //linalg/svd
 void init_SVD(pybind11::module_ &m); 
@@ -39,6 +41,7 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_BasisWriter(linalg);
     init_BasisReader(linalg);
     init_Options(linalg);
+    init_NNLSSolver(linalg);
     py::module svd = linalg.def_submodule("svd");
     init_SVD(svd);
     init_StaticSVD(svd);
