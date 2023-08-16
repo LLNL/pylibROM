@@ -169,4 +169,159 @@ public:
 
 };
 
+template <class DerivedDatabaseType>
+class PyDerivedDatabase : public PyDatabase<DerivedDatabaseType> {
+public:
+    using PyDatabase<DerivedDatabaseType>::PyDatabase;
+
+    bool
+    create(const std::string& file_name) override
+    {
+        PYBIND11_OVERRIDE(
+            bool,           /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            create,         /* Name of function in C++ (must match Python name) */
+            file_name        /* Argument(s) */
+        );
+    }
+
+    bool
+    open(
+        const std::string& file_name,
+        const std::string& type) override
+    {
+        PYBIND11_OVERRIDE(
+            bool,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            open,                  /* Name of function in C++ (must match Python name) */
+            file_name, type         /* Argument(s) */
+        );
+    }
+
+    bool
+    close() override
+    {
+        PYBIND11_OVERRIDE(
+            bool,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            close                  /* Name of function in C++ (must match Python name) */
+        );
+    }
+
+    void
+    putIntegerArray(
+        const std::string& key,
+        const int* const data,
+        int nelements) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            putIntegerArray,       /* Name of function in C++ (must match Python name) */
+            key, data, nelements   /* Argument(s) */
+        );
+    }
+
+    void
+    putDoubleArray(
+        const std::string& key,
+        const double* const data,
+        int nelements) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            putDoubleArray,        /* Name of function in C++ (must match Python name) */
+            key, data, nelements   /* Argument(s) */
+        );
+    }
+
+    void
+    putDoubleVector(
+        const std::string& key,
+        const std::vector<double>& data,
+        int nelements) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            putDoubleVector,        /* Name of function in C++ (must match Python name) */
+            key, data, nelements   /* Argument(s) */
+        );
+    }
+
+    void
+    getIntegerArray(
+        const std::string& key,
+        int* data,
+        int nelements) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            getIntegerArray,        /* Name of function in C++ (must match Python name) */
+            key, data, nelements   /* Argument(s) */
+        );
+    }
+
+    int
+    getDoubleArraySize(const std::string& key) override
+    {
+        PYBIND11_OVERRIDE(
+            int,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            getDoubleArraySize,        /* Name of function in C++ (must match Python name) */
+            key                     /* Argument(s) */
+        );
+    }
+
+    void
+    getDoubleArray(
+        const std::string& key,
+        double* data,
+        int nelements) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                  /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            getDoubleArray,        /* Name of function in C++ (must match Python name) */
+            key, data, nelements   /* Argument(s) */
+        );
+    }
+
+    void
+    getDoubleArray(
+        const std::string& key,
+        double* data,
+        int nelements,
+        const std::vector<int>& idx) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                       /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            getDoubleArray,             /* Name of function in C++ (must match Python name) */
+            key, data, nelements, idx   /* Argument(s) */
+        );
+    }
+
+    void
+    getDoubleArray(
+        const std::string& key,
+        double* data,
+        int nelements,
+        int offset,
+        int block_size,
+        int stride) override
+    {
+        PYBIND11_OVERRIDE(
+            void,                       /* Return type */
+            DerivedDatabaseType,       /* Child class */
+            getDoubleArray,             /* Name of function in C++ (must match Python name) */
+            key, data, nelements,       /* Argument(s) */
+            offset, block_size, stride
+        );
+    }
+   
+};
+
 #endif

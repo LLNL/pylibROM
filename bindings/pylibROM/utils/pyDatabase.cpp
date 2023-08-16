@@ -23,4 +23,6 @@ void init_Database(pybind11::module_ &m) {
         .value("CSV", Database::formats::CSV)
         .export_values();
 
+    // TODO(kevin): finish binding of member functions.
+
 }
