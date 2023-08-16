@@ -23,6 +23,10 @@ void init_HDFDatabase(pybind11::module_ &m) {
     hdfdb.def("close", &HDFDatabase::close);
 
     // TODO(kevin): finish binding of member functions.
+    hdfdb.def("putDoubleArray", &HDFDatabase::putDoubleArray);
+    hdfdb.def("putDoubleVector", &HDFDatabase::putDoubleVector);
+    hdfdb.def("putInteger", &HDFDatabase::putInteger);
+    hdfdb.def("putIntegerArray", &HDFDatabase::putIntegerArray);
 
     // hdfdb.def("__del__", [](HDFDatabase& self) { self.~HDFDatabase(); }); // Destructor
 

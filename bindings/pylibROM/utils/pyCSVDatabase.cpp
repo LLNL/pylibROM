@@ -75,14 +75,20 @@ public:
 
 void init_CSVDatabase(pybind11::module_ &m) {
 
-    py::class_<CSVDatabase, Database, PyCSVDatabase> hdfdb(m, "CSVDatabase");
+    py::class_<CSVDatabase, Database, PyCSVDatabase> csvdb(m, "CSVDatabase");
 
     // Constructor
-    hdfdb.def(py::init<>());
+    csvdb.def(py::init<>());
 
-    hdfdb.def("create", &CSVDatabase::create);
-    hdfdb.def("open", &CSVDatabase::open);
-    hdfdb.def("close", &CSVDatabase::close);
+    csvdb.def("create", &CSVDatabase::create);
+    csvdb.def("open", &CSVDatabase::open);
+    csvdb.def("close", &CSVDatabase::close);
+
+    // TODO(kevin): finish binding of member functions.
+    csvdb.def("putDoubleArray", &CSVDatabase::putDoubleArray);
+    csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector);
+    csvdb.def("putInteger", &CSVDatabase::putInteger);
+    csvdb.def("putIntegerArray", &CSVDatabase::putIntegerArray);
 
 }
 
