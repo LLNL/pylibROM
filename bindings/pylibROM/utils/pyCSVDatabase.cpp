@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 #include "utils/CSVDatabase.h"
 #include "utils/pyDatabase.hpp"
+#include "python_utils/cpp_utils.hpp"
 
 namespace py = pybind11;
 using namespace CAROM;
@@ -85,10 +86,18 @@ void init_CSVDatabase(pybind11::module_ &m) {
     csvdb.def("close", &CSVDatabase::close);
 
     // TODO(kevin): finish binding of member functions.
-    csvdb.def("putDoubleArray", &CSVDatabase::putDoubleArray);
+    csvdb.def("putDoubleArray", [](
+        CSVDatabase &self, const std::string& key, py::array_t<double> &data, int nelements)
+    {
+        self.putDoubleArray(key, getVectorPointer(data), nelements);
+    });
     csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector);
     csvdb.def("putInteger", &CSVDatabase::putInteger);
-    csvdb.def("putIntegerArray", &CSVDatabase::putIntegerArray);
+    csvdb.def("putIntegerArray", [](
+        CSVDatabase &self, const std::string& key, py::array_t<int> &data, int nelements)
+    {
+        self.putIntegerArray(key, getVectorPointer(data), nelements);
+    });
 
 }
 
