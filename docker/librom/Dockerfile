@@ -11,9 +11,11 @@ RUN sudo pip3 install swig
 WORKDIR $LIB_DIR
 RUN sudo git clone https://github.com/mfem/PyMFEM.git
 WORKDIR ./PyMFEM
+# --with-gslib flag does not work with later versions.
+RUN sudo git checkout v4.5.2
 # We need to use this hack until we can submit a pull request to PyMFEM.
 RUN sudo wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
-RUN sudo python3 setup.py install --with-parallel
+RUN sudo python3 setup.py install --with-parallel --with-gslib
 
 # install libROM
 WORKDIR $LIB_DIR
