@@ -1,20 +1,50 @@
 '''
-   MFEM example 23
-      See c++ version in the MFEM library for more detail
+//               pylibROM PyMFEM Example: parametric ROM for Poisson problem (adapted from ex1p.cpp)
+//
+// Description:  This example code demonstrates the use of PyMFEM and pylibROM to
+//               define a simple projection-based reduced order model of the
+//               Poisson problem -Delta u = f(x) with homogeneous Dirichlet
+//               boundary conditions and spatially varying right hand side f.
+//
+//               The example highlights three distinct ROM processes, i.e.,
+//               offline, merge, and online. The offline phase runs the full
+//               order model and stores the snapshot data in an HDF file. You
+//               can run as many offline phases as you wish to sample the
+//               parameter space. The merge phase reads all the snapshot files,
+//               builds a global reduced basis, and stores the basis in an HDF
+//               file. The online phase reads the basis, builds the ROM
+//               operator, solves the reduced order system, and lifts the
+//               solution to the full order space.
+//
+// Offline phase: python3 poisson_global_rom.py -offline -f 1.0 -id 0
+//                python3 poisson_global_rom.py -offline -f 1.1 -id 1
+//                python3 poisson_global_rom.py -offline -f 1.2 -id 2
+//
+// Merge phase:   python3 poisson_global_rom.py -merge -ns 3
+//
+// FOM run for error calculation:
+//                python3 poisson_global_rom.py -fom -f 1.15
+//
+// Online phase:  python3 poisson_global_rom.py -online -f 1.15
+//
+// This example runs in parallel with MPI, by using the same number of MPI ranks
+// in all phases (offline, merge, fom, online).
 '''
 import os
 import io
 import sys
 import time
 try:
-    import mfem.ser as mfem
+    import mfem.par as mfem
 except ModuleNotFoundError:
     msg = "PyMFEM is not installed yet. Install PyMFEM:\n"
-    msg += "\tpip install mfem"
+    msg += "\tgit clone https://github.com/mfem/PyMFEM.git\n"
+    msg += "\tcd PyMFEM\n"
+    msg += "\tpython3 setup.py install --with-parallel\n"
     raise ModuleNotFoundError(msg)
 
 from ctypes import c_double
-from mfem.ser import intArray
+from mfem.par import intArray
 from os.path import expanduser, join, dirname
 import numpy as np
 from numpy import sin, cos, exp, sqrt, pi, abs, array, floor, log, sum
@@ -109,7 +139,7 @@ def run():
                         help="Enable or disable the merge phase.")
 
     args = parser.parse_args()
-    parser.print_options(args)
+    if (myid == 0): parser.print_options(args)
 
     mesh_file       = expanduser(join(os.path.dirname(__file__),
                                       '..', 'data', args.mesh))
@@ -129,20 +159,6 @@ def run():
     visualization   = args.visualization
 
     precision       = 8
-
-    # ref_levels       = args.refine
-    # ode_solver_type  = args.ode_solver
-    # t_final          = args.t_final
-    # dt               = args.time_step
-    # speed            = args.speed
-    # dirichlet        = (not args.neumann)
-    # visit            = args.visit_datafiles
-    # visualization    = args.visualization
-    # vis_steps        = args.visualization_steps
-    # ref_dir          = args.reference
-    # ef               = args.energy_fraction
-    # rdim             = args.rdim
-    # windowNumSamples = args.numwindowsamples
 
     kappa = freq * np.pi
     if (fom):
@@ -178,9 +194,7 @@ def run():
     # 6. Define a parallel mesh by a partitioning of the serial mesh. Refine
     #    this mesh further in parallel to increase the resolution. Once the
     #    parallel mesh is defined, the serial mesh can be deleted.
-    # TODO(kevin): figure out mfem parallel version install
-    # pmesh = mfem.ParMesh(MPI_COMM_WORLD, mesh)
-    pmesh = mfem.Mesh(mesh)
+    pmesh = mfem.ParMesh(comm, mesh)
     mesh.Clear()
     par_ref_levels = 2
     for l in range(par_ref_levels):
@@ -201,11 +215,8 @@ def run():
         fec = mfem.H1_FECollection(1, dim)
         delete_fec = True
 
-    # TODO(kevin): figure out mfem parallel version install
-    # fespace = mfem.ParFiniteElementSpace(pmesh, fec)
-    # size = fespace.GlobalTrueVSize()
-    fespace = mfem.FiniteElementSpace(pmesh, fec)
-    size = fespace.GetTrueVSize()
+    fespace = mfem.ParFiniteElementSpace(pmesh, fec)
+    size = fespace.GlobalTrueVSize()
     if (myid == 0):
         print("Number of finite element unknowns: %d" % size)
 
@@ -225,10 +236,6 @@ def run():
     isIncremental = False
     basisName = "basis"
     basisFileName = "%s%d" % (basisName, id)
-    # const CAROM::Matrix* spatialbasis
-    # CAROM::Options* options;
-    # CAROM::BasisGenerator *generator;
-    # int numRowRB, numColumnRB;
     solveTimer, assembleTimer, mergeTimer = StopWatch(), StopWatch(), StopWatch()
 
     # 10. Set BasisGenerator if offline
@@ -262,15 +269,13 @@ def run():
     #     (f,phi_i) where f is given by the function f_exact and phi_i are the
     #     basis functions in the finite element fespace.
     assembleTimer.Start()
-    # TODO(kevin): figure out mfem parallel install
-    # b = mfem.ParLinearForm(fespace)
+    b = mfem.ParLinearForm(fespace)
     class RightHandSide(mfem.PyCoefficient):
         def EvalValue(self, x):
             if (dim == 3):
                 return sin(kappa * (x[0] + x[1] + x[2]))
             else:
                 return sin(kappa * (x[0] + x[1]))
-    b = mfem.LinearForm(fespace)
     f = RightHandSide()
     b.AddDomainIntegrator(mfem.DomainLFIntegrator(f))
     b.Assemble()
@@ -278,20 +283,16 @@ def run():
     # 13. Define the solution vector x as a parallel finite element grid function
     #     corresponding to fespace. Initialize x with initial guess of zero,
     #     which satisfies the boundary conditions.
-    # TODO(kevin): figure out mfem parallel install
-    # x = mfem.ParGridFunction(fespace)
-    x = mfem.GridFunction(fespace)
+    x = mfem.ParGridFunction(fespace)
     x.Assign(0.0)
 
     # 14. Set up the parallel bilinear form a(.,.) on the finite element space
     #     corresponding to the Laplacian operator -Delta, by adding the Diffusion
     #     domain integrator.
-    # TODO(kevin): figure out mfem parallel install
-    # a = mfem.ParBilinearForm(fespace)
-    a = mfem.BilinearForm(fespace)
+    a = mfem.ParBilinearForm(fespace)
     one = mfem.ConstantCoefficient(coef)
-    # if (pa):
-    #     a.SetAssemblyLevel(mfem.AssemblyLevel.PARTIAL)
+    if (pa):
+        a.SetAssemblyLevel(mfem.AssemblyLevel_PARTIAL)
     a.AddDomainIntegrator(mfem.DiffusionIntegrator(one))
 
     # 15. Assemble the parallel bilinear form and the corresponding linear
@@ -302,7 +303,8 @@ def run():
         a.EnableStaticCondensation()
     a.Assemble()
 
-    A = mfem.OperatorPtr()
+    # A = mfem.OperatorPtr()
+    A = mfem.HypreParMatrix()
     B = mfem.Vector()
     X = mfem.Vector()
     a.FormLinearSystem(ess_tdof_list, x, b, A, X, B)
@@ -315,19 +317,17 @@ def run():
         if pa:
             if mfem.UsesTensorBasis(fespace):
                 prec = mfem.OperatorJacobiSmoother(a, ess_tdof_list)
-            # TODO(kevin): figure out mfem parallel install
-            # else:
-                # prec = mfem.HypreBoomerAMG()
+        else:
+            prec = mfem.HypreBoomerAMG(A)
 
-        # TODO(kevin): figure out mfem parallel install
-        # cg = mfem.CGSolver(MPI.COMM_WORLD)
-        cg = mfem.CGSolver()
+        cg = mfem.CGSolver(comm)
         cg.SetRelTol(1e-12)
         cg.SetMaxIter(2000)
         cg.SetPrintLevel(1)
         if (prec is not None):
             cg.SetPreconditioner(prec)
-        cg.SetOperator(A.Ptr())
+        # cg.SetOperator(A.Ptr())
+        cg.SetOperator(A)
         solveTimer.Start()
         cg.Mult(B, X)
         solveTimer.Stop()
@@ -405,11 +405,8 @@ def run():
         mfem.subtract_vector(x, x_fom, diff_x)
 
         # Get norms
-        # TODO(kevin): figure out mfem parallel install
-        # tot_diff_norm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_x, diff_x))
-        # tot_fom_norm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, x_fom, x_fom))
-        tot_diff_norm = np.sqrt(mfem.InnerProduct(diff_x, diff_x))
-        tot_fom_norm = np.sqrt(mfem.InnerProduct(x_fom, x_fom))
+        tot_diff_norm = np.sqrt(mfem.InnerProduct(comm, diff_x, diff_x))
+        tot_fom_norm = np.sqrt(mfem.InnerProduct(comm, x_fom, x_fom))
 
         if (myid == 0):
             print("Relative error of ROM solution = %.5E" % (tot_diff_norm / tot_fom_norm))
@@ -448,17 +445,19 @@ def run():
     if visualization:
         sol_sock = mfem.socketstream("localhost", 19916)
         if not sol_sock.good():
-            print("Unable to connect to GLVis server at localhost:19916")
             visualization = False
-            print("GLVis visualization disabled.")
+            if (myid == 0):
+                print("Unable to connect to GLVis server at localhost:19916")
+                print("GLVis visualization disabled.")
         else:
             sol_sock << "parallel " << num_procs << " " << myid << "\n"
             sol_sock.precision(precision)
             sol_sock << "solution\n" << pmesh << x
             sol_sock << "pause\n"
             sol_sock.flush()
-            print(
-                "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
+            if (myid == 0):
+                print(
+                    "GLVis visualization paused. Press space (in the GLVis window) to resume it.")
 
     # 29. print timing info
     if (myid == 0):
