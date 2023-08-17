@@ -14,6 +14,38 @@ namespace py = pybind11;
 using namespace CAROM;
 using namespace std;
 
+template <class T>
+T* getParametricDMD_Type(
+    std::vector<Vector*>& parameter_points,
+    std::vector<T*>& dmds,
+    Vector* desired_point,
+    std::string rbf,
+    std::string interp_method,
+    double closest_rbf_val,
+    bool reorthogonalize_W)
+{
+    T *parametric_dmd = NULL;
+    getParametricDMD(parametric_dmd, parameter_points, dmds, desired_point,
+        rbf, interp_method, closest_rbf_val, reorthogonalize_W);
+    return parametric_dmd;
+}
+
+template <class T>
+T* getParametricDMD_Type(
+    std::vector<Vector*>& parameter_points,
+    std::vector<std::string>& dmd_paths,
+    Vector* desired_point,
+    std::string rbf = "G",
+    std::string interp_method = "LS",
+    double closest_rbf_val = 0.9,
+    bool reorthogonalize_W = false)
+{
+    T *parametric_dmd = NULL;
+    getParametricDMD(parametric_dmd, parameter_points, dmd_paths, desired_point,
+        rbf, interp_method, closest_rbf_val, reorthogonalize_W);
+    return parametric_dmd;
+}
+
 void init_ParametricDMD(pybind11::module_ &m) {
 
     // original getParametricDMD pass a template pointer reference T* &parametric_dmd.
@@ -24,7 +56,7 @@ void init_ParametricDMD(pybind11::module_ &m) {
     // We will need variants of this as we bind more DMD classes,
     // where dmd_type is the corresponding type.
     m.def("getParametricDMD", [](
-        DMD &dmd_type,
+        py::object &dmd_type,
         std::vector<Vector*>& parameter_points,
         std::vector<DMD*>& dmds,
         Vector* desired_point,
@@ -33,10 +65,15 @@ void init_ParametricDMD(pybind11::module_ &m) {
         double closest_rbf_val = 0.9,
         bool reorthogonalize_W = false)
     {
-        DMD *parametric_dmd = NULL;
-        getParametricDMD(parametric_dmd, parameter_points, dmds, desired_point,
-            rbf, interp_method, closest_rbf_val, reorthogonalize_W);
-        return parametric_dmd;
+        std::string name = dmd_type.attr("__name__").cast<std::string>();
+        if (name == "DMD")
+            return getParametricDMD_Type<DMD>(parameter_points, dmds, desired_point,
+                rbf, interp_method, closest_rbf_val, reorthogonalize_W);
+        else
+        {
+            std::string msg = name + " is not a proper libROM DMD class!\n";
+            throw std::runtime_error(msg.c_str());
+        }
     },
     py::arg("dmd_type"),
     py::arg("parameter_points"),
@@ -55,7 +92,7 @@ void init_ParametricDMD(pybind11::module_ &m) {
     // We will need variants of this as we bind more DMD classes,
     // where dmd_type is the corresponding type.
     m.def("getParametricDMD", [](
-        DMD &dmd_type,
+        py::object &dmd_type,
         std::vector<Vector*>& parameter_points,
         std::vector<std::string>& dmd_paths,
         Vector* desired_point,
@@ -64,10 +101,15 @@ void init_ParametricDMD(pybind11::module_ &m) {
         double closest_rbf_val = 0.9,
         bool reorthogonalize_W = false)
     {
-        DMD *parametric_dmd = NULL;
-        getParametricDMD(parametric_dmd, parameter_points, dmd_paths, desired_point,
-            rbf, interp_method, closest_rbf_val, reorthogonalize_W);
-        return parametric_dmd;
+        std::string name = dmd_type.attr("__name__").cast<std::string>();
+        if (name == "DMD")
+            return getParametricDMD_Type<DMD>(parameter_points, dmd_paths, desired_point,
+                rbf, interp_method, closest_rbf_val, reorthogonalize_W);
+        else
+        {
+            std::string msg = name + " is not a proper libROM DMD class!\n";
+            throw std::runtime_error(msg.c_str());
+        }
     },
     py::arg("dmd_type"),
     py::arg("parameter_points"),
