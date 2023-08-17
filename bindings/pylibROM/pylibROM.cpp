@@ -19,6 +19,7 @@ void init_IncrementalSVD(pybind11::module_ &m);
 
 //algo
 void init_DMD(pybind11::module_ &);
+void init_ParametricDMD(pybind11::module_ &m);
 
 //utils
 void init_mpi_utils(pybind11::module_ &m);
@@ -54,6 +55,7 @@ PYBIND11_MODULE(_pylibROM, m) {
 
     py::module algo = m.def_submodule("algo");
     init_DMD(algo);
+    init_ParametricDMD(algo);
 
     // py::module mfem = m.def_submodule("mfem");
     // init_mfem_Utilities(mfem);

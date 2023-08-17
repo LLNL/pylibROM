@@ -140,7 +140,9 @@ pybind11_add_module(_pylibROM
     bindings/pylibROM/linalg/svd/pySVD.cpp
     bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
-    bindings/pylibROM/algo/pyDMD.cpp 
+
+    bindings/pylibROM/algo/pyDMD.cpp
+	bindings/pylibROM/algo/pyParametricDMD.cpp
 
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.hpp
