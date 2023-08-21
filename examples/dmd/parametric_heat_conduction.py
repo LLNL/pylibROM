@@ -18,45 +18,14 @@
 // In these examples, the radius of the interface between different initial temperatures, the
 // alpha coefficient, and two center location variables are modified.
 //
-// For Parametric DMD (ex. 1) (radius, interpolation):
+// For Parametric DMD (ex. 1) (radius & cx & cy, interpolation):
 //   rm -rf parameters.txt
-//   mpirun -np 8 parametric_heat_conduction -r 0.4 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.45 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.55 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.6 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.5 -visit -online -predict
-//
-// For Parametric DMD (ex. 2) (radius & cx & cy, extrapolation):
-//   rm -rf parameters.txt
-//   mpirun -np 8 parametric_heat_conduction -r 0.1 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.2 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -r 0.5 -visit -online -predict
-//   (performs well, even though extrapolation)
-//   mpirun -np 8 parametric_heat_conduction -r 0.5 -cx 0.5 -cy 0.5 -visit -online -predict
-//   (doesn't perform well)
-//   mpirun -np 8 parametric_heat_conduction -r 0.6 -cx 0.6 -cy 0.6 -visit -offline -rdim 16
-//   (let's add another training point)
-//   mpirun -np 8 parametric_heat_conduction -r 0.5 -cx 0.5 -cy 0.5 -visit -online -predict
-//   (now performs well)
-//
-// For Parametric DMD (ex. 3) (alpha, interpolation):
-//   rm -rf parameters.txt
-//   mpirun -np 8 parametric_heat_conduction -a 0.1 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -a 0.15 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -a 0.25 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -a 0.3 -visit -offline -rdim 16
-//   mpirun -np 8 parametric_heat_conduction -a 0.2 -visit -online -predict
-//
-// For Parametric DMD (ex. 4) (alpha, interpolation):
-//   rm -rf parameters.txt
-//   mpirun -np 8 parametric_heat_conduction -s 3 -a 0.5 -k 0.5 -o 4 -tf 0.7 -vs 1 -visit -offline -rdim 20
-//   mpirun -np 8 parametric_heat_conduction -s 3 -a 0.55 -k 0.5 -o 4 -tf 0.7 -vs 1 -visit -offline -rdim 20
-//   mpirun -np 8 parametric_heat_conduction -s 3 -a 0.65 -k 0.5 -o 4 -tf 0.7 -vs 1 -visit -offline -rdim 20
-//   mpirun -np 8 parametric_heat_conduction -s 3 -a 0.7 -k 0.5 -o 4 -tf 0.7 -vs 1 -visit -offline -rdim 20
-//   mpirun -np 8 parametric_heat_conduction -s 3 -a 0.6 -k 0.5 -o 4 -tf 0.7 -vs 1 -visit -online -predict
-//
-// Pointwise snapshots for DMD input:
-//   mpirun -np 1 parametric_heat_conduction -m ../../../examples/data/inline-quad.mesh -pwsnap -pwx 101 -pwy 101
+//   python3 parametric_heat_conduction.py -r 0.1 -cx 0.1 -cy 0.1 -o 4 -visit -offline -rdim 16
+//   python3 parametric_heat_conduction.py -r 0.1 -cx 0.1 -cy 0.5 -o 4 -visit -offline -rdim 16
+//   python3 parametric_heat_conduction.py -r 0.1 -cx 0.5 -cy 0.5 -o 4 -visit -offline -rdim 16
+//   python3 parametric_heat_conduction.py -r 0.5 -cx 0.1 -cy 0.1 -o 4 -visit -offline -rdim 16
+//   python3 parametric_heat_conduction.py -r 0.25 -cx 0.2 -cy 0.4 -o 4 -online -predict
+//   python3 parametric_heat_conduction.py -r 0.4 -cx 0.2 -cy 0.3 -o 4 -online -predict
 //
 // =================================================================================
 //

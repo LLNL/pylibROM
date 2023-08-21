@@ -33,7 +33,7 @@ class PointwiseSnapshot:
         assert(pmesh.Dimension() == self.spaceDim)
         assert(pmesh.SpaceDimension() == self.spaceDim)
 
-        pmesh.GetBoundingBox(self.domainMin, self.domainMax, 0)
+        self.domainMin, self.domainMax = pmesh.GetBoundingBox(0)
 
         h = [0.] * 3
         for i in range(self.spaceDim):
@@ -42,8 +42,8 @@ class PointwiseSnapshot:
         rank = pmesh.GetMyRank()
         if (rank == 0):
             print("PointwiseSnapshot on bounding box from (",
-                  self.domainMin.GetDataArray()[:self.spaceDim],
-                  ") to (", self.domainMax.GetDataArray()[:self.spaceDim], ")")
+                  self.domainMin[:self.spaceDim],
+                  ") to (", self.domainMax[:self.spaceDim], ")")
 
         # TODO(kevin): we might want to re-write this loop in python manner.
         xyzData = self.xyz.GetDataArray()
@@ -61,10 +61,10 @@ class PointwiseSnapshot:
                     if (self.spaceDim > 1): xyzData[self.npoints + i + osj] = py
                     if (self.spaceDim > 2): xyzData[2 * self.npoints + i + osj] = pz
 
-        finder = mfem.FindPointsGSLIB(MPI.COMM_WORLD)
+        self.finder = mfem.FindPointsGSLIB(MPI.COMM_WORLD)
         # mfem.FindPointsGSLIB()
-        finder.Setup(pmesh)
-        finder.SetL2AvgType(mfem.FindPointsGSLIB.NONE)
+        self.finder.Setup(pmesh)
+        self.finder.SetL2AvgType(mfem.FindPointsGSLIB.NONE)
         return
 
     def GetSnapshot(self, f, s):
@@ -74,6 +74,8 @@ class PointwiseSnapshot:
         self.finder.Interpolate(self.xyz, f, s)
 
         code_out = self.finder.GetCode()
+        print(type(code_out))
+        print(code_out.__dir__())
 
         assert(code_out.Size() == self.npoints)
 
