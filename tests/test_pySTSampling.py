@@ -15,8 +15,8 @@ def test_GetSampledSpaceTimeBasis():
         t_samples_result = hyperreduction.GetSampledSpaceTimeBasis(t_samples, t_basis, s_basis_sampled, f_basis_sampled_inv)
         assert t_samples_result == [1,2,3]
         assert np.allclose(f_basis_sampled_inv.getData(),[[1728.0, 6.0], [1728.0, 6.0], [4.751093e-318, 3.297888e-320], [1728.0, 6.0], [1728.0, 6.0], [4.751093e-318, 3.297888e-320]])
-        print( t_samples_result,f_basis_sampled_inv.get_data())
-        
+        del t_samples_result
+
 def test_SpaceTimeSampling():
         # Prepare test data
         num_f_basis_vectors_used = 5
@@ -34,10 +34,10 @@ def test_SpaceTimeSampling():
         num_procs = 1
 
         t_samples_result = hyperreduction.SpaceTimeSampling(s_basis, t_basis, num_f_basis_vectors_used, t_samples, f_sampled_row,f_sampled_rows_per_proc, s_basis_sampled, myid, num_procs,num_t_samples_req,num_s_samples_req,False)
-        print(t_samples_result, f_sampled_row, f_sampled_rows_per_proc)
         assert np.all(t_samples_result == [0, 1, 2, 3, 4])
         assert np.all(f_sampled_row == [0, 1, 2, 3, 4])
         assert np.all(f_sampled_rows_per_proc == [10])
+        del t_samples_result
 
 if __name__ == '__main__':
     pytest.main()
