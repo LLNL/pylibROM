@@ -18,6 +18,14 @@ void init_mpi_utils(pybind11::module_ &m);
 //algo
 void init_DMD(pybind11::module_ &);
 
+//hyperreduction
+void init_DEIM(pybind11::module_ &m);
+void init_GNAT(pybind11::module_ &m);
+void init_QDEIM(pybind11::module_ &m);
+void init_S_OPT(pybind11::module_ &m);
+void init_STSampling(pybind11::module_ &m);
+void init_Utilities(pybind11::module_ &m);
+
 PYBIND11_MODULE(pylibROM, m) {
 	py::module linalg = m.def_submodule("linalg");
     init_vector(linalg);
@@ -36,6 +44,14 @@ PYBIND11_MODULE(pylibROM, m) {
 
     py::module utils = m.def_submodule("utils");
     init_mpi_utils(utils);
+
+    py::module hyperreduction = m.def_submodule("hyperreduction");
+    init_DEIM(hyperreduction);
+    init_GNAT(hyperreduction);
+    init_QDEIM(hyperreduction);
+    init_S_OPT(hyperreduction);
+    init_STSampling(hyperreduction);
+    init_Utilities(hyperreduction);
 }
 
 /*

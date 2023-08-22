@@ -79,6 +79,12 @@ pybind11_add_module(pylibROM
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
     bindings/pylibROM/algo/pyDMD.cpp 
 	bindings/pylibROM/utils/mpi_utils.cpp
+	bindings/pylibROM/hyperreduction/pyDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyGNAT.cpp
+	bindings/pylibROM/hyperreduction/pyQDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyS_OPT.cpp
+	bindings/pylibROM/hyperreduction/pySTSampling.cpp
+	bindings/pylibROM/hyperreduction/pyUtilities.cpp
 )
 message("building pylibROM...")
 
