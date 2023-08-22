@@ -50,6 +50,7 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_BasisReader(linalg);
     init_Options(linalg);
     init_NNLSSolver(linalg);
+
     py::module svd = linalg.def_submodule("svd");
     init_SVD(svd);
     init_StaticSVD(svd);
@@ -57,9 +58,6 @@ PYBIND11_MODULE(_pylibROM, m) {
 
     py::module algo = m.def_submodule("algo");
     init_DMD(algo);
-
-    py::module utils = m.def_submodule("utils");
-    init_mpi_utils(utils);
 
     py::module hyperreduction = m.def_submodule("hyperreduction");
     init_DEIM(hyperreduction);
