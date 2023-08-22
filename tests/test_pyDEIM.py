@@ -1,9 +1,9 @@
 import sys
 import pytest
 sys.path.append("../build")
-import pylibROM.linalg as linalg
+import _pylibROM.linalg as linalg
 import numpy as np 
-import pylibROM.hyperreduction as hyperreduction
+import _pylibROM.hyperreduction as hyperreduction
 
 
 def test_deim():
