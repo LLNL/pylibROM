@@ -137,14 +137,12 @@ pybind11_add_module(_pylibROM
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
     bindings/pylibROM/algo/pyDMD.cpp 
 	bindings/pylibROM/utils/mpi_utils.cpp
-<<<<<<< HEAD
 	bindings/pylibROM/hyperreduction/pyDEIM.cpp
 	bindings/pylibROM/hyperreduction/pyGNAT.cpp
 	bindings/pylibROM/hyperreduction/pyQDEIM.cpp
 	bindings/pylibROM/hyperreduction/pyS_OPT.cpp
 	bindings/pylibROM/hyperreduction/pySTSampling.cpp
 	bindings/pylibROM/hyperreduction/pyUtilities.cpp
-=======
 	bindings/pylibROM/utils/pyDatabase.cpp
 
 	# TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
@@ -152,7 +150,6 @@ pybind11_add_module(_pylibROM
 	# bindings/pylibROM/mfem/Utilities.cpp
 
 	bindings/pylibROM/python_utils/cpp_utils.hpp
->>>>>>> origin/main
 )
 message("building pylibROM...")
 
