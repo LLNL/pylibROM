@@ -1,6 +1,35 @@
 '''
-   MFEM example 23
-      See c++ version in the MFEM library for more detail 
+//
+//                       pylibROM PyMFEM Example: Wave_Equation (adapted from ex23.cpp)
+//
+// Compile with: make wave_equation
+//
+// =================================================================================
+//
+// Sample runs and results for Time-Windowing DMD:
+//
+// Command 1:
+//  python3 wave_equation.py -o 4 -tf 5 -nwinsamp 25
+//
+// Output 1:
+// Relative error of DMD solution (u) at t_final: 5.000000 is 1.591E-04
+// Elapsed time for solving FOM: 6.374277e+00 second
+// Elapsed time for training DMD: 2.605658e+00 second
+// Elapsed time for predicting DMD: 2.799344e-02 second
+//
+// =================================================================================
+//
+//
+// Description:  This example solves the wave equation problem of the form:
+//
+//                               d^2u/dt^2 = c^2 \Delta u.
+//
+//               The example demonstrates the use of time dependent operators,
+//               implicit solvers and second order time integration.
+//
+//               We recommend viewing examples on DG Advection and Non-linear Elasticity
+//               before viewing this example.
+//
 '''
 import os
 import io

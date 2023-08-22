@@ -1,7 +1,7 @@
-from .pyVector import Vector
-from .pyMatrix import Matrix 
-from .pyBasisWriter import BasisWriter
-from .pyBasisReader import BasisReader
-from .pyBasisGenerator import BasisGenerator 
-from .pyOptions import  Options 
-from . import svd 
+# To add pure python routines to this module,
+# either define/import the python routine in this file.
+# This will combine both c++ bindings/pure python routines into this module.
+
+# For other c++ binding modules, change the module name accordingly.
+from _pylibROM.linalg import *
+
