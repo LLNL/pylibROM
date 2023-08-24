@@ -23,6 +23,7 @@ def test_DMD():
     num_total_rows = 5
     d_num_rows = utils.split_dimension(num_total_rows, MPI.COMM_WORLD)
     num_total_rows_check, row_offset = utils.get_global_offsets(d_num_rows, MPI.COMM_WORLD)
+    assert(num_total_rows == num_total_rows_check)
 
     samples = [[0.5377, 1.8339, -2.2588, 0.8622, 0.3188],
                 [-1.3077, -0.4336, 0.3426, 3.5784, 2.7694],
@@ -31,11 +32,11 @@ def test_DMD():
 
     dmd = algo.DMD(d_num_rows, 1.0)
     for k, sample in enumerate(samples):
-        dmd.takeSample(sample, k * 1.0)
+        dmd.takeSample(sample[row_offset[d_rank]:row_offset[d_rank]+d_num_rows], k * 1.0)
 
     dmd.train(2)
     result = dmd.predict(3.0)
-
+    # print("rank: %d, " % d_rank, result.getData())
     assert np.allclose(result.getData(), prediction_baseline[row_offset[d_rank]:row_offset[d_rank]+d_num_rows], atol=1e-3)
 
     dmd.save("test_DMD")
