@@ -65,6 +65,7 @@ jobs:
             pytest test_pyBasisWriter.py --verbose
             echo run pyDMD unit test
             pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
   cmake-with-librom:
     runs-on: ubuntu-latest
     needs: [docker-librom-image]
@@ -119,6 +120,7 @@ jobs:
             pytest test_pyBasisWriter.py --verbose
             echo run pyDMD unit test
             pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
   baseline:
     runs-on: ubuntu-latest
     needs: [docker-base-image]
@@ -170,4 +172,5 @@ jobs:
             pytest test_pyBasisWriter.py --verbose
             echo run pyDMD unit test
             pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
     
