@@ -143,6 +143,8 @@ pybind11_add_module(_pylibROM
 
     bindings/pylibROM/algo/pyDMD.cpp
 	bindings/pylibROM/algo/pyParametricDMD.cpp
+	bindings/pylibROM/algo/pyNonuniformDMD.cpp
+	bindings/pylibROM/algo/pyAdaptiveDMD.cpp
 
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.hpp

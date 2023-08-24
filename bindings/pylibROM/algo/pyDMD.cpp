@@ -26,7 +26,7 @@ void init_DMD(pybind11::module_ &m) {
             return new DMD(dim, dt, alt_output_basis, vec);
         }), py::arg("dim"), py::arg("dt"), py::arg("alt_output_basis") = false, py::arg("vec") = nullptr)
 
-    // .def("setOffset", &PyDMD::setOffset, py::arg("offset_vector"), py::arg("order"))  //problem if we want to name the wrapper as DMD. Could get rid of the using namespace directive?
+    .def("setOffset", &DMD::setOffset, py::arg("offset_vector"), py::arg("order"))
     .def("takeSample", [](DMD &self, py::array_t<double> &u_in, double t) {
         self.takeSample(getVectorPointer(u_in), t);
     })
