@@ -111,16 +111,19 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 '''
 import mfem.par as mfem
 
-from dg_euler_common import FE_Evolution, InitialCondition, RiemannSolver, DomainIntegrator, FaceIntegrator
+from dg_euler_common import FE_Evolution, InitialCondition, 
+                            RiemannSolver, DomainIntegrator, FaceIntegrator
 from mfem.common.arg_parser import ArgParser
 
 from os.path import expanduser, join, dirname
 import numpy as np
 from numpy import sqrt, pi, cos, sin, hypot, arctan2
 from scipy.special import erfc
+from ctypes import *
 
 # Equation constant parameters.(using globals to share them with dg_euler_common)
 import dg_euler_common
+from helper import StopWatch
 
 # 1. Initialize MPI.from mpi4py import MPI
 
@@ -161,21 +164,41 @@ parser.add_argument('-c', '--cfl_number',
 parser.add_argument('-vis', '--visualization',
                     action='store_true',
                     help='Enable GLVis visualization')
-parser.add_argument('-vs', '--visualization-steps',
+parser.add_argument('-vs', '--visualization_steps',
                     action='store', default=50, type=float,
                     help="Visualize every n-th timestep.")
 
-args = parser.parse_args()
-mesh = args.mesh
-ser_ref_levels = args.refine_serial
-par_ref_levels = args.refine_parallel
-order = args.order
-ode_solver_type = args.ode_solver
-t_final = args.t_final
-dt = args.time_step
-cfl = args.cfl_number
-visualization = args.visualization
-vis_steps = args.visualization_steps
+# additional args for DMD
+parser.add_argument('-ef','--energy_fraction',
+                    action='store',default=0.9999, type=float,
+                    help='Energy fraction for DMD')
+parser.add_argument('-rdim','--rdim',
+                    action='store',default=-1,type=int,
+                    help='Reduced dimension for DMD')
+parser.add_argument('-crbf','--crbf',
+                    action='store',default=0.9,type=float,
+                    help='Closest RBF value')
+parser.add_argument('-nonunif','--nonunif','-no-nonunif','--no-nonunif',
+                    action='store',default=False,type=bool,
+                    help='Use NonuniformDMD')
+
+
+# assign args
+args                = parser.parse_args()
+mesh                = args.mesh
+ser_ref_levels      = args.refine_serial
+par_ref_levels      = args.refine_parallel
+order               = args.order
+ode_solver_type     = args.ode_solver
+t_final             = args.t_final
+dt                  = args.time_step
+cfl                 = args.cfl_number
+visualization       = args.visualization
+vis_steps           = args.visualization_steps
+ef                  = args.energy_fraction
+rdim                = args.rdim
+crbf                = args.crbf
+nonunif             = args.nonunif
 
 if myid == 0:
     parser.print_options(args)
@@ -303,7 +326,13 @@ if (cfl > 0):
     my_hmin = min([pmesh.GetElementSize(i, 1) for i in range(pmesh.GetNE())])
 hmin = MPI.COMM_WORLD.allreduce(my_hmin, op=MPI.MIN)
 
+# initialize timers
+fom_timer, dmd_training_timer, dmd_prediction_timer = \
+        StopWatch(), StopWatch(), StopWatch()
+
+fom_timer.Start()
 t = 0.0
+ts = []
 euler.SetTime(t)
 ode_solver.Init(euler)
 if (cfl > 0):
@@ -312,14 +341,36 @@ if (cfl > 0):
     z = mfem.Vector(A.Width())
     A.Mult(sol, z)
     max_char_speed = MPI.COMM_WORLD.allreduce(
-        dg_euler_common.max_char_speed, op=MPI.MAX)
-    dg_euler_common.max_char_speed = max_char_speed
-    dt = cfl * hmin / dg_euler_common.max_char_speed / (2*order+1)
+        dg_euler_common.max_char_speed, op=MPI.MAX) dg_euler_common.max_char_speed = max_char_speed dt = cfl * hmin / dg_euler_common.max_char_speed / (2*order+1)
+fom_timer.Stop()
+
+#- DMD setup
+def py_cast(u):
+    # py_cast takes the swig object u from pyMFEM and cast it into 
+    # numpy.ndarray, without copying data
+    uData = (c_double*u.Size()).from_address(int(udata.GetData()))
+    return np.array(uData, copy=False)
+
+# Initialize dmd_vars = [dmd_dens, dmd_x_mom, dmd_y_mom, dmd_e]
+dmd_trainer_timer.Start()
+if nonunif:
+    dmd_vars = [NonuniformDMD(u_block.GetBlock(i).Size()) 
+                for i in range(4)]
+else:
+    dmd_vars = [AdaptiveDMD(u_block.GetBlock(i).Size(),dt,'G','LS',crbf) \
+                for i in range(4)]
+for i in range(4):
+    dmd_vars[i].takeSample(py_cast(u_block.GetBlock(i)),t)
+ts += [t]
+dmd_trainer_timer.Stop()
 
 # Integrate in time.
 done = False
 ti = 0
 while not done:
+
+    fom_timer.Start()
+
     dt_real = min(dt, t_final - t)
     t, dt_real = ode_solver.Step(sol, t, dt_real)
 
@@ -331,6 +382,17 @@ while not done:
 
     ti = ti+1
     done = (t >= t_final - 1e-8*dt)
+
+    fom_timer.Stop()
+    
+    #- DMD take sample
+    dmd_trainer_timer.Start()
+    for i in range(4):
+        dmd_vars[i].takeSample(py_cast(u_block.GetBlock(i)),t)
+    ts.append(t)
+    dmd_trainer_timer.Stop()
+
+
     if (done or ti % vis_steps == 0):
         if myid == 0:
             print("time step: " + str(ti) + ", time: " + "{:g}".format(t))
@@ -351,8 +413,35 @@ for k in range(num_equation):
     uk.Save(sol_name, 8)
 
 # 12. Compute the L2 solution error summed for all components.
-# if (t_final == 2.0):
-if True:
+if (t_final == 2.0):
     error = sol.ComputeLpError(2., u0)
     if myid == 0:
         print("Solution error: " + "{:g}".format(error))
+
+# 13. Calculate the DMD modes
+if myid==0 and rdim != -1 and ef != -1:
+    print('Both rdim and ef are set. ef will be ignored')
+
+dmd_training_timer.Start()
+
+if rdim != -1:
+    if myid==0:
+        print(f'Creating DMD with rdim: {rdim}')
+    for dmd_var in dmd_vars:
+        dmd_var.train(rdim)
+elif ef != -1:
+    if myid == 0:
+        print(f'Creating DMD with energy fraction: {ef}')
+    for dmd_var in dmd_vars:
+        dmd_var.train(ef)
+
+dmd_training_timer.Stop()
+
+true_sols = [py_cast(u_block.GetBlock(i)) for i in range(4)]
+
+# 14. Predict the state at t_final using DMD
+dmd_prediction_timer.Start()
+if myid == 0:
+    print('Predicting density, momentum, and energy using DMD')
+
+# 15. Calculate the relative error between the DMD final solution and the true solution.
