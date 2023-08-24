@@ -19,10 +19,13 @@ void init_IncrementalSVD(pybind11::module_ &m);
 
 //algo
 void init_DMD(pybind11::module_ &);
+void init_ParametricDMD(pybind11::module_ &m);
 
 //utils
 void init_mpi_utils(pybind11::module_ &m);
 void init_Database(pybind11::module_ &m);
+void init_HDFDatabase(pybind11::module_ &m);
+void init_CSVDatabase(pybind11::module_ &m);
 
 //mfem
 // TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
@@ -33,6 +36,8 @@ PYBIND11_MODULE(_pylibROM, m) {
     py::module utils = m.def_submodule("utils");
     init_mpi_utils(utils);
     init_Database(utils);
+    init_HDFDatabase(utils);
+    init_CSVDatabase(utils);
     
 	py::module linalg = m.def_submodule("linalg");
     init_vector(linalg);
@@ -42,6 +47,7 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_BasisReader(linalg);
     init_Options(linalg);
     init_NNLSSolver(linalg);
+
     py::module svd = linalg.def_submodule("svd");
     init_SVD(svd);
     init_StaticSVD(svd);
@@ -49,6 +55,7 @@ PYBIND11_MODULE(_pylibROM, m) {
 
     py::module algo = m.def_submodule("algo");
     init_DMD(algo);
+    init_ParametricDMD(algo);
 
     // py::module mfem = m.def_submodule("mfem");
     // init_mfem_Utilities(mfem);

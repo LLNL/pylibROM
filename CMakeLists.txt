@@ -19,6 +19,9 @@ if (BUILD_SCALAPACK)
 	add_custom_target(RUN_SLPK_BUILD ALL DEPENDS SLPK_BUILD)
 endif(BUILD_SCALAPACK)
 
+# HDF5
+find_package(HDF5 1.8.0 REQUIRED)
+
 #=================== libROM ================================
 
 #It is tedious to build libROM. option to not build
@@ -108,17 +111,19 @@ include_directories(
 	${LIBROM_INCLUDE_DIR} 
 	${MPI_INCLUDE_PATH}
 	${MPI4PY}
+	${HDF5_C_INCLUDE_DIRS}
 	# ${MFEM_INCLUDES}
 	# ${HYPRE_INCLUDES}
 	# ${PARMETIS_INCLUDES}
 	# ${MFEM_C_INCLUDE_DIRS}
 )
-# link_libraries(
+link_libraries(
+	${HDF5_LIBRARIES}
 # 	${MFEM}
 # 	${HYPRE}
 # 	${PARMETIS}
 # 	${METIS}
-# )
+)
 
 add_subdirectory("extern/pybind11")
 
@@ -135,9 +140,15 @@ pybind11_add_module(_pylibROM
     bindings/pylibROM/linalg/svd/pySVD.cpp
     bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
     bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
-    bindings/pylibROM/algo/pyDMD.cpp 
+
+    bindings/pylibROM/algo/pyDMD.cpp
+	bindings/pylibROM/algo/pyParametricDMD.cpp
+
 	bindings/pylibROM/utils/mpi_utils.cpp
+	bindings/pylibROM/utils/pyDatabase.hpp
 	bindings/pylibROM/utils/pyDatabase.cpp
+	bindings/pylibROM/utils/pyHDFDatabase.cpp
+	bindings/pylibROM/utils/pyCSVDatabase.cpp
 
 	# TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
 	#              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
