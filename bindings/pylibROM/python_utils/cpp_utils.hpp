@@ -50,4 +50,40 @@ T* getVectorPointer(py::array_t<T> &u_in)
         
     return static_cast<T*>(buf_info.ptr);
 }
+
+template<typename T>
+py::buffer_info
+get1DArrayBufferInfo(T *ptr, const int nelem)
+{
+    return py::buffer_info(
+        ptr,                         /* Pointer to buffer */
+        sizeof(T),                          /* Size of one scalar */
+        py::format_descriptor<T>::format(), /* Python struct-style format descriptor */
+        1,                                      /* Number of dimensions */
+        { nelem },                         /* Buffer dimensions */
+        { sizeof(T) }                       /* Strides (in bytes) for each index */
+    );
+}
+
+template<typename T>
+py::capsule
+get1DArrayBufferHandle(T *ptr, const bool free_when_done=false)
+{
+    if (free_when_done)
+        return py::capsule(ptr, [](void *f){
+            T *T_ptr = reinterpret_cast<T *>(f);
+            delete[] T_ptr;
+        });
+    else
+        return py::capsule([](){});
+}
+
+template<typename T>
+py::array_t<T>
+get1DArrayFromPtr(T *ptr, const int nelem, const bool free_when_done=false)
+{
+    return py::array(get1DArrayBufferInfo(ptr, nelem),
+                     get1DArrayBufferHandle(ptr, free_when_done));
+}
+
 #endif
