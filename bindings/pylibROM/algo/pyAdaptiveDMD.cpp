@@ -18,11 +18,11 @@ PYBIND11_MODULE(adaptivedmd, m) {
             py::arg("alt_output_basis") = false,
             py::arg("state_offset") = nullptr)
         .def("train", (void (AdaptiveDMD::*)(double, const Matrix*, double)) &AdaptiveDMD::train,
-            py::arg("energy_fraction"),
+            py::arg("energy_fraction").noconvert(),
             py::arg("W0") = nullptr,
             py::arg("linearity_tol") = 0.0)
         .def("train", (void (AdaptiveDMD::*)(int, const Matrix*, double)) &AdaptiveDMD::train,
-            py::arg("k"),
+            py::arg("k").noconvert(),
             py::arg("W0") = nullptr,
             py::arg("linearity_tol") = 0.0)
         .def("getTrueDt", &AdaptiveDMD::getTrueDt)
