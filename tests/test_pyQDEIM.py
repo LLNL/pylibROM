@@ -33,12 +33,10 @@ def test_qdeim():
     num_rows = 10
 
     u = linalg.Matrix(orthonormal_mat,True,False)
-    f_sampled_row=np.array([0,0,0,0,0])
     f_sampled_row_true_ans = [1, 2, 4, 6, 9]
-    f_sampled_rows_per_proc = np.array([0])
     f_basis_sampled_inv = linalg.Matrix(num_cols, num_cols,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.QDEIM(u, num_cols, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, 0, 1, num_cols)
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.QDEIM(u, num_cols,f_basis_sampled_inv, 0, 1, num_cols)
     assert np.all(f_sampled_row == f_sampled_row_true_ans)
 
     l2_norm_diff = 0.0
@@ -80,11 +78,9 @@ def test_qdeim_gpode_oversampling():
     u = linalg.Matrix(orthonormal_mat,True,False)
     f_sampled_row = np.array([0,0,0,0,0,0,0,0])
     f_sampled_row_true_ans = [0, 1, 2, 4, 5, 6, 8, 9]
-    f_sampled_rows_per_proc = [0]
     f_basis_sampled_inv = linalg.Matrix(num_samples,num_cols,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv = hyperreduction.QDEIM(u, num_cols, f_sampled_row, f_sampled_rows_per_proc,
-                 f_basis_sampled_inv, 0, 1, num_samples)
+    f_sampled_row,f_sampled_rows_per_proc = hyperreduction.QDEIM(u, num_cols,f_basis_sampled_inv, 0, 1, num_samples)
 
     assert np.all(f_sampled_row == f_sampled_row_true_ans)
 

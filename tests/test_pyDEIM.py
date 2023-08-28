@@ -33,12 +33,10 @@ def test_deim():
     num_rows = 10
 
     u = linalg.Matrix(orthonormal_mat,False,False)
-    f_sampled_row=np.array([0,0,0,0,0])
     f_sampled_row_true_ans = [0, 1, 4, 5, 9]
-    f_sampled_rows_per_proc = np.array([0])
     f_basis_sampled_inv = linalg.Matrix(num_cols, num_cols,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.DEIM(u, num_cols, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, 0, 1)
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.DEIM(u, num_cols,f_basis_sampled_inv, 0, 1)
     assert np.all(f_sampled_row == f_sampled_row_true_ans)
 
     l2_norm_diff = 0.0
@@ -73,12 +71,10 @@ def test_deim_decreased_used_basis_vectors():
     num_basis_vectors_used = 3
 
     u = linalg.Matrix(orthonormal_mat,False,False)
-    f_sampled_row = np.array([0,0,0])
     f_sampled_row_true_ans = [0, 1, 4]
-    f_sampled_rows_per_proc = [0]
     f_basis_sampled_inv = linalg.Matrix(num_basis_vectors_used, num_basis_vectors_used,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv = hyperreduction.DEIM(u, num_basis_vectors_used, f_sampled_row, f_sampled_rows_per_proc,
+    f_sampled_row,f_sampled_rows_per_proc = hyperreduction.DEIM(u, num_basis_vectors_used,
             f_basis_sampled_inv, 0, 1)
 
     assert np.all(f_sampled_row == f_sampled_row_true_ans)

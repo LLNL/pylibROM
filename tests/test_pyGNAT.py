@@ -36,8 +36,8 @@ def test_GNAT():
     f_sampled_row_true_ans = [0, 1, 4, 5, 9]
     f_sampled_rows_per_proc = [0]
     f_basis_sampled_inv = linalg.Matrix(num_cols, num_cols,False)
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.GNAT(u, num_cols, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, 0, 1,init_samples=[])
-    assert np.all(f_sampled_row == f_sampled_row_true_ans)
+    f_sampled_row_result,f_sampled_rows_per_proc= hyperreduction.GNAT(u, num_cols,f_basis_sampled_inv, 0, 1)
+    assert np.all(f_sampled_row_result == f_sampled_row_true_ans)
 
     l2_norm_diff = 0.0
     for i in range(num_cols):
@@ -82,8 +82,7 @@ def test_GNAT_oversampling():
     f_sampled_rows_per_proc = [0]
     f_basis_sampled_inv = linalg.Matrix(num_samples, num_cols,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv = hyperreduction.GNAT(u,num_cols, f_sampled_row, f_sampled_rows_per_proc,
-            f_basis_sampled_inv, 0, 1,num_samples_req=num_samples,init_samples = [])
+    f_sampled_row,f_sampled_rows_per_proc = hyperreduction.GNAT(u,num_cols,f_basis_sampled_inv, 0, 1,num_samples)
 
     assert np.all(f_sampled_row == f_sampled_row_true_ans)
 

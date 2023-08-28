@@ -4,13 +4,10 @@
 #include <pybind11/stl.h>
 #include "hyperreduction/Utilities.h"
 #include "mpi.h"
-typedef struct ompi_datatype_t *MPI_Datatype;
 
 
 namespace py = pybind11;
 using namespace CAROM;
-
-
 
 void init_Utilities(pybind11::module_ &m) {
     py::class_<RowInfo>(m, "RowInfo")

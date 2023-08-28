@@ -59,7 +59,7 @@ def test_s_opt():
     f_sampled_rows_per_proc = [0] * d_num_procs
     f_basis_sampled_inv = linalg.Matrix(num_samples, num_cols,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.S_OPT(u, num_cols, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, d_rank, d_num_procs, num_samples,[])
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.S_OPT(u, num_cols,f_basis_sampled_inv, d_rank, d_num_procs, num_samples)
     curr_index = 0
     for i in range(1, len(f_sampled_rows_per_proc)):
         curr_index += f_sampled_rows_per_proc[i - 1]
@@ -124,7 +124,7 @@ def test_s_opt_less_basis_vectors():
     f_sampled_rows_per_proc = [0] * d_num_procs
     f_basis_sampled_inv = linalg.Matrix(num_samples, num_basis_vectors,False)
 
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.S_OPT(u, num_basis_vectors, f_sampled_row, f_sampled_rows_per_proc, f_basis_sampled_inv, d_rank, d_num_procs, num_samples,[])
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.S_OPT(u, num_basis_vectors, f_basis_sampled_inv, d_rank, d_num_procs, num_samples)
     curr_index = 0
     for i in range(1, len(f_sampled_rows_per_proc)):
         curr_index += f_sampled_rows_per_proc[i - 1]
@@ -195,7 +195,7 @@ def test_s_opt_init_vector():
        init_samples.append(90 - row_offset[d_rank])
 
     f_basis_sampled_inv = linalg.Matrix(num_samples, num_basis_vectors, False)
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.S_OPT(u, num_basis_vectors, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, d_rank, d_num_procs, num_samples, init_samples)
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.S_OPT(u, num_basis_vectors, f_basis_sampled_inv, d_rank, d_num_procs, num_samples,init_samples)
     curr_index = 0
     for i in range(1, len(f_sampled_rows_per_proc)):
         curr_index += f_sampled_rows_per_proc[i - 1]
@@ -215,7 +215,7 @@ def test_s_opt_init_vector():
     if (d_rank == 0):
         init_samples.append(0)
     
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.S_OPT(u, num_basis_vectors, f_sampled_row, f_sampled_rows_per_proc,f_basis_sampled_inv, d_rank, d_num_procs, num_samples, [])
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.S_OPT(u, num_basis_vectors,f_basis_sampled_inv, d_rank, d_num_procs, num_samples)
     curr_index = 0
     for i in range(1, len(f_sampled_rows_per_proc)):
         curr_index += f_sampled_rows_per_proc[i - 1]
@@ -279,8 +279,7 @@ def test_s_opt_qr():
     f_sampled_row_true_ans = [0, 44, 46, 49, 90]
     f_sampled_rows_per_proc = [0] * d_num_procs
     f_basis_sampled_inv = linalg.Matrix(num_samples, num_basis_vectors,False)
-    init_samples=[]
-    f_sampled_row,f_sampled_rows_per_proc,f_basis_sampled_inv= hyperreduction.S_OPT(u, num_basis_vectors, f_sampled_row, f_sampled_rows_per_proc, f_basis_sampled_inv, d_rank, d_num_procs, num_samples,init_samples,True)
+    f_sampled_row,f_sampled_rows_per_proc= hyperreduction.S_OPT(u, num_basis_vectors, f_basis_sampled_inv, d_rank, d_num_procs, num_samples,qr_factorize=True)
     curr_index = 0
     for i in range(1, len(f_sampled_rows_per_proc)):
         curr_index += f_sampled_rows_per_proc[i - 1]
