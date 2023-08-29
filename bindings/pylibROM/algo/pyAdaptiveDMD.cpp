@@ -7,7 +7,8 @@
 namespace py = pybind11;
 using namespace CAROM;
 
-PYBIND11_MODULE(adaptivedmd, m) {
+void init_AdaptiveDMD(pybind11::module_ &m){
+
     py::class_<AdaptiveDMD, DMD>(m, "AdaptiveDMD")
         .def(py::init<int, double, std::string, std::string, double, bool, Vector*>(),
             py::arg("dim"),

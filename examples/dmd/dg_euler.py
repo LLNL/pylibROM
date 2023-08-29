@@ -111,7 +111,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 '''
 import mfem.par as mfem
 
-from dg_euler_common import FE_Evolution, InitialCondition, 
+from dg_euler_common import FE_Evolution, InitialCondition, \
                             RiemannSolver, DomainIntegrator, FaceIntegrator
 from mfem.common.arg_parser import ArgParser
 
@@ -123,7 +123,8 @@ from ctypes import *
 
 # Equation constant parameters.(using globals to share them with dg_euler_common)
 import dg_euler_common
-from helper import StopWatch
+from pylibROM.python_utils.StopWatch import StopWatch
+from pylibROM.algo import NonuniformDMD, AdaptiveDMD
 
 # 1. Initialize MPI.from mpi4py import MPI
 
@@ -164,6 +165,9 @@ parser.add_argument('-c', '--cfl_number',
 parser.add_argument('-vis', '--visualization',
                     action='store_true',
                     help='Enable GLVis visualization')
+parser.add_argument('-visit', '--visit-datafiles',
+                    action='store_true', default=False,
+                    help='Save data files for VisIt (visit.llnl.gov) visualize.')
 parser.add_argument('-vs', '--visualization_steps',
                     action='store', default=50, type=float,
                     help="Visualize every n-th timestep.")
@@ -194,6 +198,7 @@ t_final             = args.t_final
 dt                  = args.time_step
 cfl                 = args.cfl_number
 visualization       = args.visualization
+visit               = args.visit_datafiles
 vis_steps           = args.visualization_steps
 ef                  = args.energy_fraction
 rdim                = args.rdim
@@ -340,19 +345,14 @@ if (cfl > 0):
     #  maximum char speed at all quadrature points on all faces.
     z = mfem.Vector(A.Width())
     A.Mult(sol, z)
-    max_char_speed = MPI.COMM_WORLD.allreduce(
-        dg_euler_common.max_char_speed, op=MPI.MAX) dg_euler_common.max_char_speed = max_char_speed dt = cfl * hmin / dg_euler_common.max_char_speed / (2*order+1)
+    max_char_speed = MPI.COMM_WORLD.allreduce(dg_euler_common.max_char_speed, op=MPI.MAX) 
+    dg_euler_common.max_char_speed = max_char_speed 
+    dt = cfl * hmin / dg_euler_common.max_char_speed / (2*order+1)
 fom_timer.Stop()
 
 #- DMD setup
-def py_cast(u):
-    # py_cast takes the swig object u from pyMFEM and cast it into 
-    # numpy.ndarray, without copying data
-    uData = (c_double*u.Size()).from_address(int(udata.GetData()))
-    return np.array(uData, copy=False)
-
 # Initialize dmd_vars = [dmd_dens, dmd_x_mom, dmd_y_mom, dmd_e]
-dmd_trainer_timer.Start()
+dmd_training_timer.Start()
 if nonunif:
     dmd_vars = [NonuniformDMD(u_block.GetBlock(i).Size()) 
                 for i in range(4)]
@@ -360,9 +360,9 @@ else:
     dmd_vars = [AdaptiveDMD(u_block.GetBlock(i).Size(),dt,'G','LS',crbf) \
                 for i in range(4)]
 for i in range(4):
-    dmd_vars[i].takeSample(py_cast(u_block.GetBlock(i)),t)
+    dmd_vars[i].takeSample(u_block.GetBlock(i).GetDataArray(),t)
 ts += [t]
-dmd_trainer_timer.Stop()
+dmd_training_timer.Stop()
 
 # Integrate in time.
 done = False
@@ -386,11 +386,11 @@ while not done:
     fom_timer.Stop()
     
     #- DMD take sample
-    dmd_trainer_timer.Start()
+    dmd_training_timer.Start()
     for i in range(4):
-        dmd_vars[i].takeSample(py_cast(u_block.GetBlock(i)),t)
+        dmd_vars[i].takeSample(u_block.GetBlock(i).GetDataArray(),t)
     ts.append(t)
-    dmd_trainer_timer.Stop()
+    dmd_training_timer.Stop()
 
 
     if (done or ti % vis_steps == 0):
@@ -437,11 +437,58 @@ elif ef != -1:
 
 dmd_training_timer.Stop()
 
-true_sols = [py_cast(u_block.GetBlock(i)) for i in range(4)]
+true_solution_vars = [u_block.GetBlock(i) for i in range(4)]
 
 # 14. Predict the state at t_final using DMD
 dmd_prediction_timer.Start()
 if myid == 0:
     print('Predicting density, momentum, and energy using DMD')
 
+result_vars = [dmd_var.predict(ts[0]) for dmd_var in dmd_vars]
+initial_dmd_sols = [mfem.Vector(result_var.getData(), result_var.dim()) for result_var in result_vars]
+for i in range(4):
+    block = u_block.GetBlock(i)
+    block = initial_dmd_sols[i]
+    #u_block.Update(initial_dmd_sols[i],offsets[i])
+
+dmd_visit_dc = mfem.VisItDataCollection('DMD_DG_Euler', pmesh)
+dmd_visit_dc.RegisterField('solution',mom)
+if (visit):
+    dmd_visit_dc.SetCycle(0)
+    dmd_visit_dc.SetTime(0.0)
+    dmd_visit_dc.Save()
+
+if visit:
+    for i in range(len(ts.size)):
+        if (i==(len(ts)-1)) or (i%vis_steps==0):
+            result_vars = [var.predict(ts[i]) for var in dmd_vars]
+            dmd_sols = [mfem.Vector(result_var.getData(),result_var.dim()) for result_var in result_vars]
+            for k in range(4):
+                u_block.Update(dmd_sols[k],offsets[k])
+
+            dmd_visit_dc.SetCycle(i)
+            dmd_visit_dc.SetTime(ts[i])
+            dmd_visit_dc.Save()
+dmd_prediction_timer.Stop()
+result_vars = [dmd_var.predict(t_final) for dmd_var in dmd_vars]
+
 # 15. Calculate the relative error between the DMD final solution and the true solution.
+dmd_solution_vars = [mfem.Vector(result_var.getData(),result_var.dim()) for result_var in result_vars]
+diff_vars = [mfem.Vector(result_var.dim()) for result_var in result_vars]
+for i in range(4):
+    mfem.subtract_vector(dmd_solution_vars[i],true_solution_vars[i],\
+                         diff_vars[i])
+tot_diff_norm_vars = [sqrt(mfem.InnerProduct(MPI.COMM_WORLD,diff_var,diff_var)) for diff_var in diff_vars]
+tot_true_solution_norm_vars = [sqrt(mfem.InnerProduct(MPI.COMM_WORLD,true_solution_var,true_solution_var))\
+                                       for true_solution_var in true_solution_vars]
+
+if myid==0:
+    var_names = ['dens', 'x_mom', 'y_mom', 'e']
+    for i in range(len(var_names)):
+        rel_error = tot_diff_norm_vars[i]/tot_true_solution_norm_vars[i]
+        print(f'Relative error of DMD {var_names[i]} at t_final: {t_final} is {rel_error:.10f}\n')
+
+    print(f'Elapsed time for solving FOM: {fom_timer.duration:.6e}\n')
+    print(f'Elapsed time for training DMD: {dmd_training_timer.duration:.6e}\n')
+    print(f'Elapsed time for predicting DMD: {dmd_prediction_timer.duration:.6e}\n')
+
