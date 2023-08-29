@@ -401,6 +401,11 @@ while not done:
             sout.send_text("parallel " + str(num_procs) + " " + str(myid))
             sout.send_solution(pmesh, mom)
             sout.flush()
+        if visit:
+            visit_dc.SetCycle(ti)
+            visit_dc.SetTime(t)
+            visit_dc.Save()
+
 
 if myid == 0:
     print("done")
@@ -487,9 +492,9 @@ if myid==0:
     var_names = ['dens', 'x_mom', 'y_mom', 'e']
     for i in range(len(var_names)):
         rel_error = tot_diff_norm_vars[i]/tot_true_solution_norm_vars[i]
-        print(f'Relative error of DMD {var_names[i]} at t_final: {t_final} is {rel_error:.10f}\n')
+        print(f'Relative error of DMD {var_names[i]} at t_final: {t_final} is {rel_error:.10f}')
 
-    print(f'Elapsed time for solving FOM: {fom_timer.duration:.6e}\n')
-    print(f'Elapsed time for training DMD: {dmd_training_timer.duration:.6e}\n')
-    print(f'Elapsed time for predicting DMD: {dmd_prediction_timer.duration:.6e}\n')
+    print(f'Elapsed time for solving FOM: {fom_timer.duration:.6e}')
+    print(f'Elapsed time for training DMD: {dmd_training_timer.duration:.6e}')
+    print(f'Elapsed time for predicting DMD: {dmd_prediction_timer.duration:.6e}')
 
