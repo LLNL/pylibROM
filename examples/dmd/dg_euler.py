@@ -21,7 +21,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 // Sample runs and results for adaptive DMD:
 //
 // Command 1:
-//   mpirun -np 8 dg_euler -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -visit
+//   mpirun -np 8 dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -visit
 //
 // Output 1:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 0.00015272589
@@ -30,7 +30,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 6.85403e-05
 //
 // Command 2:
-//   mpirun -np 8 dg_euler -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -visit
+//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -visit
 //
 // Output 2:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 1.573349e-06
@@ -39,7 +39,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 1.7326842e-06
 //
 // Command 3:
-//   mpirun -np 8 dg_euler -p 2 -rs 2 -rp 1 -o 1 -s 3 -visit
+//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -visit
 //
 // Output 3:
 //   Relative error of DMD density (dens) at t_final: 2 is 0.00022777614
@@ -52,7 +52,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 // Sample runs and results for nonuniform DMD:
 //
 // Command 1:
-//   mpirun -np 8 dg_euler -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -nonunif -visit
+//   mpirun -np 8 dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -nonunif -visit
 //
 // Output 1:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 0.00015499558
@@ -61,7 +61,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 7.0110651e-05
 //
 // Command 2:
-//   mpirun -np 8 dg_euler -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -nonunif -visit
+//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -nonunif -visit
 //
 // Output 2:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 4.1676355e-07
@@ -70,7 +70,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 8.3869658e-07
 //
 // Command 3:
-//   mpirun -np 8 dg_euler -p 2 -rs 2 -rp 1 -o 1 -s 3 -nonunif -visit
+//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -nonunif -visit
 //
 // Output 3:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 7.9616991e-07
@@ -340,6 +340,8 @@ t = 0.0
 ts = []
 euler.SetTime(t)
 ode_solver.Init(euler)
+fom_timer.Stop()
+
 if (cfl > 0):
     #  Find a safe dt, using a temporary vector. Calling Mult() computes the
     #  maximum char speed at all quadrature points on all faces.
@@ -348,7 +350,6 @@ if (cfl > 0):
     max_char_speed = MPI.COMM_WORLD.allreduce(dg_euler_common.max_char_speed, op=MPI.MAX) 
     dg_euler_common.max_char_speed = max_char_speed 
     dt = cfl * hmin / dg_euler_common.max_char_speed / (2*order+1)
-fom_timer.Stop()
 
 #- DMD setup
 # Initialize dmd_vars = [dmd_dens, dmd_x_mom, dmd_y_mom, dmd_e]
