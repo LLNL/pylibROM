@@ -23,7 +23,7 @@ void init_GNAT(pybind11::module_ &m) {
         std::vector<int> f_sampled_rows_per_proc(num_procs);
         GNAT(f_basis, num_f_basis_vectors_used, f_sampled_row, f_sampled_rows_per_proc,
              f_basis_sampled_inv, myid, num_procs, num_samples_req,&init_samples);
-      return std::make_tuple(f_sampled_row, f_sampled_rows_per_proc);
+     return std::make_tuple(std::move(f_sampled_row), std::move(f_sampled_rows_per_proc));
     },py::arg("f_basis"),
     py::arg("num_f_basis_vectors_used"),
     py::arg("f_basis_sampled_inv"),

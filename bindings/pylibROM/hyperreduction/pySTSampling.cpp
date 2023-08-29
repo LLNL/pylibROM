@@ -22,7 +22,7 @@ void init_STSampling(pybind11::module_ &m) {
                   const int num_s_samples_req = -1,
                   const bool excludeFinalTime = false) {
       std::vector<int> t_samples(num_t_samples_req);
-      SpaceTimeSampling(s_basis, t_basis,num_f_basis_vectors_used,t_samples,getVectorPointer_int(f_sampled_row), getVectorPointer_int(f_sampled_rows_per_proc), s_basis_sampled, myid, num_procs, num_t_samples_req,num_s_samples_req,excludeFinalTime);
+      SpaceTimeSampling(s_basis, t_basis,num_f_basis_vectors_used,t_samples,getVectorPointer(f_sampled_row), getVectorPointer(f_sampled_rows_per_proc), s_basis_sampled, myid, num_procs, num_t_samples_req,num_s_samples_req,excludeFinalTime);
       return std::move(t_samples);
     }, py::arg("s_basis"), py::arg("t_basis"), py::arg("num_f_basis_vectors_used"),
        py::arg("f_sampled_row"), py::arg("f_sampled_rows_per_proc"),

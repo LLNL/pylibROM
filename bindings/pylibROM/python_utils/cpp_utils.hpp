@@ -50,23 +50,4 @@ T* getVectorPointer(py::array_t<T> &u_in)
         
     return static_cast<T*>(buf_info.ptr);
 }
-
-inline int* getVectorPointer_int(py::array_t<int> &u_in)
-{
-    py::buffer_info buf_info = u_in.request();
-    // If it is 1D array, we should ensure that the memory is contiguous.
-    if (buf_info.ndim != 1)
-    {
-        throw std::runtime_error("Input array must be 1-dimensional!\n");
-    }
-    else if (buf_info.strides[0] != sizeof(int))
-    {
-        std::string msg = "Input numpy array must have a contiguous memory! - ";
-        msg += std::to_string(buf_info.strides[0]) + "\n";
-        throw std::runtime_error(msg.c_str());
-    }
-        
-    return static_cast<int*>(buf_info.ptr);
-}
-
 #endif
