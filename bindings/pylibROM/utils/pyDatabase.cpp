@@ -24,7 +24,7 @@ void init_Database(pybind11::module_ &m) {
         .export_values();
 
     // TODO(kevin): finish binding of member functions.
-    db.def("getIntegerArray", [](
+    db.def("getInteger", [](
         Database &self, const std::string& key)
     {
         int data;
