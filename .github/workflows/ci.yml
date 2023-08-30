@@ -63,6 +63,18 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDEIM unit test
+            pytest test_pyDEIM.py --verbose
+            echo run pyGNAT unit test
+            pytest test_pyGNAT.py --verbose
+            echo run pyQDEIM unit test
+            pytest test_pyQDEIM.py --verbose
+            echo run pyS_OPT unit test
+            pytest test_pyS_OPT.py --verbose
+            echo run pySTSampling unit test
+            pytest test_pySTSampling.py --verbose
+            echo run pyUtilities unit test
+            pytest test_pyUtilities.py --verbose
   cmake-with-librom:
     runs-on: ubuntu-latest
     needs: [docker-librom-image]
@@ -115,6 +127,18 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDEIM unit test
+            pytest test_pyDEIM.py --verbose
+            echo run pyGNAT unit test
+            pytest test_pyGNAT.py --verbose
+            echo run pyQDEIM unit test
+            pytest test_pyQDEIM.py --verbose
+            echo run pyS_OPT unit test
+            pytest test_pyS_OPT.py --verbose
+            echo run pySTSampling unit test
+            pytest test_pySTSampling.py --verbose
+            echo run pyUtilities unit test
+            pytest test_pyUtilities.py --verbose
   baseline:
     runs-on: ubuntu-latest
     needs: [docker-base-image]
@@ -164,4 +188,16 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDEIM unit test
+            pytest test_pyDEIM.py --verbose
+            echo run pyGNAT unit test
+            pytest test_pyGNAT.py --verbose
+            echo run pyQDEIM unit test
+            pytest test_pyQDEIM.py --verbose
+            echo run pyS_OPT unit test
+            pytest test_pyS_OPT.py --verbose
+            echo run pySTSampling unit test
+            pytest test_pySTSampling.py --verbose
+            echo run pyUtilities unit test
+            pytest test_pyUtilities.py --verbose
     

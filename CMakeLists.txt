@@ -143,7 +143,14 @@ pybind11_add_module(_pylibROM
 
     bindings/pylibROM/algo/pyDMD.cpp
 	bindings/pylibROM/algo/pyParametricDMD.cpp
-
+    
+	bindings/pylibROM/hyperreduction/pyDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyGNAT.cpp
+	bindings/pylibROM/hyperreduction/pyQDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyS_OPT.cpp
+	bindings/pylibROM/hyperreduction/pySTSampling.cpp
+	bindings/pylibROM/hyperreduction/pyUtilities.cpp
+	
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.hpp
 	bindings/pylibROM/utils/pyDatabase.cpp
