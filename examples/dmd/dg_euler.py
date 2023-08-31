@@ -21,7 +21,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 // Sample runs and results for adaptive DMD:
 //
 // Command 1:
-//   mpirun -np 8 dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -visit
+//   mpirun -np 8 python dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -visit
 //
 // Output 1:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 0.00015272589
@@ -30,7 +30,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 6.85403e-05
 //
 // Command 2:
-//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -visit
+//   mpirun -np 8 python dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -visit
 //
 // Output 2:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 1.573349e-06
@@ -39,7 +39,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 1.7326842e-06
 //
 // Command 3:
-//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -visit
+//   mpirun -np 8 python dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -visit
 //
 // Output 3:
 //   Relative error of DMD density (dens) at t_final: 2 is 0.00022777614
@@ -52,7 +52,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 // Sample runs and results for nonuniform DMD:
 //
 // Command 1:
-//   mpirun -np 8 dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -nonunif -visit
+//   mpirun -np 8 python dg_euler.py -p 1 -rs 1 -rp 1 -o 5 -s 6 -tf 0.1 -nonunif -visit
 //
 // Output 1:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 0.00015499558
@@ -61,7 +61,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 7.0110651e-05
 //
 // Command 2:
-//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -nonunif -visit
+//   mpirun -np 8 python dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -tf 0.1 -nonunif -visit
 //
 // Output 2:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 4.1676355e-07
@@ -70,7 +70,7 @@ Below is the description from libROM/examples/dmd/dg_euler.cpp:
 //   Relative error of DMD energy (e) at t_final: 0.1 is 8.3869658e-07
 //
 // Command 3:
-//   mpirun -np 8 dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -nonunif -visit
+//   mpirun -np 8 python dg_euler.py -p 2 -rs 2 -rp 1 -o 1 -s 3 -nonunif -visit
 //
 // Output 3:
 //   Relative error of DMD density (dens) at t_final: 0.1 is 7.9616991e-07
@@ -182,9 +182,8 @@ parser.add_argument('-rdim','--rdim',
 parser.add_argument('-crbf','--crbf',
                     action='store',default=0.9,type=float,
                     help='Closest RBF value')
-parser.add_argument('-nonunif','--nonunif','-no-nonunif','--no-nonunif',
-                    action='store',default=False,type=bool,
-                    help='Use NonuniformDMD')
+parser.add_argument('-nonunif','--nonunif',dest='nonunif',
+                    action='store_true',help='Use NonuniformDMD')
 
 
 # assign args
