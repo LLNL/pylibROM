@@ -128,24 +128,30 @@ link_libraries(
 add_subdirectory("extern/pybind11")
 
 pybind11_add_module(_pylibROM
-    bindings/pylibROM/pylibROM.cpp
+  bindings/pylibROM/pylibROM.cpp
 
-    bindings/pylibROM/linalg/pyMatrix.cpp
-    bindings/pylibROM/linalg/pyVector.cpp
-    bindings/pylibROM/linalg/pyBasisGenerator.cpp
-    bindings/pylibROM/linalg/pyBasisReader.cpp
+  bindings/pylibROM/linalg/pyMatrix.cpp
+  bindings/pylibROM/linalg/pyVector.cpp
+  bindings/pylibROM/linalg/pyBasisGenerator.cpp
+  bindings/pylibROM/linalg/pyBasisReader.cpp
 	bindings/pylibROM/linalg/pyBasisWriter.cpp
-    bindings/pylibROM/linalg/pyOptions.cpp
-    bindings/pylibROM/linalg/pyNNLS.cpp
-    bindings/pylibROM/linalg/svd/pySVD.cpp
-    bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
-    bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
+  bindings/pylibROM/linalg/pyOptions.cpp
+  bindings/pylibROM/linalg/pyNNLS.cpp
+  bindings/pylibROM/linalg/svd/pySVD.cpp
+  bindings/pylibROM/linalg/svd/pyStaticSVD.cpp
+  bindings/pylibROM/linalg/svd/pyIncrementalSVD.cpp
 
-    bindings/pylibROM/algo/pyDMD.cpp
+  bindings/pylibROM/algo/pyDMD.cpp
 	bindings/pylibROM/algo/pyParametricDMD.cpp
 	bindings/pylibROM/algo/pyNonuniformDMD.cpp
-        bindings/pylibROM/algo/pyAdaptiveDMD.cpp
-
+  bindings/pylibROM/algo/pyAdaptiveDMD.cpp
+	bindings/pylibROM/hyperreduction/pyDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyGNAT.cpp
+	bindings/pylibROM/hyperreduction/pyQDEIM.cpp
+	bindings/pylibROM/hyperreduction/pyS_OPT.cpp
+	bindings/pylibROM/hyperreduction/pySTSampling.cpp
+	bindings/pylibROM/hyperreduction/pyUtilities.cpp
+	
 	bindings/pylibROM/utils/mpi_utils.cpp
 	bindings/pylibROM/utils/pyDatabase.hpp
 	bindings/pylibROM/utils/pyDatabase.cpp

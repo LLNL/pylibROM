@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import scipy as sp
 from mpi4py import MPI
-import pylibROM.linalg as la
+import _pylibROM.linalg as la
 
 #- parallelization setup
 comm = MPI.COMM_WORLD

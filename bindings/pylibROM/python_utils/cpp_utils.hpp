@@ -50,5 +50,4 @@ T* getVectorPointer(py::array_t<T> &u_in)
         
     return static_cast<T*>(buf_info.ptr);
 }
-
 #endif
