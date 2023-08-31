@@ -15,15 +15,15 @@
 # // =============================================================================
 # //
 # // Parametric serial DMD command (for HDF version, append -hdf):
-# //   parametric_tw_csv -o hc_parametric_serial -rdim 16 -dtc 0.01 -offline
-# //   parametric_tw_csv -o hc_parametric_serial -rdim 16 -dtc 0.01 -online
+# //   python3 parametric_tw_csv.py -o hc_parametric_serial -rdim 16 -dtc 0.01 -offline
+# //   python3 parametric_tw_csv.py -o hc_parametric_serial -rdim 16 -dtc 0.01 -online
 # //
 # // Final-time prediction error (Last line in run/hc_parametric_serial/dmd_par5_prediction_error.csv):
 # //   0.0012598331433506
 # //
 # // Parametric time windowing DMD command (for HDF version, append -hdf):
-# //   parametric_tw_csv -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -offline
-# //   parametric_tw_csv -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -online
+# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -offline
+# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -offline
 # //
 # // Final-time prediction error (Last line in run/hc_parametric_tw/dmd_par5_prediction_error.csv):
 # //   0.0006507358659606
