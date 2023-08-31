@@ -80,8 +80,10 @@ get1DArrayBufferHandle(T *ptr, const bool free_when_done=false)
 
 template<typename T>
 py::array_t<T>
-get1DArrayFromPtr(T *ptr, const int nelem, const bool free_when_done=false)
+get1DArrayFromPtr(T *ptr, const int nelem, bool free_when_done=false)
 {
+    // if empty array, no need to free when done.
+    free_when_done = free_when_done && (nelem > 0);
     return py::array(get1DArrayBufferInfo(ptr, nelem),
                      get1DArrayBufferHandle(ptr, free_when_done));
 }

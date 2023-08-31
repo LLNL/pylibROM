@@ -107,6 +107,15 @@ void init_CSVDatabase(pybind11::module_ &m) {
         return get1DArrayFromPtr(dataptr, nelements, true);
     });
 
+    csvdb.def("getIntegerVector", [](
+        CSVDatabase &self, const std::string& key, bool append)
+    {
+        std::vector<int> *datavec = new std::vector<int>;
+        self.getIntegerVector(key, *datavec, append);
+        return get1DArrayFromPtr(datavec->data(), datavec->size(), true);
+    },
+    py::arg("key"), py::arg("append") = false);
+
     csvdb.def("getDoubleArray", [](
         CSVDatabase &self, const std::string& key, int nelements)
     {
@@ -131,6 +140,15 @@ void init_CSVDatabase(pybind11::module_ &m) {
         self.getDoubleArray(key, dataptr, nelements, offset, block_size, stride);
         return get1DArrayFromPtr(dataptr, nelements, true);
     });
+
+    csvdb.def("getDoubleVector", [](
+        CSVDatabase &self, const std::string& key, bool append)
+    {
+        std::vector<double> *datavec = new std::vector<double>();
+        self.getDoubleVector(key, *datavec, append);
+        return get1DArrayFromPtr(datavec->data(), datavec->size(), true);
+    },
+    py::arg("key"), py::arg("append") = false);
 
     csvdb.def("getDoubleArraySize", &CSVDatabase::getDoubleArraySize);
 

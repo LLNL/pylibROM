@@ -46,25 +46,6 @@
 # // 8. DATA_DIR/SPATIAL_IDX.csv            -- (optional) each row specifies one spatial index of VAR_NAME
 # // 9. run/OUT_DIR/indicator_val.csv       -- (optional) each row specifies one indicator endpoint value
 
-#include "mfem.hpp"
-#include "algo/DMD.h"
-#include "algo/AdaptiveDMD.h"
-#include "algo/NonuniformDMD.h"
-#include "linalg/Vector.h"
-#include "linalg/Matrix.h"
-#include "utils/HDFDatabase.h"
-#include "utils/CSVDatabase.h"
-#include <cmath>
-#include <iostream>
-#include <limits>
-
-#ifndef _WIN32
-#include <sys/stat.h>  // mkdir
-#else
-#include <direct.h>    // _mkdir
-#define mkdir(dir, mode) _mkdir(dir)
-#endif
-
 import os
 import io
 import pathlib
@@ -130,7 +111,7 @@ if __name__ == "__main__":
                         action='store_true', default=True,
                         help='Enable GLVis visualization')
     parser.add_argument("-train", "--train",
-                        action='store_true', dest='train',
+                        action='store_true', dest='train', default=True,
                         help="Enable DMD training.")
     parser.add_argument("-no-train", "--no-train",
                         action='store_false', dest='train',
@@ -247,7 +228,7 @@ if __name__ == "__main__":
     assert(not ((dtc > 0.0) and (ddt > 0.0)))
 
     if (t_final > 0.0):
-        save_csv = true
+        save_csv = True
 
     outputPath = "run"
     if (basename != ""):
