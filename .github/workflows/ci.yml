@@ -63,6 +63,9 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDMD unit test
+            pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
             echo run pyDEIM unit test
             pytest test_pyDEIM.py --verbose
             echo run pyGNAT unit test
@@ -127,6 +130,9 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDMD unit test
+            pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
             echo run pyDEIM unit test
             pytest test_pyDEIM.py --verbose
             echo run pyGNAT unit test
@@ -188,6 +194,9 @@ jobs:
             pytest test_pyBasisReader.py --verbose
             echo run pyBasisWriter unit test
             pytest test_pyBasisWriter.py --verbose
+            echo run pyDMD unit test
+            pytest test_pyDMD.py --verbose
+            mpirun -n 2 pytest test_pyDMD.py --verbose
             echo run pyDEIM unit test
             pytest test_pyDEIM.py --verbose
             echo run pyGNAT unit test

@@ -20,6 +20,8 @@ void init_IncrementalSVD(pybind11::module_ &m);
 //algo
 void init_DMD(pybind11::module_ &);
 void init_ParametricDMD(pybind11::module_ &m);
+void init_NonuniformDMD(pybind11::module_ &m);
+void init_AdaptiveDMD(pybind11::module_ &m);
 
 //hyperreduction
 void init_DEIM(pybind11::module_ &m);
@@ -64,6 +66,8 @@ PYBIND11_MODULE(_pylibROM, m) {
     py::module algo = m.def_submodule("algo");
     init_DMD(algo);
     init_ParametricDMD(algo);
+    init_AdaptiveDMD(algo);
+    init_NonuniformDMD(algo);
 
     py::module hyperreduction = m.def_submodule("hyperreduction");
     init_DEIM(hyperreduction);
