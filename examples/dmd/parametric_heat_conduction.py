@@ -209,6 +209,9 @@ if __name__ == "__main__":
     parser.add_argument('-vis', '--visualization',
                         action='store_true', default=True,
                         help='Enable GLVis visualization')
+    parser.add_argument('-no-vis', '--no-visualization',
+                        action='store_false', dest='visualization',
+                        help='Enable GLVis visualization')
     parser.add_argument('-visit', '--visit-datafiles',
                         action='store_true', default=False,
                         help="Save data files for VisIt (visit.llnl.gov) visualization.")
@@ -234,7 +237,10 @@ if __name__ == "__main__":
                         action='store_true', default=False,
                         help="Enable or disable MFEM DOF solution snapshot files).")
     parser.add_argument("-csv", "--csv",
-                        action='store_true', default=False,
+                        action='store_true', default=False, dest='csvFormat',
+                        help="Use CSV or HDF format for files output by -save option.")
+    parser.add_argument("-hdf", "--hdf",
+                        action='store_false', dest='csvFormat',
                         help="Use CSV or HDF format for files output by -save option.")
     parser.add_argument("-out", "--outputfile-name",
                         action='store', default="", type=str,
@@ -278,7 +284,7 @@ if __name__ == "__main__":
     visit               = args.visit_datafiles
     adios2              = args.adios2_streams
     visualization       = args.visualization
-    csvFormat           = args.csv
+    csvFormat           = args.csvFormat
     dt                  = args.time_step
     t_final             = args.t_final
     vis_steps           = args.visualization_steps
@@ -536,7 +542,7 @@ if __name__ == "__main__":
                 pathlib.Path("%s/step%d" % (outputPath, ti)).mkdir(parents=True, exist_ok=True)
                 db.putDoubleArray("%s/step%d/sol.csv" % (outputPath, ti), u.GetDataArray(), u.Size())
             else:
-                db.putDoubleArray("step%dsol" % ti, u.GetData(), u.Size())
+                db.putDoubleArray("step%dsol" % ti, u.GetDataArray(), u.Size())
 
         ts += [t]
         snap_list += [ti]
