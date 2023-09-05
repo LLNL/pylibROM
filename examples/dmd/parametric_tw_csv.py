@@ -23,7 +23,7 @@
 # //
 # // Parametric time windowing DMD command (for HDF version, append -hdf):
 # //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -offline
-# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -offline
+# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -online
 # //
 # // Final-time prediction error (Last line in run/hc_parametric_tw/dmd_par5_prediction_error.csv):
 # //   0.0006507358659606
