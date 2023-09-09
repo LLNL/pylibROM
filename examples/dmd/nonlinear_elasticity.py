@@ -76,6 +76,9 @@ parser.add_argument("-K", "--bulk-modulus",
 parser.add_argument('-vis', '--visualization',
                     action='store_true', default=True,
                     help='Enable GLVis visualization')
+parser.add_argument('-visit', '--visit-datafiles',
+                    action='store_true', default=False,
+                    help="Save data files for VisIt (visit.llnl.gov) visualization.")
 parser.add_argument("-vs", "--visualization-steps",
                     action='store', default=1, type=int,
                     help="Visualize every n-th timestep.")
@@ -102,7 +105,7 @@ mu = args.shear_modulus
 K = args.bulk_modulus
 visualization = args.visualization
 vis_steps = args.visualization_steps
-ef = args.ef
+ef = args.energy_fraction
 rdim = args.rdim
 windowNumSamples = args.numwindowsamples
 
@@ -470,8 +473,8 @@ dmd_v = []
 dmd_x = []
 ts = []
 dmd_training_timer.Start()
-dmd_v.append(DMD(vx.GetBlock(0).Size()))
-dmd_x.append(DMD(vx.GetBlock(1).Size()))
+dmd_v.append(DMD(vx.GetBlock(0).Size(),dt))
+dmd_x.append(DMD(vx.GetBlock(1).Size(),dt))
 dmd_v[curr_window].takeSample(vx.GetBlock(0).GetDataArray(), t)
 dmd_x[curr_window].takeSample(vx.GetBlock(1).GetDataArray(), t)
 ts.append(t)
@@ -503,8 +506,8 @@ while not last_step:
             dmd_x[curr_window].train(ef)
         if not last_step:
             curr_window += 1
-            dmd_v.append(DMD(vx.GetBlock(0).Size()))
-            dmd_x.append(DMD(vx.GetBlock(1).Size()))
+            dmd_v.append(DMD(vx.GetBlock(0).Size(),dt))
+            dmd_x.append(DMD(vx.GetBlock(1).Size(),dt))
             dmd_v[curr_window].takeSample(vx.GetBlock(0).GetDataArray(), t)
             dmd_x[curr_window].takeSample(vx.GetBlock(1).GetDataArray(), t)
     ts.append(t)
