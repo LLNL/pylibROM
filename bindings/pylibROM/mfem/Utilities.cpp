@@ -23,8 +23,8 @@ void init_mfem_Utilities(pybind11::module_ &m) {
                                 const CAROM::Matrix& C,
                                 CAROM::Vector& CtAB_vec){
         HypreParMatrix *Aptr = extractSwigPtr<HypreParMatrix>(A);
-        HypreParMatrix *Bptr = extractSwigPtr<HypreParMatrix>(B);
-        CAROM::ComputeCtAB_vec(*Aptr, *Bptr, C, CtAB);
+        HypreParVector *Bptr = extractSwigPtr<HypreParVector>(B);
+        CAROM::ComputeCtAB_vec(*Aptr, *Bptr, C, CtAB_vec);
     });
 
 }

@@ -63,14 +63,13 @@ class CMakeBuild(build_ext):
             librom_dir = os.path.dirname(os.path.realpath(__file__))
             librom_dir += "/extern/libROM"
             print("Installing libROM library: %s" % librom_dir)
-            if (install_scalapack):
-                cmake_args += [f"-DBUILD_SCALAPACK=ON"]
-            # librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
-            # if (install_scalapack): librom_cmd += " -s"
-            # print("libROM installation command: %s" % librom_cmd)
-            # subprocess.run(
-            #     librom_cmd, shell=True, check=True
-            # )
+            
+            librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
+            if (install_scalapack): librom_cmd += " -s"
+            print("libROM installation command: %s" % librom_cmd)
+            subprocess.run(
+                librom_cmd, shell=True, check=True
+            )
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
             cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
