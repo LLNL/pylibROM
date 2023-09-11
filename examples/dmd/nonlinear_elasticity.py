@@ -8,17 +8,14 @@
       type.
 
    How to run:
-      mpirun -np 4 python <arguments>
+      mpirun -np 8 python <arguments>
 
    Example of arguments:
-      ex10p.py -m beam-quad.mesh -s 3 -rs 2 -dt 3
-      ex10p.py -m beam-tri.mesh -s 3 -rs 2 -dt 3
-      ex10p.py -m beam-hex.mesh -s 2 -rs 1 -dt 3
-      ex10p.py -m beam-tet.mesh -s 2 -rs 1 -dt 3
-      ex10p.py -m beam-quad.mesh -s 14 -rs 2 -dt 0.03 -vs 20
-      ex10p.py -m beam-hex.mesh -s 14 -rs 1 -dt 0.05 -vs 20
-
-   See c++ version in the MFEM library for more detail 
+      nonlinear_elasticity.py -s 2 -rs 1 -dt 0.01 -tf 5 -visit
+   
+      Output 1:
+      Relative error of DMD position (x) at t_final: 5 is 6.95681e-05
+      Relative error of DMD velocity (v) at t_final: 5 is 0.00139776
 '''
 import sys
 import mfem.par as mfem
@@ -104,6 +101,7 @@ visc = args.viscosity
 mu = args.shear_modulus
 K = args.bulk_modulus
 visualization = args.visualization
+visit = args.visit_datafiles
 vis_steps = args.visualization_steps
 ef = args.energy_fraction
 rdim = args.rdim
