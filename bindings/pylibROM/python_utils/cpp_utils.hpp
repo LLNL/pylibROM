@@ -88,4 +88,12 @@ get1DArrayFromPtr(T *ptr, const int nelem, bool free_when_done=false)
                      get1DArrayBufferHandle(ptr, free_when_done));
 }
 
+template<typename T>
+T*
+extractSwigPtr(py::object &swig_target)
+{
+    std::uintptr_t temp = swig_target.attr("this").attr("__int__")().cast<std::uintptr_t>();
+    return reinterpret_cast<T *>(temp);
+}
+
 #endif

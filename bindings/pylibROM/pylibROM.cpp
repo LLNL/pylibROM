@@ -38,9 +38,7 @@ void init_HDFDatabase(pybind11::module_ &m);
 void init_CSVDatabase(pybind11::module_ &m);
 
 //mfem
-// TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
-//              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
-// void init_mfem_Utilities(pybind11::module_ &m);
+void init_mfem_Utilities(pybind11::module_ &m);
 
 PYBIND11_MODULE(_pylibROM, m) {
     py::module utils = m.def_submodule("utils");
@@ -76,8 +74,9 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_S_OPT(hyperreduction);
     init_STSampling(hyperreduction);
     init_Utilities(hyperreduction);
-    // py::module mfem = m.def_submodule("mfem");
-    // init_mfem_Utilities(mfem);
+
+    py::module mfem = m.def_submodule("mfem");
+    init_mfem_Utilities(mfem);
 
     // py::module python_utils = m.def_submodule("python_utils");
 }
