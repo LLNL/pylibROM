@@ -23,7 +23,7 @@ RUN sudo git clone https://github.com/LLNL/libROM.git
 WORKDIR ./libROM
 RUN sudo git pull
 # pylibROM is currently based on a specific commit of the libROM.
-RUN sudo git checkout 0edcb6fb268ae06bf835c3476665862040eb512d
+RUN sudo git checkout mfem_fix
 WORKDIR ./build
 RUN sudo cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
 # RUN sudo cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=OFF
