@@ -572,7 +572,7 @@ if visit:
         dmd_dc.Save()
         nodes, owns_nodes = pmesh.SwapNodes(nodes, owns_nodes)
 
-        if i % windowNumSamples == 0 and i < ts.size()-1:
+        if i % windowNumSamples == 0 and i < len(ts)-1:
             curr_window += 1
 else:
     curr_window = len(dmd_v) - 1
