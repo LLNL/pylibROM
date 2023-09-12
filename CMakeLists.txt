@@ -55,7 +55,7 @@ if (BUILD_LIBROM)
         	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
         	CONFIGURE_COMMAND ""
         	BINARY_DIR ${LIBROM_DIR}
-        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -m -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
+        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -m -g -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
         	INSTALL_COMMAND ""
 	)	
 	message("Building libROM dependency...")

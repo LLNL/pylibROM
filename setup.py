@@ -64,7 +64,7 @@ class CMakeBuild(build_ext):
             librom_dir += "/extern/libROM"
             print("Installing libROM library: %s" % librom_dir)
             
-            librom_cmd = "cd %s && ./scripts/compile.sh -m -t ./cmake/toolchains/simple.cmake" % librom_dir
+            librom_cmd = "cd %s && ./scripts/compile.sh -m -g -t ./cmake/toolchains/simple.cmake" % librom_dir
             if (install_scalapack): librom_cmd += " -s"
             print("libROM installation command: %s" % librom_cmd)
             subprocess.run(
