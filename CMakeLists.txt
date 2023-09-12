@@ -158,9 +158,12 @@ pybind11_add_module(_pylibROM
 	bindings/pylibROM/utils/pyHDFDatabase.cpp
 	bindings/pylibROM/utils/pyCSVDatabase.cpp
 
-	bindings/pylibROM/mfem/Utilities.cpp
+	bindings/pylibROM/mfem/pyUtilities.cpp
+	bindings/pylibROM/mfem/pyPointwiseSnapshot.cpp
+	bindings/pylibROM/mfem/pySampleMesh.cpp
 
 	bindings/pylibROM/python_utils/cpp_utils.hpp
+	bindings/pylibROM/python_utils/cpp_utils.cpp
 )
 message("building pylibROM...")
 

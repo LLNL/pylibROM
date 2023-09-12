@@ -39,6 +39,8 @@ void init_CSVDatabase(pybind11::module_ &m);
 
 //mfem
 void init_mfem_Utilities(pybind11::module_ &m);
+void init_mfem_PointwiseSnapshot(pybind11::module_ &m);
+void init_mfem_SampleMesh(pybind11::module_ &m);
 
 PYBIND11_MODULE(_pylibROM, m) {
     py::module utils = m.def_submodule("utils");
@@ -77,6 +79,8 @@ PYBIND11_MODULE(_pylibROM, m) {
 
     py::module mfem = m.def_submodule("mfem");
     init_mfem_Utilities(mfem);
+    init_mfem_PointwiseSnapshot(mfem);
+    init_mfem_SampleMesh(mfem);
 
     // py::module python_utils = m.def_submodule("python_utils");
 }

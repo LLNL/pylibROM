@@ -3,4 +3,4 @@
 # This will combine both c++ bindings/pure python routines into this module.
 from _pylibROM.mfem import *
 # from .Utilities import ComputeCtAB
-from .PointwiseSnapshot import PointwiseSnapshot
+# from .PointwiseSnapshot import PointwiseSnapshot
