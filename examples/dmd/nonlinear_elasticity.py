@@ -10,19 +10,19 @@
    How to run:
       mpirun -np 8 python <arguments>
 
-      Example 1 of arguments:
+      Arguments of serial case:
       nonlinear_elasticity.py -s 2 -rs 1 -dt 0.01 -tf 5 -visit
    
-      Output 1:
-      Relative error of DMD velocity (v) at t_final: 5.000000 is 1.145E-03
-      Relative error of DMD position (x) at t_final: 5.000000 is 7.371E-05
+      Outputs of serial case:
+      Relative error of DMD velocity (v) at t_final: 5.000000 is 2.501E-03
+      Relative error of DMD position (x) at t_final: 5.000000 is 1.325E-04
 
-      Example 2 of arguments:
+      Arguments of time windowing case:
       nonlinear_elasticity.py -s 2 -rs 1 -dt 0.01 -tf 5 -nwinsamp 10 -visit
    
-      Output 2:
-      Relative error of DMD velocity (v) at t_final: 5.000000 is 1.106E-04
-      Relative error of DMD position (x) at t_final: 5.000000 is 4.304E-06
+      Outputs of time windowing case:
+      Relative error of DMD velocity (v) at t_final: 5.000000 is 6.509E-04
+      Relative error of DMD position (x) at t_final: 5.000000 is 9.197E-06
 '''
 import sys
 import mfem.par as mfem
