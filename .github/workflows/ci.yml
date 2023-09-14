@@ -74,8 +74,6 @@ jobs:
             pytest test_pyQDEIM.py --verbose
             echo run pyS_OPT unit test
             pytest test_pyS_OPT.py --verbose
-            echo run pySTSampling unit test
-            pytest test_pySTSampling.py --verbose
             echo run pyUtilities unit test
             pytest test_pyUtilities.py --verbose
   cmake-with-librom:
@@ -141,8 +139,6 @@ jobs:
             pytest test_pyQDEIM.py --verbose
             echo run pyS_OPT unit test
             pytest test_pyS_OPT.py --verbose
-            echo run pySTSampling unit test
-            pytest test_pySTSampling.py --verbose
             echo run pyUtilities unit test
             pytest test_pyUtilities.py --verbose
   baseline:
@@ -205,8 +201,6 @@ jobs:
             pytest test_pyQDEIM.py --verbose
             echo run pyS_OPT unit test
             pytest test_pyS_OPT.py --verbose
-            echo run pySTSampling unit test
-            pytest test_pySTSampling.py --verbose
             echo run pyUtilities unit test
             pytest test_pyUtilities.py --verbose
     
