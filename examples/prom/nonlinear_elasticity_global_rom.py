@@ -99,7 +99,7 @@ except ModuleNotFoundError:
     raise ModuleNotFoundError(msg)
 
 from ctypes import c_double
-from mfem.par import intArray, add_vector
+from mfem.par import intArray, add_vector, subtract_vector
 from os.path import expanduser, join, dirname
 import numpy as np
 from numpy import sin, cos, exp, sqrt, pi, abs, array, floor, log, sum
@@ -110,7 +110,7 @@ import pylibROM.linalg as linalg
 import pylibROM.hyperreduction as hyper
 import pylibROM.mfem as mfem_support
 from pylibROM.mfem import ComputeCtAB
-from pylibROM.utils import StopWatch
+from pylibROM.python_utils import StopWatch
 
 class ReducedSystemOperator(mfem.PyOperator):
     def __init__(self, M, S, H, ess_tdof_list):
@@ -1194,355 +1194,273 @@ def run():
             w_v0 = mfem.Vector(sp_v_gf.GetTrueVector())
             w_x0 = mfem.Vector(sp_x_gf.GetTrueVector())
 
-        // Convert essential boundary list from FOM mesh to sample mesh
-        // Create binary list where 1 means essential boundary element, 0 means nonessential.
-        CAROM::Matrix Ess_mat(true_size, 1, true);
-        for (size_t i = 0; i < true_size; i++)
-        {
-            Ess_mat(i,0) = 0;
-            for (size_t j = 0; j < ess_tdof_list.Size(); j++)
-            {
-                if (ess_tdof_list[j] == i )
-                {
-                    Ess_mat(i,0) = 1;
-                }
-            }
-        }
+        # Convert essential boundary list from FOM mesh to sample mesh
+        # Create binary list where 1 means essential boundary element, 0 means nonessential.
+        Ess_mat = linalg.Matrix(true_size, 1, True)
+        for i in range(true_size):
+            Ess_mat[i,0] = 0.
+            for j in range(ess_tdof_list.Size()):
+                if (ess_tdof_list[j] == i ):
+                    Ess_mat[i,0] = 1.
 
-        // Project binary FOM list onto sampling space
-        MPI_Bcast(&sp_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-        CAROM::Matrix Ess_mat_sp(sp_size, 1, false);
-        smm->GatherDistributedMatrixRows("X", Ess_mat, 1, Ess_mat_sp);
+        # Project binary FOM list onto sampling space
+        MPI.COMM_WORLD.Bcast([sp_size, MPI.INT], root=0)
+        Ess_mat_sp = linalg.Matrix(sp_size, 1, False)
+        smm.GatherDistributedMatrixRows("X", Ess_mat, 1, Ess_mat_sp)
 
-        // Count number of true elements in new matrix
-        int num_ess_sp = 0;
+        # Count number of true elements in new matrix
+        num_ess_sp = 0
 
-        for (size_t i = 0; i < sp_size; i++)
-        {
-            if (Ess_mat_sp(i,0) == 1)
-            {
-                num_ess_sp += 1;
-            }
-        }
+        for i in range(sp_size):
+            if (Ess_mat_sp[i,0] == 1):
+                num_ess_sp += 1
 
-        // Initialize essential dof list in sampling space
-        Array<int> ess_tdof_list_sp(num_ess_sp);
+        # Initialize essential dof list in sampling space
+        ess_tdof_list_sp = mfem.intArray(num_ess_sp)
 
-        // Add indices to list
-        int ctr = 0;
-        for (size_t i = 0; i < sp_size; i++)
-        {
-            if (Ess_mat_sp(i,0) == 1)
-            {
-                ess_tdof_list_sp[ctr] = i;
-                ctr += 1;
-            }
-        }
+        # Add indices to list
+        ctr = 0
+        for i in range(sp_size):
+            if (Ess_mat_sp[i,0] == 1):
+                ess_tdof_list_sp[ctr] = i
+                ctr += 1
 
-        if (myid == 0)
-        {
-            // Define operator in sample space
-            soper = new HyperelasticOperator(*sp_XV_space, ess_tdof_list_sp, visc, mu, K);
-        }
+        if (myid == 0):
+            # Define operator in sample space
+            soper = HyperelasticOperator(sp_XV_space, ess_tdof_list_sp, visc, mu, K)
 
-        if (hyperreduce)
-        {   romop = new RomOperator(&oper, soper, rvdim, rxdim, hdim, smm, w_v0, w_x0,
-                                    vx0.GetBlock(0), BV_librom, BX_librom, H_librom, Hsinv, myid,
-                                    num_samples_req != -1, hyperreduce, x_base_only);
-        }
-        else
-        {
-            romop = new RomOperator(&oper, soper, rvdim, rxdim, hdim, smm,
-                                    &(vx0.GetBlock(0)),
-                                    &(vx0.GetBlock(1)), vx0.GetBlock(0), BV_librom, BX_librom, H_librom, Hsinv,
-                                    myid,
-                                    num_samples_req != -1, hyperreduce, x_base_only);
-        }
+        if (hyperreduce):
+            romop = RomOperator(oper, soper, rvdim, rxdim, hdim, smm, w_v0, w_x0,
+                                vx0.GetBlock(0), BV_librom, BX_librom, H_librom, Hsinv, myid,
+                                (num_samples_req != -1), hyperreduce, x_base_only)
+        else:
+            romop = RomOperator(oper, soper, rvdim, rxdim, hdim, smm,
+                                vx0.GetBlock(0), vx0.GetBlock(1), vx0.GetBlock(0),
+                                BV_librom, BX_librom, H_librom, Hsinv, myid,
+                                (num_samples_req != -1), hyperreduce, x_base_only)
 
-        // Print lifted initial energies
-        BroadcastUndistributedRomVector(w);
+        # Print lifted initial energies
+        BroadcastUndistributedRomVector(w)
 
-        for (int i=0; i<rvdim; ++i)
-            (*w_v)(i) = (*w)(i);
+        for i in range(rvdim):
+            w_v[i] = w[i]
 
-        for (int i=0; i<rxdim; ++i)
-            (*w_x)(i) = (*w)(rvdim + i);
+        for i in range(rxdim):
+            w_x[i] = w[rvdim + i]
 
-        romop->V_v.mult(*w_v, *v_rec_librom);
-        romop->V_x.mult(*w_x, *x_rec_librom);
+        romop.V_v.mult(w_v, v_rec_librom)
+        romop.V_x.mult(w_x, x_rec_librom)
 
-        *v_rec += vx0.GetBlock(0);
-        *x_rec += vx0.GetBlock(1);
+        v_rec += vx0.GetBlock(0)
+        x_rec += vx0.GetBlock(1)
 
-        v_gf.SetFromTrueDofs(*v_rec);
-        x_gf.SetFromTrueDofs(*x_rec);
+        v_gf.SetFromTrueDofs(v_rec)
+        x_gf.SetFromTrueDofs(x_rec)
 
-        double ee = oper.ElasticEnergy(x_gf);
-        double ke = oper.KineticEnergy(v_gf);
+        ee = oper.ElasticEnergy(x_gf)
+        ke = oper.KineticEnergy(v_gf)
 
-        if (myid == 0)
-        {
-            cout << "Lifted initial energies, EE = " << ee
-                 << ", KE = " << ke << ", ΔTE = " << (ee + ke) - (ee0 + ke0) << endl;
-
-        }
+        if (myid == 0):
+            print("Lifted initial energies, EE = %.e, KE = %.e, ΔTE = %.e" % (ee, ke, (ee + ke) - (ee0 + ke0)))
 
         ode_solver.Init(romop)
     else:
         # fom
         ode_solver.Init(oper)
 
-    // 13. Perform time-integration
-    //     (looping over the time iterations, ti, with a time-step dt).
-    //     (taking samples and storing it into the pROM object)
+    # 13. Perform time-integration
+    #     (looping over the time iterations, ti, with a time-step dt).
+    #     (taking samples and storing it into the pROM object)
 
-    double t = 0.0;
-    vector<double> ts;
-    oper.SetTime(t);
+    t = 0.0
+    ts = []
+    oper.SetTime(t)
 
-    bool last_step = false;
-    for (int ti = 1; !last_step; ti++)
-    {
-        double dt_real = min(dt, t_final - t);
+    last_step = False
+    ti = 1
+    while (not last_step):
+        dt_real = min(dt, t_final - t)
 
-        if (online)
-        {
-            if (myid == 0)
-            {
-                solveTimer.Start();
-                ode_solver->Step(*wMFEM, t, dt_real);
-                solveTimer.Stop();
-            }
+        if (online):
+            if (myid == 0):
+                solveTimer.Start()
+                ode_solver.Step(wMFEM, t, dt_real)
+                solveTimer.Stop()
 
-            MPI_Bcast(&t, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-        }
-        else
-        {
-            solveTimer.Start();
-            ode_solver->Step(vx, t, dt_real);
-            solveTimer.Stop();
-        }
+            MPI.COMM_WORLD.Bcast([t, MPI.DOUBLE], root=0)
+        else:
+            solveTimer.Start()
+            ode_solver.Step(vx, t, dt_real)
+            solveTimer.Stop()
 
-        last_step = (t >= t_final - 1e-8 * dt);
+        last_step = (t >= t_final - 1e-8 * dt)
 
-        if (offline)
-        {
+        if (offline):
 
-            if (basis_generator_x->isNextSample(t) || x_base_only == false
-                    && basis_generator_v->isNextSample(t))
-            {
-                dvxdt = oper.dvxdt_sp.GetData();
-                vx_diff = BlockVector(vx);
-                vx_diff -= vx0;
-            }
+            if (basis_generator_x.isNextSample(t) or (x_base_only == False)
+                    and basis_generator_v.isNextSample(t)):
+                dvxdt = oper.dvxdt_sp.GetData()
+                vx_diff = mfem.BlockVector(vx)
+                vx_diff -= vx0
 
-            // Take samples
-            if (x_base_only == false && basis_generator_v->isNextSample(t))
-            {
-                basis_generator_v->takeSample(vx_diff.GetBlock(0), t, dt);
-                basis_generator_v->computeNextSampleTime(vx_diff.GetBlock(0), dvdt.GetData(),
-                        t);
-                basis_generator_H->takeSample(oper.H_sp.GetData(), t, dt);
-            }
+            # Take samples
+            if ((x_base_only == False) and basis_generator_v.isNextSample(t)):
+                basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
+                basis_generator_v.computeNextSampleTime(vx_diff.GetBlock(0), dvdt.GetData(), t)
+                basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
 
-            if (basis_generator_x->isNextSample(t))
-            {
-                basis_generator_x->takeSample(vx_diff.GetBlock(1), t, dt);
-                basis_generator_x->computeNextSampleTime(vx_diff.GetBlock(1), dxdt.GetData(),
-                        t);
+            if (basis_generator_x.isNextSample(t)):
+                basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray(), t, dt)
+                basis_generator_x.computeNextSampleTime(vx_diff.GetBlock(1).GetDataArray(), dxdt.GetDataArray(), t)
 
-                if (x_base_only == true)
-                {
-                    basis_generator_H->takeSample(oper.H_sp.GetData(), t, dt);
-                }
-            }
-        }
+                if (x_base_only):
+                    basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
 
-        if (last_step || (ti % vis_steps) == 0)
-        {
-            if (online)
-            {
-                BroadcastUndistributedRomVector(w);
+        if (last_step or ((ti % vis_steps) == 0)):
+            if (online):
+                BroadcastUndistributedRomVector(w)
 
-                for (int i=0; i<rvdim; ++i)
-                    (*w_v)(i) = (*w)(i);
+                for i in range(rvdim):
+                    w_v[i] = w[i]
 
-                for (int i=0; i<rxdim; ++i)
-                    (*w_x)(i) = (*w)(rvdim + i);
+                for i in range(rxdim):
+                    w_x[i] = w[rvdim + i]
 
-                romop->V_v.mult(*w_v, *v_rec_librom);
-                romop->V_x.mult(*w_x, *x_rec_librom);
+                romop.V_v.mult(w_v, v_rec_librom)
+                romop.V_x.mult(w_x, x_rec_librom)
 
-                *v_rec += vx0.GetBlock(0);
-                *x_rec += vx0.GetBlock(1);
+                v_rec += vx0.GetBlock(0)
+                x_rec += vx0.GetBlock(1)
 
-                v_gf.SetFromTrueDofs(*v_rec);
-                x_gf.SetFromTrueDofs(*x_rec);
+                v_gf.SetFromTrueDofs(v_rec)
+                x_gf.SetFromTrueDofs(x_rec)
 
-            }
-            else
-            {
-                v_gf.SetFromTrueVector();
-                x_gf.SetFromTrueVector();
+            else:
+                v_gf.SetFromTrueVector()
+                x_gf.SetFromTrueVector()
 
-            }
+            ee = oper.ElasticEnergy(x_gf)
+            ke = oper.KineticEnergy(v_gf)
 
-            double ee = oper.ElasticEnergy(x_gf);
-            double ke = oper.KineticEnergy(v_gf);
+            if (myid == 0):
+                print("step %d, t = %f, EE = %.e, KE = %.e, ΔTE = %.e" % (ti, t, ee, ke, (ee + ke) - (ee0 + ke0)))
 
-            if (myid == 0)
-            {
-                cout << "step " << ti << ", t = " << t << ", EE = " << ee
-                     << ", KE = " << ke << ", ΔTE = " << (ee + ke) - (ee0 + ke0) << endl;
-            }
+            if (visualization):
+                visualize(vis_v, pmesh, x_gf, v_gf)
+                if (vis_w):
+                    oper.GetElasticEnergyDensity(x_gf, w_gf)
+                    visualize(vis_w, pmesh, x_gf, w_gf)
 
-            if (visualization)
-            {
-                visualize(vis_v, pmesh, &x_gf, &v_gf);
-                if (vis_w)
-                {
-                    oper.GetElasticEnergyDensity(x_gf, w_gf);
-                    visualize(vis_w, pmesh, &x_gf, &w_gf);
-                }
-            }
+            if (visit):
+                nodes = x_gf
+                owns_nodes = 0
+                pmesh.SwapNodes(nodes, owns_nodes)
 
-            if (visit)
-            {
-                GridFunction* nodes = &x_gf;
-                int owns_nodes = 0;
-                pmesh->SwapNodes(nodes, owns_nodes);
+                dc.SetCycle(ti)
+                dc.SetTime(t)
+                dc.Save()
 
-                dc->SetCycle(ti);
-                dc->SetTime(t);
-                dc->Save();
-            }
-        }
+        ti += 1
+    # timestep loop
 
-    } // timestep loop
+    if (myid == 0):
+        print("Elapsed time for time integration loop %.e" % solveTimer.duration)
 
-    if (myid == 0) cout << "Elapsed time for time integration loop " <<
-                            solveTimer.RealTime() << endl;
+    velo_name = "velocity_s%f.%06d" % (s, myid)
+    pos_name = "position_s%f.%06d" % (s, myid)
 
-    ostringstream velo_name, pos_name;
+    if (offline):
+        # Sample final solution, to prevent extrapolation in ROM between the last sample and the end of the simulation.
+        dvxdt = oper.dvxdt_sp.GetData()
+        vx_diff = mfem.BlockVector(vx)
+        vx_diff -= vx0
 
-    velo_name << "velocity_s"<< s << "." << setfill('0') << setw(6) << myid;
-    pos_name << "position_s"<< s << "." << setfill('0') << setw(6) << myid;
+        # Take samples
+        if (not x_base_only):
+            basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
+            basis_generator_v.writeSnapshot()
+            del basis_generator_v
 
-    if (offline)
-    {
-        // Sample final solution, to prevent extrapolation in ROM between the last sample and the end of the simulation.
-        dvxdt = oper.dvxdt_sp.GetData();
-        vx_diff = BlockVector(vx);
-        vx_diff -= vx0;
+        basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
+        basis_generator_H.writeSnapshot()
+        del basis_generator_H
 
-        // Take samples
-        if (x_base_only == false)
-        {
-            basis_generator_v->takeSample(vx_diff.GetBlock(0), t, dt);
-            basis_generator_v->writeSnapshot();
-            delete basis_generator_v;
-        }
+        basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray(), t, dt)
+        basis_generator_x.writeSnapshot()
+        del basis_generator_x
 
-        basis_generator_H->takeSample(oper.H_sp.GetData(), t, dt);
-        basis_generator_H->writeSnapshot();
-        delete basis_generator_H;
+        # 14. Save the displaced mesh, the velocity and elastic energy.
+        nodes = x_gf
+        owns_nodes = 0
+        pmesh.SwapNodes(nodes, owns_nodes)
 
-        basis_generator_x->takeSample(vx_diff.GetBlock(1), t, dt);
-        basis_generator_x->writeSnapshot();
-        delete basis_generator_x;
+        mesh_name = "deformed.%06d" % myid
+        ee_name = "elastic_energy.%06d" % myid
 
-        // 14. Save the displaced mesh, the velocity and elastic energy.
-        GridFunction* nodes = &x_gf;
-        int owns_nodes = 0;
-        pmesh->SwapNodes(nodes, owns_nodes);
+        pmesh.Print(mesh_name, 8)
+        pmesh.SwapNodes(nodes, owns_nodes)
 
-        ostringstream mesh_name, ee_name;
-        mesh_name << "deformed." << setfill('0') << setw(6) << myid;
-        ee_name << "elastic_energy." << setfill('0') << setw(6) << myid;
+        with open(velo_name, 'w') as fid:
+            velo_ofs = io.StringIO()
+            velo_ofs.precision = 16
+            v_final = mfem.Vector(vx.GetBlock(0))
+            v_final.Save(velo_ofs)
+            fid.write(velo_ofs.getvalue())
 
-        ofstream mesh_ofs(mesh_name.str().c_str());
-        mesh_ofs.precision(8);
-        pmesh->Print(mesh_ofs);
-        pmesh->SwapNodes(nodes, owns_nodes);
-        ofstream velo_ofs(velo_name.str().c_str());
-        velo_ofs.precision(16);
+        with open(pos_name, 'w') as fid:
+            pos_ofs = io.StringIO()
+            pos_ofs.precision = 16
+            x_final = mfem.Vector(vx.GetBlock(1))
+            x_final.Save(pos_ofs)
+            fid.write(pos_ofs.getvalue())
 
-        Vector v_final(vx.GetBlock(0));
-        for (int i = 0; i < v_final.Size(); ++i)
-        {
-            velo_ofs << v_final[i] << std::endl;
-        }
+        with open(ee_name, 'w') as fid:
+            ee_ofs = io.StringIO()
+            ee_ofs.precision = 8
+            oper.GetElasticEnergyDensity(x_gf, w_gf)
+            w_gf.Save(ee_ofs)
 
-        ofstream pos_ofs(pos_name.str().c_str());
-        pos_ofs.precision(16);
+    # 15. Calculate the relative error between the ROM final solution and the true solution.
+    if (online):
+        # Initialize FOM solution
+        v_fom = mfem.Vector(v_rec.Size())
+        x_fom = mfem.Vector(x_rec.Size())
 
-        Vector x_final(vx.GetBlock(1));
-        for (int i = 0; i < x_final.Size(); ++i)
-        {
-            pos_ofs << x_final[i] << std::endl;
-        }
+        # Open and load file
+        with open(velo_name, 'r') as fom_v_file:
+            v_fom.Load(fom_v_file, v_rec.Size())
 
-        ofstream ee_ofs(ee_name.str().c_str());
-        ee_ofs.precision(8);
-        oper.GetElasticEnergyDensity(x_gf, w_gf);
-        w_gf.Save(ee_ofs);
+        with open(pos_name, 'r') as fom_x_file:
+            x_fom.Load(fom_x_file, x_rec.Size())
 
-    }
+        # Get difference vector
+        diff_v = mfem.Vector(v_rec.Size())
+        diff_x = mfem.Vector(x_rec.Size())
 
-    // 15. Calculate the relative error between the ROM final solution and the true solution.
-    if (online)
-    {
-        // Initialize FOM solution
-        Vector v_fom(v_rec->Size());
-        Vector x_fom(x_rec->Size());
+        subtract_vector(v_rec, v_fom, diff_v)
+        subtract_vector(x_rec, x_fom, diff_x)
 
-        ifstream fom_v_file, fom_x_file;
+        # Get norms
+        tot_diff_norm_v = sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_v, diff_v))
+        tot_diff_norm_x = sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_x, diff_x))
 
-        // Open and load file
-        fom_v_file.open(velo_name.str().c_str());
-        fom_x_file.open(pos_name.str().c_str());
+        tot_v_fom_norm = sqrt(mfem.InnerProduct(MPI.COMM_WORLD, v_fom, v_fom))
+        tot_x_fom_norm = sqrt(mfem.InnerProduct(MPI.COMM_WORLD, x_fom, x_fom))
 
-        v_fom.Load(fom_v_file, v_rec->Size());
-        x_fom.Load(fom_x_file, x_rec->Size());
+        if (myid == 0):
+            print("Relative error of ROM position (x) at t_final: %f is %.8e" % (t_final, tot_diff_norm_x / tot_x_fom_norm))
+            print("Relative error of ROM velocity (v) at t_final: %f is %.8e" % (t_final, tot_diff_norm_v / tot_v_fom_norm))
 
-        fom_v_file.close();
-        fom_x_file.close();
+    # 16. Free the used memory.
+    del ode_solver
+    del pmesh
 
-        // Get difference vector
-        Vector diff_v(v_rec->Size());
-        Vector diff_x(x_rec->Size());
+    totalTimer.Stop()
+    if (myid == 0):
+        print("Elapsed time for entire simulation %.e" % totalTimer.duration)
 
-        subtract(*v_rec, v_fom, diff_v);
-        subtract(*x_rec, x_fom, diff_x);
-
-        // Get norms
-        double tot_diff_norm_v = sqrt(InnerProduct(MPI_COMM_WORLD, diff_v, diff_v));
-        double tot_diff_norm_x = sqrt(InnerProduct(MPI_COMM_WORLD, diff_x, diff_x));
-
-        double tot_v_fom_norm = sqrt(InnerProduct(MPI_COMM_WORLD,
-                                     v_fom, v_fom));
-        double tot_x_fom_norm = sqrt(InnerProduct(MPI_COMM_WORLD,
-                                     x_fom, x_fom));
-
-        if (myid == 0)
-        {
-            cout << "Relative error of ROM position (x) at t_final: " << t_final <<
-                 " is " << tot_diff_norm_x / tot_x_fom_norm << endl;
-            cout << "Relative error of ROM velocity (v) at t_final: " << t_final <<
-                 " is " << tot_diff_norm_v / tot_v_fom_norm << endl;
-        }
-    }
-
-    // 16. Free the used memory.
-    delete ode_solver;
-    delete pmesh;
-
-    totalTimer.Stop();
-    if (myid == 0) cout << "Elapsed time for entire simulation " <<
-                            totalTimer.RealTime() << endl;
-
-    MPI_Finalize();
-    return 0;
+    MPI.Finalize()
+    return
 
 if __name__ == "__main__":
     run()
