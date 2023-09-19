@@ -156,7 +156,10 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         ref_density = 1.0
 
         self.ess_tdof_list = intArray()
-        self.z = mfem.Vector(self.Height()//2)
+        self.z = mfem.Vector(self.Height() // 2)
+        self.z2 = mfem.Vector(self.Height() // 2)
+        self.H_sp = mfem.Vector(self.Height() // 2)
+        self.dvxdt_sp = mfem.Vector(self.Height() // 2)
         self.fespace = fespace
         self.viscosity = visc
         self.newton_solver = mfem.NewtonSolver(fespace.GetComm())
@@ -229,19 +232,19 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         newton_solver.SetMaxIter(10)
         self.newton_solver = newton_solver
 
-    def Mult(self, vx, vx_dt):
-        sc = self.Height()//2
+    def Mult(self, vx, dvx_dt):
+        sc = self.Height() // 2
         v = mfem.Vector(vx, 0,  sc)
         x = mfem.Vector(vx, sc,  sc)
         dv_dt = mfem.Vector(dvx_dt, 0, sc)
         dx_dt = mfem.Vector(dvx_dt, sc,  sc)
 
-        self.H.Mult(x, z)
+        self.H.Mult(x, self.z)
         if (self.viscosity != 0.0):
-            S.TrueAddMult(v, z)
-            z.SetSubVector(self.ess_tdof_list, 0.0)
-        z.Neg()
-        self.M_solver.Mult(z, dv_dt)
+            self.S.TrueAddMult(v, self.z)
+            self.z.SetSubVector(self.ess_tdof_list, 0.0)
+        self.z.Neg()
+        self.M_solver.Mult(self.z, dv_dt)
         dx_dt = v
 
     def ImplicitSolve(self, dt, vx, dvx_dt):
@@ -267,6 +270,7 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         return self.H.GetEnergy(x)
 
     def KineticEnergy(self, v):
+        from mpi4py import MPI
         local_energy = 0.5*self.M.InnerProduct(v, v)
         energy = MPI.COMM_WORLD.allreduce(local_energy, op=MPI.SUM)
         return energy
@@ -1284,13 +1288,13 @@ def run():
         if (online):
             if (myid == 0):
                 solveTimer.Start()
-                ode_solver.Step(wMFEM, t, dt_real)
+                t, dt = ode_solver.Step(wMFEM, t, dt_real)
                 solveTimer.Stop()
 
             MPI.COMM_WORLD.Bcast([t, MPI.DOUBLE], root=0)
         else:
             solveTimer.Start()
-            ode_solver.Step(vx, t, dt_real)
+            t, dt = ode_solver.Step(vx, t, dt_real)
             solveTimer.Stop()
 
         last_step = (t >= t_final - 1e-8 * dt)
@@ -1306,7 +1310,7 @@ def run():
             # Take samples
             if ((x_base_only == False) and basis_generator_v.isNextSample(t)):
                 basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
-                basis_generator_v.computeNextSampleTime(vx_diff.GetBlock(0), dvdt.GetData(), t)
+                basis_generator_v.computeNextSampleTime(vx_diff.GetBlock(0).GetDataArray(), dvdt.GetDataArray(), t)
                 basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
 
             if (basis_generator_x.isNextSample(t)):
