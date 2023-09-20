@@ -112,57 +112,21 @@ import pylibROM.mfem as mfem_support
 from pylibROM.mfem import ComputeCtAB
 from pylibROM.python_utils import StopWatch
 
-class ReducedSystemOperator(mfem.PyOperator):
-    def __init__(self, M, S, H, ess_tdof_list):
-        mfem.PyOperator.__init__(self, M.ParFESpace().TrueVSize())
-        self.M = M
-        self.S = S
-        self.H = H
-        self.Jacobian = None
-        h = M.ParFESpace().TrueVSize()
-        self.w = mfem.Vector(h)
-        self.z = mfem.Vector(h)
-        self.dt = 0.0
-        self.ess_tdof_list = ess_tdof_list
-
-    def SetParameters(self, dt, v, x):
-        self.dt = dt
-        self.v = v
-        self.x = x
-
-    def Mult(self, k, y):
-        add_vector(self.v, self.dt, k, self.w)
-        add_vector(self.x, self.dt, self.w, self.z)
-        self.H.Mult(self.z, y)
-        self.M.TrueAddMult(k, y)
-        self.S.TrueAddMult(self.w, y)
-        y.SetSubVector(self.ess_tdof_list, 0.0)
-
-    def GetGradient(self, k):
-        localJ = mfem.Add(1.0, self.M.SpMat(), self.dt, self.S.SpMat())
-        add_vector(self.v, self.dt, k, self.w)
-        add_vector(self.x, self.dt, self.w, self.z)
-        localJ.Add(self.dt * self.dt,  self.H.GetLocalGradient(self.z))
-        Jacobian = self.M.ParallelAssemble(localJ)
-        Jacobian.EliminateRowsCols(self.ess_tdof_list)
-        return Jacobian
-
 class HyperelasticOperator(mfem.PyTimeDependentOperator):
-    def __init__(self, fespace, ess_bdr, visc, mu, K):
+    def __init__(self, fespace, ess_tdof_list_, visc, mu, K):
         mfem.PyTimeDependentOperator.__init__(self, 2*fespace.TrueVSize(), 0.0)
 
         rel_tol = 1e-8
         skip_zero_entries = 0
         ref_density = 1.0
 
-        self.ess_tdof_list = intArray()
+        self.ess_tdof_list = ess_tdof_list_
         self.z = mfem.Vector(self.Height() // 2)
         self.z2 = mfem.Vector(self.Height() // 2)
         self.H_sp = mfem.Vector(self.Height() // 2)
         self.dvxdt_sp = mfem.Vector(self.Height() // 2)
         self.fespace = fespace
         self.viscosity = visc
-        self.newton_solver = mfem.NewtonSolver(fespace.GetComm())
 
         M = mfem.ParBilinearForm(fespace)
         S = mfem.ParBilinearForm(fespace)
@@ -176,8 +140,6 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         M.Assemble(skip_zero_entries)
         M.Finalize(skip_zero_entries)
         self.Mmat = M.ParallelAssemble()
-
-        fespace.GetEssentialTrueDofs(ess_bdr, self.ess_tdof_list)
         self.Mmat.EliminateRowsCols(self.ess_tdof_list)
 
         M_solver = mfem.CGSolver(fespace.GetComm())
@@ -203,34 +165,8 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         S.AddDomainIntegrator(mfem.VectorDiffusionIntegrator(visc_coeff))
         S.Assemble(skip_zero_entries)
         S.Finalize(skip_zero_entries)
-
-        self.reduced_oper = ReducedSystemOperator(M, S, H, self.ess_tdof_list)
-
-        J_hypreSmoother = mfem.HypreSmoother()
-        J_hypreSmoother.SetType(mfem.HypreSmoother.l1Jacobi)
-        J_hypreSmoother.SetPositiveDiagonal(True)
-        J_prec = J_hypreSmoother
-
-        J_minres = mfem.MINRESSolver(fespace.GetComm())
-        J_minres.SetRelTol(rel_tol)
-        J_minres.SetAbsTol(0.0)
-        J_minres.SetMaxIter(300)
-        J_minres.SetPrintLevel(-1)
-        J_minres.SetPreconditioner(J_prec)
-
-        self.J_solver = J_minres
-        self.J_prec = J_prec
-
-        newton_solver = mfem.NewtonSolver(fespace.GetComm())
-        newton_solver.iterative_mode = False
-        newton_solver.SetSolver(self.J_solver)
-        newton_solver.SetOperator(self.reduced_oper)
-        newton_solver.SetPrintLevel(1)  # print Newton iterations
-        newton_solver.SetRelTol(rel_tol)
-        newton_solver.SetAbsTol(0.0)
-        newton_solver.SetAdaptiveLinRtol(2, 0.5, 0.9)
-        newton_solver.SetMaxIter(10)
-        self.newton_solver = newton_solver
+        self.Smat = mfem.HypreParMatrix()
+        S.FormSystemMatrix(self.ess_tdof_list, self.Smat)
 
     def Mult(self, vx, dvx_dt):
         sc = self.Height() // 2
@@ -240,31 +176,17 @@ class HyperelasticOperator(mfem.PyTimeDependentOperator):
         dx_dt = mfem.Vector(dvx_dt, sc,  sc)
 
         self.H.Mult(x, self.z)
+        self.H_sp.Assign(self.z)
+
         if (self.viscosity != 0.0):
-            self.S.TrueAddMult(v, self.z)
-            self.z.SetSubVector(self.ess_tdof_list, 0.0)
+            self.Smat.Mult(v, self.z2)
+            self.z += self.z2
+        
         self.z.Neg()
         self.M_solver.Mult(self.z, dv_dt)
-        dx_dt = v
 
-    def ImplicitSolve(self, dt, vx, dvx_dt):
-        sc = self.Height()//2
-        v = mfem.Vector(vx, 0,  sc)
-        x = mfem.Vector(vx, sc,  sc)
-        dv_dt = mfem.Vector(dvx_dt, 0, sc)
-        dx_dt = mfem.Vector(dvx_dt, sc,  sc)
-
-        # By eliminating kx from the coupled system:
-        # kv = -M^{-1}*[H(x + dt*kx) + S*(v + dt*kv)]
-        # kx = v + dt*kv
-        # we reduce it to a nonlinear equation for kv, represented by the
-        # backward_euler_oper. This equation is solved with the newton_solver
-        # object (using J_solver and J_prec internally).
-        self.reduced_oper.SetParameters(dt, v, x)
-        zero = mfem.Vector()  # empty vector is interpreted as
-        # zero r.h.s. by NewtonSolver
-        self.newton_solver.Mult(zero, dv_dt)
-        add_vector(v, dt, dv_dt, dx_dt)
+        dx_dt.Assign(v) # this changes dvx_dt
+        self.dvxdt_sp.Assign(dvx_dt)
 
     def ElasticEnergy(self, x):
         return self.H.GetEnergy(x)
@@ -304,9 +226,9 @@ class RomOperator(mfem.PyTimeDependentOperator):
         self.zX = linalg.Vector(max(self.nsamp_H, 1), False)
         self.oversampling = oversampling_
         self.M_hat_solver = mfem.CGSolver(fom_.fespace.GetComm())
-        self.z = mfem.Vector(self.height // 2)
+        self.z = mfem.Vector(self.Height() // 2)
         self.hyperreduce = hyperreduce_
-        self.x_base_only_ = x_base_only_
+        self.x_base_only = x_base_only_
 
         if (myid == 0):
             self.V_v_sp = linalg.Matrix(self.fomSp.Height() // 2, self.rvdim, False)
@@ -322,7 +244,7 @@ class RomOperator(mfem.PyTimeDependentOperator):
         self.smm.GatherDistributedMatrixRows("X", self.V_x, self.rxdim, self.V_x_sp)
 
         # Create V_vTU_H, for hyperreduction
-        self.V_v.transposeMult(self.U_H, self.V_vTU_H)
+        self.V_vTU_H = self.V_v.transposeMult(self.U_H)
 
         self.S_hat = linalg.Matrix(self.rvdim, self.rvdim, False)
         self.S_hat_v0 = linalg.Vector(self.rvdim, False)
@@ -347,12 +269,12 @@ class RomOperator(mfem.PyTimeDependentOperator):
         if (myid == 0):
             self.spdim = self.fomSp.Height()  # Reduced height
 
-            self.zH.SetSize(self.spdim // 2)  # Samples of H
+            self.zH = mfem.Vector(self.spdim // 2)  # Samples of H
 
             # Allocate auxillary vectors
             self.z.SetSize(self.spdim // 2)
-            self.z_v.SetSize(self.spdim // 2)
-            self.z_x.SetSize(self.spdim // 2)
+            self.z_v = mfem.Vector(self.spdim // 2)
+            self.z_x = mfem.Vector(self.spdim // 2)
             self.z_librom = linalg.Vector(self.z.GetDataArray(), False, False)
             self.z_v_librom = linalg.Vector(self.z_v.GetDataArray(), False, False)
             self.z_x_librom = linalg.Vector(self.z_x.GetDataArray(), False, False)
@@ -553,7 +475,7 @@ def BasisGeneratorFinalSummary(bg, energyFraction, cutoff, cutoffOutputPath):
     partialSum = 0.0
     for sv in range(sing_vals.dim()):
         partialSum += sing_vals[sv]
-        for i in range(energy_fractions.size()-1, -1, -1):
+        for i in range(len(energy_fractions)-1, -1, -1):
             if (partialSum / sum > energy_fractions[i]):
                 outfile.write("For energy fraction: %.5E, take first %d of %d basis vectors" % (energy_fractions[i], sv+1, sing_vals.dim()))
                 energy_fractions.pop(-1)
@@ -877,6 +799,8 @@ def run():
 
     v_gf = mfem.ParGridFunction(fespace)
     x_gf = mfem.ParGridFunction(fespace)
+    v_gf.MakeTRef(fespace, vx, true_offset[0])
+    x_gf.MakeTRef(fespace, vx, true_offset[1])
     # v_gf.MakeTRef(&fespace, vx,
     #               true_offset[0]); // Associate a new FiniteElementSpace and new true-dof data with the GridFunction.
     # x_gf.MakeTRef(&fespace, vx, true_offset[1]);
@@ -1208,7 +1132,7 @@ def run():
                     Ess_mat[i,0] = 1.
 
         # Project binary FOM list onto sampling space
-        MPI.COMM_WORLD.Bcast([sp_size, MPI.INT], root=0)
+        MPI.COMM_WORLD.bcast(sp_size, root=0)
         Ess_mat_sp = linalg.Matrix(sp_size, 1, False)
         smm.GatherDistributedMatrixRows("X", Ess_mat, 1, Ess_mat_sp)
 
@@ -1265,7 +1189,7 @@ def run():
         ke = oper.KineticEnergy(v_gf)
 
         if (myid == 0):
-            print("Lifted initial energies, EE = %.e, KE = %.e, ΔTE = %.e" % (ee, ke, (ee + ke) - (ee0 + ke0)))
+            print("Lifted initial energies, EE = %.5e, KE = %.5e, ΔTE = %.5e" % (ee, ke, (ee + ke) - (ee0 + ke0)))
 
         ode_solver.Init(romop)
     else:
@@ -1291,7 +1215,7 @@ def run():
                 t, dt = ode_solver.Step(wMFEM, t, dt_real)
                 solveTimer.Stop()
 
-            MPI.COMM_WORLD.Bcast([t, MPI.DOUBLE], root=0)
+            MPI.COMM_WORLD.bcast(t, root=0)
         else:
             solveTimer.Start()
             t, dt = ode_solver.Step(vx, t, dt_real)
@@ -1300,15 +1224,13 @@ def run():
         last_step = (t >= t_final - 1e-8 * dt)
 
         if (offline):
-
-            if (basis_generator_x.isNextSample(t) or (x_base_only == False)
-                    and basis_generator_v.isNextSample(t)):
+            if (basis_generator_x.isNextSample(t) or (not x_base_only) and basis_generator_v.isNextSample(t)):
                 dvxdt = oper.dvxdt_sp.GetData()
                 vx_diff = mfem.BlockVector(vx)
                 vx_diff -= vx0
 
             # Take samples
-            if ((x_base_only == False) and basis_generator_v.isNextSample(t)):
+            if ((not x_base_only) and basis_generator_v.isNextSample(t)):
                 basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
                 basis_generator_v.computeNextSampleTime(vx_diff.GetBlock(0).GetDataArray(), dvdt.GetDataArray(), t)
                 basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
@@ -1347,7 +1269,7 @@ def run():
             ke = oper.KineticEnergy(v_gf)
 
             if (myid == 0):
-                print("step %d, t = %f, EE = %.e, KE = %.e, ΔTE = %.e" % (ti, t, ee, ke, (ee + ke) - (ee0 + ke0)))
+                print("step %d, t = %f, EE = %.5e, KE = %.5e, ΔTE = %.5e" % (ti, t, ee, ke, (ee + ke) - (ee0 + ke0)))
 
             if (visualization):
                 visualize(vis_v, pmesh, x_gf, v_gf)
@@ -1368,7 +1290,7 @@ def run():
     # timestep loop
 
     if (myid == 0):
-        print("Elapsed time for time integration loop %.e" % solveTimer.duration)
+        print("Elapsed time for time integration loop %.5e" % solveTimer.duration)
 
     velo_name = "velocity_s%f.%06d" % (s, myid)
     pos_name = "position_s%f.%06d" % (s, myid)
@@ -1404,25 +1326,15 @@ def run():
         pmesh.Print(mesh_name, 8)
         pmesh.SwapNodes(nodes, owns_nodes)
 
-        with open(velo_name, 'w') as fid:
-            velo_ofs = io.StringIO()
-            velo_ofs.precision = 16
-            v_final = mfem.Vector(vx.GetBlock(0))
-            v_final.Save(velo_ofs)
-            fid.write(velo_ofs.getvalue())
-
-        with open(pos_name, 'w') as fid:
-            pos_ofs = io.StringIO()
-            pos_ofs.precision = 16
-            x_final = mfem.Vector(vx.GetBlock(1))
-            x_final.Save(pos_ofs)
-            fid.write(pos_ofs.getvalue())
+        np.savetxt(velo_name, vx.GetBlock(0).GetDataArray(), fmt='%.16e')
+        np.savetxt(pos_name, vx.GetBlock(1).GetDataArray(), fmt='%.16e')
 
         with open(ee_name, 'w') as fid:
             ee_ofs = io.StringIO()
             ee_ofs.precision = 8
             oper.GetElasticEnergyDensity(x_gf, w_gf)
             w_gf.Save(ee_ofs)
+            fid.write(ee_ofs.getvalue())
 
     # 15. Calculate the relative error between the ROM final solution and the true solution.
     if (online):
@@ -1431,11 +1343,9 @@ def run():
         x_fom = mfem.Vector(x_rec.Size())
 
         # Open and load file
-        with open(velo_name, 'r') as fom_v_file:
-            v_fom.Load(fom_v_file, v_rec.Size())
+        v_fom.Load(velo_name, v_rec.Size())
 
-        with open(pos_name, 'r') as fom_x_file:
-            x_fom.Load(fom_x_file, x_rec.Size())
+        x_fom.Load(pos_name, x_rec.Size())
 
         # Get difference vector
         diff_v = mfem.Vector(v_rec.Size())
@@ -1461,7 +1371,7 @@ def run():
 
     totalTimer.Stop()
     if (myid == 0):
-        print("Elapsed time for entire simulation %.e" % totalTimer.duration)
+        print("Elapsed time for entire simulation %.5e" % totalTimer.duration)
 
     MPI.Finalize()
     return
