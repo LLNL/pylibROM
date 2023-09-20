@@ -163,7 +163,6 @@ pybind11_add_module(_pylibROM
 	bindings/pylibROM/mfem/pySampleMesh.cpp
 
 	bindings/pylibROM/python_utils/cpp_utils.hpp
-	bindings/pylibROM/python_utils/cpp_utils.cpp
 )
 message("building pylibROM...")
 
