@@ -30,25 +30,25 @@
 # // and nonlinear term basis, with velocity initial condition:
 # //
 # // Offline phase:
-# //      ./nonlinear_elasticity_global_rom -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 0.90 -id 0
+# //      python3 nonlinear_elasticity_global_rom.py -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 0.90 -id 0
 # //
-# //      ./nonlinear_elasticity_global_rom -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 1.10 -id 1
+# //      python3 nonlinear_elasticity_global_rom.py -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 1.10 -id 1
 # //
 # // Merge phase:
-# //      ./nonlinear_elasticity_global_rom -merge -ns 2 -dt 0.01 -tf 5.0
+# //      python3 nonlinear_elasticity_global_rom.py -merge -ns 2 -dt 0.01 -tf 5.0
 # //
 # // Create FOM comparison data:
-# //      ./nonlinear_elasticity_global_rom -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 1.00 -id 2
+# //      python3 nonlinear_elasticity_global_rom.py -offline -dt 0.01 -tf 5.0 -s 14 -vs 100 -sc 1.00 -id 2
 # //
 # // Online phase with full sampling:
-# //      ./nonlinear_elasticity_global_rom -online -dt 0.01 -tf 5.0 -s 14 -vs 100 -hyp -rvdim 40 -rxdim 10 -hdim 71 -nsr 1170 -sc 1.00
+# //      python3 nonlinear_elasticity_global_rom.py -online -dt 0.01 -tf 5.0 -s 14 -vs 100 -hyp -rvdim 40 -rxdim 10 -hdim 71 -nsr 1170 -sc 1.00
 # // Output message:
 # //      Elapsed time for time integration loop 1.80759
 # //      Relative error of ROM position (x) at t_final: 5 is 0.000231698
 # //      Relative error of ROM velocity (v) at t_final: 5 is 0.466941
 # //
 # // Online phase with strong hyper-reduction:
-# //      ./nonlinear_elasticity_global_rom -online -dt 0.01 -tf 5.0 -s 14 -vs 100 -hyp -rvdim 40 -rxdim 10 -hdim 71 -nsr 100 -sc 1.00
+# //      python3 nonlinear_elasticity_global_rom.py -online -dt 0.01 -tf 5.0 -s 14 -vs 100 -hyp -rvdim 40 -rxdim 10 -hdim 71 -nsr 100 -sc 1.00
 # // Output message:
 # //      Elapsed time for time integration loop 1.08048
 # //      Relative error of ROM position (x) at t_final: 5 is 0.00209877
