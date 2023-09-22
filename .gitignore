@@ -1,4 +1,7 @@
+.gitignore
 build
+.git/
+.github
 *.egg-info
 *.mfem_root
 *.gf

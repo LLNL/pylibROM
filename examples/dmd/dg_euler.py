@@ -323,6 +323,12 @@ if (visualization):
     if myid == 0:
         print("GLVis visualization paused.")
         print(" Press space (in the GLVis window) to resume it.")
+visit_dc = mfem.VisItDataCollection('DG_Euler',pmesh)
+visit_dc.RegisterField('solution',mom)
+if visit:
+    visit_dc.SetCycle(0)
+    visit_dc.SetTime(0.0)
+    visit_dc.Save()
 
 # Determine the minimum element size.
 my_hmin = 0
@@ -464,12 +470,13 @@ if (visit):
     dmd_visit_dc.Save()
 
 if visit:
-    for i in range(len(ts.size)):
-        if (i==(len(ts)-1)) or (i%vis_steps==0):
+    for i in range(len(ts)):
+        if (i==(len(ts)-2)) or (i%vis_steps==0):
             result_vars = [var.predict(ts[i]) for var in dmd_vars]
             dmd_sols = [mfem.Vector(result_var.getData(),result_var.dim()) for result_var in result_vars]
             for k in range(4):
-                u_block.Update(dmd_sols[k],offsets[k])
+                block = u_block.GetBlock(i)
+                block = dmd_sols[k]
 
             dmd_visit_dc.SetCycle(i)
             dmd_visit_dc.SetTime(ts[i])
