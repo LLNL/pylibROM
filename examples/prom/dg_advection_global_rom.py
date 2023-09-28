@@ -115,6 +115,10 @@ device = mfem.Device('cpu')
 if myid == 0:
     device.Print()
 
+# initialize timers
+solveTimer, assembleTimer, mergeTimer = \
+        StopWatch(), StopWatch(), StopWatch()
+
 # 3. Read the serial mesh from the given mesh file on all processors. We can
 #    handle geometrically periodic meshes in this code.
 meshfile = expanduser(join(dirname(__file__), '..', 'data', args.mesh))
@@ -251,11 +255,12 @@ class inflow_coeff(mfem.PyCoefficient):
     def EvalValue(self, x):
         return 0
 
+
 # 8. Set up and assemble the bilinear and linear forms corresponding to the
 #    DG discretization. The DGTraceIntegrator involves integrals over mesh
 #    interior faces.
 
-
+assembleTimer.Start()
 velocity = velocity_coeff(dim)
 inflow = inflow_coeff()
 u0 = u0_coeff()
@@ -283,8 +288,9 @@ b.Assemble()
 M = m.ParallelAssemble()
 K = k.ParallelAssemble()
 B = b.ParallelAssemble()
+assembleTimer.Stop()
 
-# 7. Define the initial conditions, save the corresponding grid function to
+# 9. Define the initial conditions, save the corresponding grid function to
 #    a file
 u = mfem.ParGridFunction(fes)
 u.ProjectCoefficient(u0)
@@ -297,6 +303,41 @@ pmesh.Print(mesh_name, 8)
 u.Save(sol_name, 8)
 
 
+# 10. Initiate ROM related variables
+# ROM object options
+max_num_snapshots = 100000
+update_right_SV = False
+isIncremental = False
+basisName = "basis"
+basisFileName = "%s%d" % (basisName, id)
+
+# BasisGenerator in offline phase 
+if (offline):
+    options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
+                            update_right_SV)
+    generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
+
+# Merge phase 
+if (merge):
+    mergeTimer.Start()
+    options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
+                            update_right_SV)
+    generator = libROM.BasisGenerator(options, isIncremental, basisName)
+    for paramID in range(nsets):
+        snapshot_filename = "%s%d_snapshot" % (basisName, paramID)
+        generator.loadSamples(snapshot_filename,"snapshot", 5)
+
+    generator.endSamples() # save the merged basis file
+    mergeTimer.Stop()
+    if (myid == 0):
+        print("Elapsed time for merging and building ROM basis: %e second\n" %
+               mergeTimer.duration)
+    del generator
+    del options
+    MPI.Finalize()
+    return
+
+# TODO
 class FE_Evolution(mfem.PyTimeDependentOperator):
     def __init__(self, M, K, b):
         mfem.PyTimeDependentOperator.__init__(self, M.Height())
