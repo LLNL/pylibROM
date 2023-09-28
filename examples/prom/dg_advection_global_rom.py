@@ -1,8 +1,19 @@
 '''
-   MFEM example 9
-      This is a version of Example 1 with a simple adaptive mesh
-      refinement loop. 
-      See c++ version in the MFEM library for more detail 
+   libROM MFEM Example: dg_advection_global_rom (adapted from ex9p.cpp)
+
+      This example code solves the time-dependent advection equation
+      du/dt + v.grad(u) = 0, where v is a given fluid velocity, and
+      u0(x)=u(0,x) is a given initial condition.
+
+      The example demonstrates the use of Discontinuous Galerkin (DG)
+      bilinear forms in MFEM (face integrators), the use of implicit
+      and explicit ODE time integrators, the definition of periodic
+      boundary conditions through periodic meshes, as well as the use
+      of GLVis for persistent visualization of a time-evolving
+      solution. Saving of time-dependent data files for visualization
+      with VisIt (visit.llnl.gov) and ParaView (paraview.org), as
+      well as the optional saving with ADIOS2 (adios2.readthedocs.io)
+      are also illustrated.
 '''
 from mfem import path
 import mfem.par as mfem
@@ -13,18 +24,88 @@ import numpy as np
 from numpy import sqrt, pi, cos, sin, hypot, arctan2
 from scipy.special import erfc
 
+import pylibROM.linalg as libROM
+from pylibROM.python_utils.StopWatch import StopWatch
+
 num_proc = MPI.COMM_WORLD.size
 myid = MPI.COMM_WORLD.rank
 verbose = (myid == 0)
 
-problem = 0
-ser_ref_levels = 2
-par_ref_levels = 0
-order = 3
-ode_solver_type = 4
-t_final = 10
-dt = 0.01
-vis_steps = 5
+parser = ArgParser(description='dg_advection_global_rom')
+parser.add_argument('-m', '--mesh',
+                    default='periodic-hexagon.mesh',
+                    action='store', type=str,
+                    help='Mesh file to use.')
+parser.add_argument('-p', '--problem',
+                    action='store', default=0, type=int,
+                    'Problem setup to use');
+parser.add_argument('-rs', '--refine-serial',
+                    action='store', default=2, type=int,
+                    help="Number of times to refine the mesh uniformly before parallel")
+parser.add_argument('-rp', '--refine-parallel',
+                    action='store', default=0, type=int,
+                    help="Number of times to refine the mesh uniformly after parallel")
+parser.add_argument('-o', '--order',
+                    action='store', default=3, type=int,
+                    help="Finite element order (polynomial degree)")
+help_ode = "\n".join(["ODE solver: 1 - Forward Euler",
+                      "\t2 - RK2, 3 - RK3, 4 - RK4, 6 - RK6"])
+parser.add_argument('-s', '--ode-solver_type',
+                    action='store', default=4, type=int,
+                    help=help_ode)
+parser.add_argument('-tf', '--t-final',
+                    action='store', default=10.0, type=float,
+                    help="Final time; start time is 0.")
+parser.add_argument('-dt', '--time-step',
+                    action='store', default=0.01, type=float,
+                    help="Time step")
+parser.add_argument("-vs", "--visualization-steps",
+                    action='store', default=5, type=int,
+                    help="Visualize every n-th timestep.")
+parser.add_argument("-fom", "--fom",
+                    action='store_true', default=False,
+                    help="Enable or disable the fom phase.")
+parser.add_argument("-offline", "--offline",
+                    action='store_true', default=False,
+                    help="Enable or disable the offline phase.")
+parser.add_argument("-online", "--online",
+                    action='store_true', default=False,
+                    help="Enable or disable the online phase.")
+parser.add_argument("-merge", "--merge",
+                    action='store_true', default=False,
+                    help="Enable or disable the merge phase.")
+parser.add_argument('-ef','--energy_fraction',
+                    action='store', default=0.9999, type=float,
+                    help='Energy fraction for POD')
+parser.add_argument('-rdim','--rdim',
+                    action='store', default=-1, type=int,
+                    help='Reduced dimension for POD')
+args = parser.parse_args()
+
+problem = args.problem
+ser_ref_levels = args.refine_serial
+par_ref_levels = args.refine_parallel
+order = args.order
+ode_solver_type = args.ode_solver
+t_final = args.t_final
+dt = args.time_step
+vis_steps = args.visualization_steps
+fom = args.fom
+offline = args.offline
+online = args.online
+merge = args.merge
+ef = args.energy_fraction
+rdim = args.rdim
+
+if (fom):
+    if (not (fom and (not offline) and (not online))):
+        raise ValueError("offline and online must be turned off if fom is used.")
+else:
+    check = (offline and (not merge) and (not online))          \
+            or ((not offline) and merge and (not online))       \
+            or ((not offline) and (not merge) and online)
+    if (not check):
+        raise ValueError("only one of offline, merge, or online must be true!")
 
 device = mfem.Device('cpu')
 if myid == 0:
@@ -32,10 +113,10 @@ if myid == 0:
 
 # 3. Read the serial mesh from the given mesh file on all processors. We can
 #    handle geometrically periodic meshes in this code.
-meshfile = expanduser(join(path, 'data', 'periodic-hexagon.mesh'))
+meshfile = expanduser(join(dirname(__file__), '..', 'data', args.mesh))
 if not exists(meshfile):
     path = dirname(dirname(__file__))
-    meshfile = expanduser(join(path, 'data', 'periodic-hexagon.mesh'))
+    meshfile = expanduser(join(dirname(__file__), '..', 'data', args.mesh))
 
 mesh = mfem.Mesh(meshfile, 1, 1)
 dim = mesh.Dimension()
