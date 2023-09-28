@@ -35,10 +35,13 @@ parser = ArgParser(description='dg_advection_global_rom')
 parser.add_argument('-m', '--mesh',
                     default='periodic-hexagon.mesh',
                     action='store', type=str,
-                    help='Mesh file to use.')
+                    help="Mesh file to use.")
 parser.add_argument('-p', '--problem',
                     action='store', default=0, type=int,
-                    'Problem setup to use');
+                    help="Problem setup to use")
+parser.add_argument('-ff', '--f-factor',
+                    action='store', default=1.0, type=float,
+                    help="Frequency scalar factor")
 parser.add_argument('-rs', '--refine-serial',
                     action='store', default=2, type=int,
                     help="Number of times to refine the mesh uniformly before parallel")
@@ -76,13 +79,14 @@ parser.add_argument("-merge", "--merge",
                     help="Enable or disable the merge phase.")
 parser.add_argument('-ef','--energy_fraction',
                     action='store', default=0.9999, type=float,
-                    help='Energy fraction for POD')
+                    help="Energy fraction for POD")
 parser.add_argument('-rdim','--rdim',
                     action='store', default=-1, type=int,
-                    help='Reduced dimension for POD')
+                    help="Reduced dimension for POD")
 args = parser.parse_args()
 
 problem = args.problem
+f_factor = args.f_factor
 ser_ref_levels = args.refine_serial
 par_ref_levels = args.refine_parallel
 order = args.order
@@ -236,7 +240,7 @@ class u0_coeff(mfem.PyCoefficient):
             phi = arctan2(x[1], x[0])
             return (sin(pi * rho) ** 2) * sin(3*phi)
         elif problem == 3:
-            return sin(pi * X[0]) * sin(pi * X[1])
+            return sin(f_factor * pi * X[0]) * sin(f_factor * pi * X[1])
 
         return 0.0
 
