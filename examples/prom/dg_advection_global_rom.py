@@ -18,6 +18,7 @@
 from mfem import path
 import mfem.par as mfem
 from mfem.par import intArray
+from mfem.common.arg_parser import ArgParser
 from os.path import expanduser, join, dirname, exists
 from mpi4py import MPI
 import numpy as np
@@ -86,6 +87,8 @@ parser.add_argument('-ef','--energy_fraction',
 parser.add_argument('-rdim','--rdim',
                     action='store', default=-1, type=int,
                     help="Reduced dimension for POD")
+parser.add_argument("-id", "--id",
+                    action='store', default=0, type=int, help="Parametric id")
 args = parser.parse_args()
 
 problem = args.problem
@@ -93,7 +96,7 @@ f_factor = args.f_factor
 ser_ref_levels = args.refine_serial
 par_ref_levels = args.refine_parallel
 order = args.order
-ode_solver_type = args.ode_solver
+ode_solver_type = args.ode_solver_type
 t_final = args.t_final
 dt = args.time_step
 vis_steps = args.visualization_steps
@@ -103,6 +106,7 @@ online = args.online
 merge = args.merge
 ef = args.energy_fraction
 rdim = args.rdim
+id = args.id
 
 if (fom):
     if (not (fom and (not offline) and (not online))):
@@ -146,7 +150,7 @@ elif ode_solver_type == 4:
 elif ode_solver_type == 6:
     ode_solver = mfem.RK6Solver()
 elif ode_solver_type == 11:
-    ode_solver = BackwardEulerSolver()
+    ode_solver = mfem.BackwardEulerSolver()
 elif ode_solver_type == 12:
     ode_solver = mfem.SDIRK23Solver(2)
 elif ode_solver_type == 13:
@@ -318,8 +322,61 @@ sol_name = "ex9-init."+smyid
 pmesh.Print(mesh_name, 8)
 u.Save(sol_name, 8)
 
+# 10. FOM Evolution operator
+class FE_Evolution(mfem.PyTimeDependentOperator):
+    def __init__(self, M, K, b):
+        mfem.PyTimeDependentOperator.__init__(self, M.Height())
 
-# 10. Initiate ROM related variables
+        self.M_prec = mfem.HypreSmoother()
+        self.M_solver = mfem.CGSolver(M.GetComm())
+        self.T_prec = mfem.HypreSmoother()
+        self.T_solver = mfem.CGSolver(M.GetComm())
+        self.z = mfem.Vector(M.Height())
+
+        self.K = K
+        self.M = M
+        self.T = None
+        self.b = b
+        self.M_prec.SetType(mfem.HypreSmoother.Jacobi)
+        self.M_solver.SetPreconditioner(self.M_prec)
+        self.M_solver.SetOperator(M)
+        self.M_solver.iterative_mode = False
+        self.M_solver.SetRelTol(1e-9)
+        self.M_solver.SetAbsTol(0.0)
+        self.M_solver.SetMaxIter(100)
+        self.M_solver.SetPrintLevel(0)
+        self.T_solver.SetPreconditioner(self.T_prec)
+        self.T_solver.iterative_mode = False
+        self.T_solver.SetRelTol(1e-9)
+        self.T_solver.SetAbsTol(0.0)
+        self.T_solver.SetMaxIter(100)
+        self.T_solver.SetPrintLevel(0)
+
+
+#    def EvalMult(self, x):
+#        if you want to impolement Mult in using python objects,
+#        such as numpy.. this needs to be implemented and don't
+#        overwrite Mult
+
+
+    def Mult(self, x, y):
+        # y = M^{-1} (K x + b)
+        self.K.Mult(x, self.z)
+        self.z += b
+        self.M_solver.Mult(self.z, y)
+
+    def ImplicitSolve(self, dt, x, k):
+        # (M - dt*K) k = (K x + b)
+        if self.T is None:
+            self.T = mfem.Add(1.0, self.M, -dt, self.K)
+            current_dt = dt
+            self.T_solver.SetOperator(self.T)
+        self.K.Mult(x, self.z)
+        self.z += b
+        self.T_solver.Mult(self.z, k)
+
+
+# 11. Initiate ROM related variables
 # ROM object options
 max_num_snapshots = 100000
 update_right_SV = False
@@ -329,14 +386,14 @@ basisFileName = "%s%d" % (basisName, id)
 
 # BasisGenerator in offline phase 
 if offline:
-    options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
+    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
 
 # Merge phase 
 if merge:
     mergeTimer.Start()
-    options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
+    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisName)
     for paramID in range(nsets):
@@ -351,41 +408,7 @@ if merge:
     del generator
     del options
     MPI.Finalize()
-    return
-
-# TODO
-class FE_Evolution(mfem.PyTimeDependentOperator):
-    def __init__(self, M, K, b):
-        mfem.PyTimeDependentOperator.__init__(self, M.Height())
-
-        self.M_prec = mfem.HypreSmoother()
-        self.M_solver = mfem.CGSolver(M.GetComm())
-        self.z = mfem.Vector(M.Height())
-
-        self.K = K
-        self.M = M
-        self.b = b
-        self.M_prec.SetType(mfem.HypreSmoother.Jacobi)
-        self.M_solver.SetPreconditioner(self.M_prec)
-        self.M_solver.SetOperator(M)
-        self.M_solver.iterative_mode = False
-        self.M_solver.SetRelTol(1e-9)
-        self.M_solver.SetAbsTol(0.0)
-        self.M_solver.SetMaxIter(100)
-        self.M_solver.SetPrintLevel(0)
-
-
-#    def EvalMult(self, x):
-#        if you want to impolement Mult in using python objects,
-#        such as numpy.. this needs to be implemented and don't
-#        overwrite Mult
-
-
-    def Mult(self, x, y):
-        self.K.Mult(x, self.z)
-        self.z += b
-        self.M_solver.Mult(self.z, y)
-
+    sys.exit(0)
 
 adv = FE_Evolution(M, K, B)
 
