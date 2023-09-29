@@ -432,7 +432,7 @@ if merge:
     MPI.Finalize()
     sys.exit(0)
 
-# Assemble evolution operator
+# 12. Assemble evolution operator
 assembleTimer.Start()
 if online:
     reader = libROM.BasisReader(basisName)
@@ -468,7 +468,7 @@ else:
 ode_solver.Init(adv)
 assembleTimer.Stop()
 
-# Time marching
+# 13. Time marching
 t = 0.0
 ti = 0
 while True:
@@ -496,14 +496,14 @@ while True:
     if done:
        break
 
-# Compute basis
+# 14. Compute basis
 if offline:
     generator.writeSnapshot()
     del generator
     del options
 
 solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
-# Compare solution
+# 15. Save and compare solution
 if online:
     u_final_carom = spatialbasis.mult(u_hat_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
@@ -515,11 +515,15 @@ if online:
     diffNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
     if myid == 0:
         print("Relative L2 error of ROM solution = %.5E" % (diffNorm / fomNorm))
-       
+        print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.duration)
+        print("Elapsed time for solving ROM: %e second\n" % solveTimer.duration)
 
 if offline or fom:
     u = np.array((c_double * U.Size()).from_address(int(U.GetData())), copy=False)
     np.savetxt(solution_filename, u, fmt='%.16f')
+    if myid == 0:
+        print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.duration)
+        print("Elapsed time for solving FOM: %e second\n" % solveTimer.duration)
 
 del fes
 MPI.Finalize()
