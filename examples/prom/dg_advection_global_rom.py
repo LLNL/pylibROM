@@ -51,9 +51,13 @@ parser.add_argument('-o', '--order',
                     action='store', default=3, type=int,
                     help="Finite element order (polynomial degree)")
 help_ode = "\n".join(["ODE solver: 1 - Forward Euler",
-                      "\t2 - RK2, 3 - RK3, 4 - RK4, 6 - RK6"])
-parser.add_argument('-s', '--ode-solver_type',
-                    action='store', default=4, type=int,
+                      "\t2 - RK2 SSP, 3 - RK3 SSP, 4 - RK4, 6 - RK6",
+                      "\t11 - Backward Euler,",
+                      "\t12 - SDIRK23 (L-stable), 13 - SDIRK33,",
+                      "\t22 - Implicit Midpoint Method,",
+                      "\t23 - SDIRK23 (A-stable), 24 - SDIRK34"])
+parser.add_argument('-s', '--ode-solver-type',
+                    action='store', default=11, type=int,
                     help=help_ode)
 parser.add_argument('-tf', '--t-final',
                     action='store', default=10.0, type=float,
@@ -136,11 +140,23 @@ if ode_solver_type == 1:
 elif ode_solver_type == 2:
     ode_solver = mfem.RK2Solver(1.0)
 elif ode_solver_type == 3:
-    ode_solver = mfem.RK3SSolver()
+    ode_solver = mfem.RK3SSPSolver()
 elif ode_solver_type == 4:
     ode_solver = mfem.RK4Solver()
 elif ode_solver_type == 6:
     ode_solver = mfem.RK6Solver()
+elif ode_solver_type == 11:
+    ode_solver = BackwardEulerSolver()
+elif ode_solver_type == 12:
+    ode_solver = mfem.SDIRK23Solver(2)
+elif ode_solver_type == 13:
+    ode_solver = mfem.SDIRK33Solver()
+elif ode_solver_type == 22:
+    ode_solver = mfem.ImplicitMidpointSolver()
+elif ode_solver_type == 23:
+    ode_solver = mfem.SDIRK23Solver()
+elif ode_solver_type == 24:
+    ode_solver = mfem.SDIRK34Solver()
 else:
     if myid == 0:
         print("Unknown ODE solver type: " + str(ode_solver_type))
