@@ -29,7 +29,6 @@ from pylibROM.python_utils.StopWatch import StopWatch
 
 num_proc = MPI.COMM_WORLD.size
 myid = MPI.COMM_WORLD.rank
-verbose = (myid == 0)
 
 parser = ArgParser(description='dg_advection_global_rom')
 parser.add_argument('-m', '--mesh',
@@ -143,7 +142,8 @@ elif ode_solver_type == 4:
 elif ode_solver_type == 6:
     ode_solver = mfem.RK6Solver()
 else:
-    print("Unknown ODE solver type: " + str(ode_solver_type))
+    if myid == 0:
+        print("Unknown ODE solver type: " + str(ode_solver_type))
     exit
 
 # 5. Refine the mesh to increase the resolution. In this example we do
@@ -312,13 +312,13 @@ basisName = "basis"
 basisFileName = "%s%d" % (basisName, id)
 
 # BasisGenerator in offline phase 
-if (offline):
+if offline:
     options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
 
 # Merge phase 
-if (merge):
+if merge:
     mergeTimer.Start()
     options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
@@ -329,7 +329,7 @@ if (merge):
 
     generator.endSamples() # save the merged basis file
     mergeTimer.Stop()
-    if (myid == 0):
+    if myid == 0:
         print("Elapsed time for merging and building ROM basis: %e second\n" %
                mergeTimer.duration)
     del generator
