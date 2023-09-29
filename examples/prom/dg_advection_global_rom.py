@@ -315,6 +315,7 @@ assembleTimer.Stop()
 u = mfem.ParGridFunction(fes)
 u.ProjectCoefficient(u0)
 U = u.GetTrueDofs()
+u_init = U
 
 smyid = '{:0>6d}'.format(myid)
 mesh_name = "ex9-mesh."+smyid
@@ -322,7 +323,7 @@ sol_name = "ex9-init."+smyid
 pmesh.Print(mesh_name, 8)
 u.Save(sol_name, 8)
 
-# 10. FOM Evolution operator
+# 10. Evolution operator
 class FE_Evolution(mfem.PyTimeDependentOperator):
     def __init__(self, M, K, b):
         mfem.PyTimeDependentOperator.__init__(self, M.Height())
@@ -352,29 +353,50 @@ class FE_Evolution(mfem.PyTimeDependentOperator):
         self.T_solver.SetMaxIter(100)
         self.T_solver.SetPrintLevel(0)
 
-
-#    def EvalMult(self, x):
-#        if you want to impolement Mult in using python objects,
-#        such as numpy.. this needs to be implemented and don't
-#        overwrite Mult
-
-
     def Mult(self, x, y):
-        # y = M^{-1} (K x + b)
+        # M y = K x + b
         self.K.Mult(x, self.z)
-        self.z += b
+        self.z += self.b
         self.M_solver.Mult(self.z, y)
 
     def ImplicitSolve(self, dt, x, k):
-        # (M - dt*K) k = (K x + b)
+        # (M - dt*K) k = K x + b
         if self.T is None:
             self.T = mfem.Add(1.0, self.M, -dt, self.K)
             current_dt = dt
             self.T_solver.SetOperator(self.T)
         self.K.Mult(x, self.z)
-        self.z += b
+        self.z += self.b
         self.T_solver.Mult(self.z, k)
 
+class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
+    def __init__(self, M, K, b, u_init_hat, num_cols):
+        mfem.PyTimeDependentOperator.__init__(self, num_cols)
+
+        self.z = mfem.Vector(num_cols) 
+        self.K = K
+        self.M = M
+        self.b = b
+        self.u_init_hat = u_init_hat
+        self.Minv = M
+        self.Minv.invert()
+        self.Tinv = None
+
+    def Mult(self, x, y):
+        self.K.Mult(x, self.z)
+        self.z += self.b
+        self.z += self.u_init_hat
+        self.Minv.Mult(self.z, y)
+
+    def ImplicitSolve(self, dt, x, k):
+        if self.Tinv is None:
+            self.Tinv = mfem.Add(1.0, self.M, -dt, self.K)
+            current_dt = dt
+            self.Tinv.invert()
+        self.K.Mult(x, self.z)
+        self.z += self.b
+        self.z += self.u_init_hat
+        self.Tinv.Mult(self.z, k)
 
 # 11. Initiate ROM related variables
 # ROM object options
@@ -410,21 +432,94 @@ if merge:
     MPI.Finalize()
     sys.exit(0)
 
-adv = FE_Evolution(M, K, B)
+# Assemble evolution operator
+assembleTimer.Start()
+if online:
+    reader = libROM.BasisReader(basisName)
+    numRowRB = spatialbasis.numRows()
+    numColumnRB = spatialbasis.numColumns()
+    if (myid == 0):
+        print("spatial basis dimension is %d x %d\n" % (numRowRB, numColumnRB))
 
+    M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
+    ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
+    M_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
+    M_hat.Set(1, M_hat_carom.getData())
+    M_hat.Transpose()
+
+    K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
+    ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
+    K_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
+    K_hat.Set(1, K_hat_carom.getData())
+    K_hat.Transpose()
+
+    b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
+    b_carom = libROM.Vector(b_vec, True, False)
+    b_hat_carom = spatialbasis.transposeMult(b_carom)
+    b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
+
+    u_init_carom = libROM.Vector(numColumnRB, False)
+    ComputeCtAB_vec(K, u_init, spatialbasis, u_init_hat_carom)
+    u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
+
+    adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
+else:
+    adv = FE_Evolution(M, K, B)
 ode_solver.Init(adv)
+assembleTimer.Stop()
+
+# Time marching
 t = 0.0
 ti = 0
 while True:
-    if t > t_final - dt/2:
-        break
-    t, dt = ode_solver.Step(U, t, dt)
+    dt_real = min(dt, t_final - t)
+    solveTimer.Start()
+    if online:
+        t, dt = ode_solver.Step(U_init, t, dt_real)
+    else:
+        t, dt = ode_solver.Step(U, t, dt_real)
+    solveTimer.Stop()
     ti = ti + 1
-    if ti % vis_steps == 0:
+
+    if t >= t_final - 1e-8 * dt:
+        done = True
+
+    if offline:
+        u_centered = U - u_init
+        u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
+        addSample = generator.takeSample(u_sample, t, dt)
+
+    if done or ti % vis_steps == 0:
         if myid == 0:
             print("time step: " + str(ti) + ", time: " + str(np.round(t, 3)))
 
+    if done:
+       break
 
-u.Assign(U)
-sol_name = "ex9-final."+smyid
-u.Save(sol_name, 8)
+# Compute basis
+if offline:
+    generator.writeSnapshot()
+    del generator
+    del options
+
+solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
+# Compare solution
+if online:
+    u_final_carom = spatialbasis.mult(u_hat_final_carom)
+    u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
+    u_final += u_init
+    fom_solution = mfem.Vector(u_final.Size())
+    fom_solution.Load(solution_filename_fom, u_final.Size())
+    fomNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
+    fom_solution -= u_final
+    diffNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
+    if myid == 0:
+        print("Relative L2 error of ROM solution = %.5E" % (diffNorm / fomNorm))
+       
+
+if offline or fom:
+    u = np.array((c_double * U.Size()).from_address(int(U.GetData())), copy=False)
+    np.savetxt(solution_filename, u, fmt='%.16f')
+
+del fes
+MPI.Finalize()
