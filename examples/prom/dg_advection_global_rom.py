@@ -25,8 +25,11 @@ import numpy as np
 from numpy import sqrt, pi, cos, sin, hypot, arctan2
 from scipy.special import erfc
 
+import sys
+from ctypes import c_double
 import pylibROM.linalg as libROM
 from pylibROM.python_utils.StopWatch import StopWatch
+from pylibROM.mfem import ComputeCtAB, ComputeCtAB_vec
 
 num_proc = MPI.COMM_WORLD.size
 myid = MPI.COMM_WORLD.rank
@@ -89,6 +92,8 @@ parser.add_argument('-rdim','--rdim',
                     help="Reduced dimension for POD")
 parser.add_argument("-id", "--id",
                     action='store', default=0, type=int, help="Parametric id")
+parser.add_argument("-ns", "--nsets",
+                    action='store', default=1, type=int, help="Number of parametric snapshot sets")
 args = parser.parse_args()
 
 problem = args.problem
@@ -107,6 +112,7 @@ merge = args.merge
 ef = args.energy_fraction
 rdim = args.rdim
 id = args.id
+nsets = args.nsets
 
 if (fom):
     if (not (fom and (not offline) and (not online))):
@@ -315,7 +321,7 @@ assembleTimer.Stop()
 u = mfem.ParGridFunction(fes)
 u.ProjectCoefficient(u0)
 U = u.GetTrueDofs()
-u_init = U
+u_init = mfem.Vector(U)
 
 smyid = '{:0>6d}'.format(myid)
 mesh_name = "ex9-mesh."+smyid
@@ -411,6 +417,10 @@ if offline:
     options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
+    u_curr = mfem.Vector(U)
+    u_centered = mfem.Vector(U.Size())
+    mfem.subtract_vector(u_curr, u_init, u_centered);
+    u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
 
 # Merge phase 
 if merge:
@@ -436,6 +446,7 @@ if merge:
 assembleTimer.Start()
 if online:
     reader = libROM.BasisReader(basisName)
+    spatialbasis = reader.getSpatialBasis(0.0)
     numRowRB = spatialbasis.numRows()
     numColumnRB = spatialbasis.numColumns()
     if (myid == 0):
@@ -446,12 +457,14 @@ if online:
     M_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
     M_hat.Set(1, M_hat_carom.getData())
     M_hat.Transpose()
+    #M_hat_carom.transpose()
 
     K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
     K_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
     K_hat.Set(1, K_hat_carom.getData())
     K_hat.Transpose()
+    #K_hat_carom.transpose()
 
     b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
     b_carom = libROM.Vector(b_vec, True, False)
@@ -471,7 +484,8 @@ assembleTimer.Stop()
 # 13. Time marching
 t = 0.0
 ti = 0
-while True:
+done = False
+while not done:
     dt_real = min(dt, t_final - t)
     solveTimer.Start()
     if online:
@@ -485,16 +499,15 @@ while True:
         done = True
 
     if offline:
-        u_centered = U - u_init
+        u_curr = mfem.Vector(U)
+        u_centered = mfem.Vector(U.Size())
+        mfem.subtract_vector(u_curr, u_init, u_centered);
         u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
         addSample = generator.takeSample(u_sample, t, dt)
 
     if done or ti % vis_steps == 0:
         if myid == 0:
             print("time step: " + str(ti) + ", time: " + str(np.round(t, 3)))
-
-    if done:
-       break
 
 # 14. Compute basis
 if offline:
@@ -507,12 +520,14 @@ solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
 if online:
     u_final_carom = spatialbasis.mult(u_hat_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
-    u_final += u_init
+    rom_solution = mfem.Vector(u_final.Size())
+    mfem.add_vector(u_final, u_init, rom_solution)
     fom_solution = mfem.Vector(u_final.Size())
     fom_solution.Load(solution_filename_fom, u_final.Size())
     fomNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
-    fom_solution -= u_final
-    diffNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
+    diff_solution = mfem.Vector(u_final.Size())
+    mfem.subtract_vector(fom_solution, u_final, diff_solution) 
+    diffNorm = np.sqrt(mfem.InnerProduct(comm, diff_solution, diff_soltuion))
     if myid == 0:
         print("Relative L2 error of ROM solution = %.5E" % (diffNorm / fomNorm))
         print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.duration)
@@ -520,7 +535,7 @@ if online:
 
 if offline or fom:
     u = np.array((c_double * U.Size()).from_address(int(U.GetData())), copy=False)
-    np.savetxt(solution_filename, u, fmt='%.16f')
+    np.savetxt(solution_filename_fom, u, fmt='%.16f')
     if myid == 0:
         print("Elapsed time for assembling FOM: %e second\n" % assembleTimer.duration)
         print("Elapsed time for solving FOM: %e second\n" % solveTimer.duration)
