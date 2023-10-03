@@ -474,7 +474,7 @@ if online:
     b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
 
     u_init_hat_carom = libROM.Vector(numColumnRB, False)
-    ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom)
+    ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom) # seg fault
     u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
 
     adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
