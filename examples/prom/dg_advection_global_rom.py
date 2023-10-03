@@ -350,13 +350,13 @@ class FE_Evolution(mfem.PyTimeDependentOperator):
         self.M_solver.iterative_mode = False
         self.M_solver.SetRelTol(1e-9)
         self.M_solver.SetAbsTol(0.0)
-        self.M_solver.SetMaxIter(100)
+        self.M_solver.SetMaxIter(1000)
         self.M_solver.SetPrintLevel(0)
         self.T_solver.SetPreconditioner(self.T_prec)
         self.T_solver.iterative_mode = False
         self.T_solver.SetRelTol(1e-9)
         self.T_solver.SetAbsTol(0.0)
-        self.T_solver.SetMaxIter(100)
+        self.T_solver.SetMaxIter(1000)
         self.T_solver.SetPrintLevel(0)
 
     def Mult(self, x, y):
@@ -385,7 +385,7 @@ class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
         self.b = b
         self.u_init_hat = u_init_hat
         self.Minv = M
-        self.Minv.invert()
+        self.Minv.Invert()
         self.Tinv = None
 
     def Mult(self, x, y):
