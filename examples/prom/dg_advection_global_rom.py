@@ -417,11 +417,6 @@ if offline:
     options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
-    u_curr = mfem.Vector(U)
-    u_centered = mfem.Vector(U.Size())
-    mfem.subtract_vector(u_curr, u_init, u_centered);
-    u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
-    addSample = generator.takeSample(u_sample, t, dt)
 
 # Merge phase 
 if merge:
@@ -487,6 +482,13 @@ assembleTimer.Stop()
 t = 0.0
 ti = 0
 done = False
+if offline:
+    u_curr = mfem.Vector(U)
+    u_centered = mfem.Vector(U.Size())
+    mfem.subtract_vector(u_curr, u_init, u_centered);
+    u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
+    addSample = generator.takeSample(u_sample, t, dt)
+
 while not done:
     dt_real = min(dt, t_final - t)
     solveTimer.Start()
