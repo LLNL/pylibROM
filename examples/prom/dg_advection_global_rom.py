@@ -396,7 +396,8 @@ class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
 
     def ImplicitSolve(self, dt, x, k):
         if self.Tinv is None:
-            self.Tinv = mfem.Add(1.0, self.M, -dt, self.K)
+            self.Tinv = self.M
+            self.Tinv.Add(-dt, self.K)
             current_dt = dt
             self.Tinv.invert()
         self.K.Mult(x, self.z)
@@ -453,14 +454,12 @@ if online:
 
     M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
-    M_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
-    M_hat.Assign(M_hat_carom.getData())
+    M_hat = mfem.DenseMatrix(M_hat_carom.getData())
     M_hat.Transpose()
 
     K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
-    K_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
-    K_hat.Assign(K_hat_carom.getData())
+    K_hat = mfem.DenseMatrix(K_hat_carom.getData())
     K_hat.Transpose()
 
     b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
