@@ -472,6 +472,7 @@ if online:
     u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
 
     u_hat = mfem.Vector(numColumnRB)
+    u_hat.Assign(0.0)
 
     adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
 else:
