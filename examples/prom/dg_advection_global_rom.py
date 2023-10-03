@@ -114,7 +114,7 @@ rdim = args.rdim
 id = args.id
 nsets = args.nsets
 
-if (fom):
+if fom:
     if (not (fom and (not offline) and (not online))):
         raise ValueError("offline and online must be turned off if fom is used.")
 else:
@@ -421,6 +421,7 @@ if offline:
     u_centered = mfem.Vector(U.Size())
     mfem.subtract_vector(u_curr, u_init, u_centered);
     u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
+    addSample = generator.takeSample(u_sample, t, dt)
 
 # Merge phase 
 if merge:
@@ -446,7 +447,10 @@ if merge:
 assembleTimer.Start()
 if online:
     reader = libROM.BasisReader(basisName)
-    spatialbasis = reader.getSpatialBasis(0.0)
+    if rdim != -1:
+        spatialbasis = reader.getSpatialBasis(0.0, rdim)
+    else:
+        spatialbasis = reader.getSpatialBasis(0.0, ef)
     numRowRB = spatialbasis.numRows()
     numColumnRB = spatialbasis.numColumns()
     if (myid == 0):
@@ -455,24 +459,22 @@ if online:
     M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
     M_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
-    M_hat.Set(1, M_hat_carom.getData())
+    M_hat.Assign(M_hat_carom.getData())
     M_hat.Transpose()
-    #M_hat_carom.transpose()
 
     K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
     K_hat = mfem.DenseMatrix(numColumnRB, numColumnRB)
-    K_hat.Set(1, K_hat_carom.getData())
+    K_hat.Assign(K_hat_carom.getData())
     K_hat.Transpose()
-    #K_hat_carom.transpose()
 
     b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
     b_carom = libROM.Vector(b_vec, True, False)
     b_hat_carom = spatialbasis.transposeMult(b_carom)
     b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
 
-    u_init_carom = libROM.Vector(numColumnRB, False)
-    ComputeCtAB_vec(K, u_init, spatialbasis, u_init_hat_carom)
+    u_init_hat_carom = libROM.Vector(numColumnRB, False)
+    ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom)
     u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
 
     adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
