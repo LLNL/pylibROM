@@ -472,6 +472,8 @@ if online:
     ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom) # seg fault
     u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
 
+    u_hat = mfem.Vector(numColumnRB)
+
     adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
 else:
     adv = FE_Evolution(M, K, B)
@@ -493,7 +495,7 @@ while not done:
     dt_real = min(dt, t_final - t)
     solveTimer.Start()
     if online:
-        t, dt = ode_solver.Step(U_init, t, dt_real)
+        t, dt = ode_solver.Step(u_hat, t, dt_real)
     else:
         t, dt = ode_solver.Step(U, t, dt_real)
     solveTimer.Stop()
@@ -522,6 +524,8 @@ if offline:
 solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
 # 15. Save and compare solution
 if online:
+    u_hat_final_vec = np.array((c_double * u_hat.Size()).from_address(int(u_hat.GetData())), copy=False)
+    u_hat_final_carom = libROM.Vector(u_hat_final_vec, False, False)
     u_final_carom = spatialbasis.mult(u_hat_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
     rom_solution = mfem.Vector(u_final.Size())
