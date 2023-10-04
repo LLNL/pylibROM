@@ -409,7 +409,7 @@ x *= -1
 
 # check if this is correct
 pmesh.Print(mesh_name, precision)
-np.savetxt(sol_name,-X.GetDataArray(),fmt='%.16f')
+np.savetxt(sol_name,x.GetDataArray(),fmt='%.16f')
 
 
 # 27. Calculate the relative error of the ROM prediction compared to FOM
