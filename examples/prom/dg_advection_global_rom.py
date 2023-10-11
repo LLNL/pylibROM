@@ -399,7 +399,7 @@ class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
             self.Tinv = self.M
             self.Tinv.Add(-dt, self.K)
             current_dt = dt
-            self.Tinv.invert()
+            self.Tinv.Invert()
         self.K.Mult(x, self.z)
         self.z += self.b
         self.z += self.u_init_hat
@@ -526,16 +526,17 @@ solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
 if online:
     u_hat_final_vec = np.array((c_double * u_hat.Size()).from_address(int(u_hat.GetData())), copy=False)
     u_hat_final_carom = libROM.Vector(u_hat_final_vec, False, False)
-    u_final_carom = spatialbasis.mult(u_hat_final_carom)
+    u_final_vec = np.array((c_double * u_init.Size()).from_address(int(u_init.GetData())), copy=False)
+    u_final_carom = libROM.Vector(u_final_vec, u_init.Size(), True)
+    spatialbasis.mult(u_hat_final_carom, u_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
-    rom_solution = mfem.Vector(u_final.Size())
-    mfem.add_vector(u_final, u_init, rom_solution)
+    u_final += u_init
     fom_solution = mfem.Vector(u_final.Size())
     fom_solution.Load(solution_filename_fom, u_final.Size())
-    fomNorm = np.sqrt(mfem.InnerProduct(comm, fom_solution, fom_soltuion))
+    fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, fom_solution, fom_solution))
     diff_solution = mfem.Vector(u_final.Size())
     mfem.subtract_vector(fom_solution, u_final, diff_solution) 
-    diffNorm = np.sqrt(mfem.InnerProduct(comm, diff_solution, diff_soltuion))
+    diffNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_solution, diff_solution))
     if myid == 0:
         print("Relative L2 error of ROM solution = %.5E" % (diffNorm / fomNorm))
         print("Elapsed time for assembling ROM: %e second\n" % assembleTimer.duration)
