@@ -14,7 +14,33 @@
       with VisIt (visit.llnl.gov) and ParaView (paraview.org), as
       well as the optional saving with ADIOS2 (adios2.readthedocs.io)
       are also illustrated.
+
+   How to run:
+      mpirun -np 8 python <arguments>
+
+      Arguments of reproductive case:
+      dg_advection_global_rom.py -offline
+      dg_advection_global_rom.py -merge -ns 1
+      dg_advection_global_rom.py -online
+
+      Outputs of reproductive case:
+      Relative L2 error of ROM solution = 5.64184E-04
+
+      Arguments of parametric predictive case:
+      Offline phase: dg_advection_global_rom.py -offline -ff 1.0 -id 0
+                     dg_advection_global_rom.py -offline -ff 1.1 -id 1
+                     dg_advection_global_rom.py -offline -ff 1.2 -id 2
+
+      Merge phase: dg_advection_global_rom.py -merge -ns 3
+
+      FOM solution: dg_advection_global_rom.py -fom -ff 1.15
+
+      Online phase: dg_advection_global_rom.py -online -ff 1.15
+
+      Outputs of parametric predictive case:
+      Relative L2 error of ROM solution = 4.33318E-04
 '''
+
 from mfem import path
 import mfem.par as mfem
 from mfem.par import intArray
@@ -461,14 +487,14 @@ if online:
     M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
     M_hat = mfem.DenseMatrix(M_hat_carom.getData())
-    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose?
+    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose
     # M_hat.Transpose()
 
     K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
     K_hat = mfem.DenseMatrix(K_hat_carom.getData())
-    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose?
-    #K_hat.Transpose()
+    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose
+    # K_hat.Transpose()
 
     b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
     b_carom = libROM.Vector(b_vec, True)
