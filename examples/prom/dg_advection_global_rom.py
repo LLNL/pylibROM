@@ -433,7 +433,7 @@ if merge:
     generator = libROM.BasisGenerator(options, isIncremental, basisName)
     for paramID in range(nsets):
         snapshot_filename = "%s%d_snapshot" % (basisName, paramID)
-        generator.loadSamples(snapshot_filename,"snapshot", 5)
+        generator.loadSamples(snapshot_filename,"snapshot") # this is much slower than C++
 
     generator.endSamples() # save the merged basis file
     mergeTimer.Stop()
@@ -461,15 +461,17 @@ if online:
     M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
     M_hat = mfem.DenseMatrix(M_hat_carom.getData())
-    M_hat.Transpose()
+    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose?
+    # M_hat.Transpose()
 
     K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
     ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
     K_hat = mfem.DenseMatrix(K_hat_carom.getData())
-    K_hat.Transpose()
+    # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose?
+    #K_hat.Transpose()
 
     b_vec = np.array((c_double * B.Size()).from_address(int(B.GetData())), copy=False)
-    b_carom = libROM.Vector(b_vec, True, False)
+    b_carom = libROM.Vector(b_vec, True)
     b_hat_carom = spatialbasis.transposeMult(b_carom)
     b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
 
@@ -483,6 +485,7 @@ if online:
     adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
 else:
     adv = FE_Evolution(M, K, B)
+adv.SetTime(0.0)
 ode_solver.Init(adv)
 assembleTimer.Stop()
 
@@ -494,8 +497,8 @@ if offline:
     u_curr = mfem.Vector(U)
     u_centered = mfem.Vector(U.Size())
     mfem.subtract_vector(u_curr, u_init, u_centered);
-    u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
-    addSample = generator.takeSample(u_sample, t, dt)
+    u_centered_vec = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
+    addSample = generator.takeSample(u_centered_vec, t, dt)
 
 while not done:
     dt_real = min(dt, t_final - t)
@@ -535,15 +538,10 @@ if online:
     u_final_carom = libROM.Vector(U.Size(), True)
     spatialbasis.mult(u_hat_final_carom, u_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
-    fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, u_final, u_final))
-    print("538: %.5E" % fomNorm)
     u_final += u_init
-    fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, u_final, u_final))
-    print("541: %.5E" % fomNorm)
     fom_solution = mfem.Vector(u_final.Size())
     fom_solution.Load(solution_filename_fom, u_final.Size())
     fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, fom_solution, fom_solution))
-    print("545: %.5E" % fomNorm)
     diff_solution = mfem.Vector(u_final.Size())
     mfem.subtract_vector(fom_solution, u_final, diff_solution) 
     diffNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_solution, diff_solution))
