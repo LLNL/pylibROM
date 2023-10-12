@@ -40,7 +40,7 @@ parser.add_argument('-m', '--mesh',
                     action='store', type=str,
                     help="Mesh file to use.")
 parser.add_argument('-p', '--problem',
-                    action='store', default=0, type=int,
+                    action='store', default=3, type=int,
                     help="Problem setup to use")
 parser.add_argument('-ff', '--f-factor',
                     action='store', default=1.0, type=float,
@@ -378,15 +378,15 @@ class FE_Evolution(mfem.PyTimeDependentOperator):
 class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
     def __init__(self, M, K, b, u_init_hat, num_cols):
         mfem.PyTimeDependentOperator.__init__(self, num_cols)
-
         self.z = mfem.Vector(num_cols) 
+
         self.K = K
         self.M = M
         self.b = b
         self.u_init_hat = u_init_hat
-        self.Minv = M
-        self.Minv.Invert()
-        self.Tinv = None
+
+        self.Minv = mfem.DenseMatrixInverse(self.M)
+        self.Ainv = None
 
     def Mult(self, x, y):
         self.K.Mult(x, self.z)
@@ -395,15 +395,21 @@ class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
         self.Minv.Mult(self.z, y)
 
     def ImplicitSolve(self, dt, x, k):
-        if self.Tinv is None:
-            self.Tinv = self.M
-            self.Tinv.Add(-dt, self.K)
+        if self.Ainv is None:
+            #self.Ainv = mfem.DenseMatrix(self.M.NumRows(), self.M.NumCols())
+            #self.Ainv.Assign(0)
+            #self.Ainv.Add(1.0, self.M)
+            #self.Ainv.Add(-dt, self.K)
+            A = mfem.DenseMatrix(self.K.NumRows(), self.K.NumCols())
+            A.Set(dt, self.K)
+            self.Ainv = mfem.DenseMatrix(self.M)
+            self.Ainv -= A
             current_dt = dt
-            self.Tinv.Invert()
+            self.Ainv.Invert()
         self.K.Mult(x, self.z)
         self.z += self.b
         self.z += self.u_init_hat
-        self.Tinv.Mult(self.z, k)
+        self.Ainv.Mult(self.z, k)
 
 # 11. Initiate ROM related variables
 # ROM object options
@@ -413,13 +419,13 @@ isIncremental = False
 basisName = "basis"
 basisFileName = "%s%d" % (basisName, id)
 
-# BasisGenerator in offline phase 
+# BasisGenerator for snapshot collection in offline phase 
 if offline:
     options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
 
-# Merge phase 
+# BasisGenerator for basis construction in online phase 
 if merge:
     mergeTimer.Start()
     options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
@@ -468,7 +474,7 @@ if online:
     b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
 
     u_init_hat_carom = libROM.Vector(numColumnRB, False)
-    ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom) # seg fault
+    ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom)
     u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
 
     u_hat = mfem.Vector(numColumnRB)
@@ -508,8 +514,8 @@ while not done:
         u_curr = mfem.Vector(U)
         u_centered = mfem.Vector(U.Size())
         mfem.subtract_vector(u_curr, u_init, u_centered);
-        u_sample = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
-        addSample = generator.takeSample(u_sample, t, dt)
+        u_centered_vec = np.array((c_double * u_centered.Size()).from_address(int(u_centered.GetData())), copy=False)
+        addSample = generator.takeSample(u_centered_vec, t, dt)
 
     if done or ti % vis_steps == 0:
         if myid == 0:
@@ -525,15 +531,19 @@ solution_filename_fom = "dg_advection_global_rom-final.%06d" % f_factor
 # 15. Save and compare solution
 if online:
     u_hat_final_vec = np.array((c_double * u_hat.Size()).from_address(int(u_hat.GetData())), copy=False)
-    u_hat_final_carom = libROM.Vector(u_hat_final_vec, False, False)
-    u_final_vec = np.array((c_double * u_init.Size()).from_address(int(u_init.GetData())), copy=False)
-    u_final_carom = libROM.Vector(u_final_vec, u_init.Size(), True)
+    u_hat_final_carom = libROM.Vector(u_hat_final_vec, False)
+    u_final_carom = libROM.Vector(U.Size(), True)
     spatialbasis.mult(u_hat_final_carom, u_final_carom)
     u_final = mfem.Vector(u_final_carom.getData(), u_final_carom.dim())
+    fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, u_final, u_final))
+    print("538: %.5E" % fomNorm)
     u_final += u_init
+    fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, u_final, u_final))
+    print("541: %.5E" % fomNorm)
     fom_solution = mfem.Vector(u_final.Size())
     fom_solution.Load(solution_filename_fom, u_final.Size())
     fomNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, fom_solution, fom_solution))
+    print("545: %.5E" % fomNorm)
     diff_solution = mfem.Vector(u_final.Size())
     mfem.subtract_vector(fom_solution, u_final, diff_solution) 
     diffNorm = np.sqrt(mfem.InnerProduct(MPI.COMM_WORLD, diff_solution, diff_solution))
