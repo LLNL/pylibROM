@@ -88,9 +88,6 @@ get1DArrayFromPtr(T *ptr, const int nelem, bool free_when_done=false)
                      get1DArrayBufferHandle(ptr, free_when_done));
 }
 
-void *
-extractSwigPtrAddress(const py::handle &swig_target);
-
 template<typename T>
 T*
 extractSwigPtr(const py::handle &swig_target)

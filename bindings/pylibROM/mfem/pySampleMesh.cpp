@@ -47,7 +47,7 @@ void init_mfem_SampleMesh(pybind11::module_ &m) {
             ParFiniteElementSpace *spfes_target = self.GetSampleFESpace(space);
 
             // deep copy of the spfes_target.
-            void *spfes_address = extractSwigPtrAddress(spfespace);
+            void *spfes_address = extractSwigPtr<void>(spfespace);
             ParFiniteElementSpace *spfes = new (spfes_address) ParFiniteElementSpace(*spfes_target);
         })
 
@@ -55,13 +55,16 @@ void init_mfem_SampleMesh(pybind11::module_ &m) {
             ParMesh *sppmesh_target = self.GetSampleMesh();
 
             // deep copy of the spfes_target.
-            void *sppmesh_address = extractSwigPtrAddress(sppmesh);
+            void *sppmesh_address = extractSwigPtr<void>(sppmesh);
             ParMesh *sample_pmesh = new (sppmesh_address) ParMesh(*sppmesh_target);
         })
 
         .def("GetNumVarSamples", &CAROM::SampleMeshManager::GetNumVarSamples)
 
-        .def("GetSampledValues", &CAROM::SampleMeshManager::GetSampledValues)
+        .def("GetSampledValues", [](CAROM::SampleMeshManager &self, const std::string variable, py::object &v, CAROM::Vector &s){
+            Vector *v_ptr = extractSwigPtr<Vector>(v);
+            self.GetSampledValues(variable, *v_ptr, s);
+        })
 
         .def("GetSampleElements", &CAROM::SampleMeshManager::GetSampleElements)
 

@@ -38,11 +38,11 @@ For parallel version, a manual installation is required:
 ```
 git clone https://github.com/mfem/PyMFEM.git
 cd PyMFEM
-python3 setup.py install --with-parallel
+python3 setup.py install --with-parallel --with-gslib
 ```
 On LC quartz, use `--user` flag:
 ```
-python3 setup.py install --with-parallel --user
+python3 setup.py install --with-parallel --with-gslib --user
 ```
 Make sure [`swig`](https://pypi.org/project/swig) is installed first. Also, the binary file must be located in `PATH` environment variable.
 
