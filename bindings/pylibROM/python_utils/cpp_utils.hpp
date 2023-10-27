@@ -88,4 +88,15 @@ get1DArrayFromPtr(T *ptr, const int nelem, bool free_when_done=false)
                      get1DArrayBufferHandle(ptr, free_when_done));
 }
 
+template<typename T>
+T*
+extractSwigPtr(const py::handle &swig_target)
+{
+    // On python, swig_target.this.__int__() returns the memory address of the wrapped c++ object pointer.
+    // We execute the same command here in the c++ side, where the memory address is given as py::object.
+    // The returned py::object is simply cast as std::uintptr_t, which is then cast into a c++ object type we want.
+    std::uintptr_t temp = swig_target.attr("this").attr("__int__")().cast<std::uintptr_t>();
+    return reinterpret_cast<T *>(temp);
+}
+
 #endif
