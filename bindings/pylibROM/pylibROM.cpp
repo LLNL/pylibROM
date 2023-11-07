@@ -23,6 +23,11 @@ void init_ParametricDMD(pybind11::module_ &m);
 void init_NonuniformDMD(pybind11::module_ &m);
 void init_AdaptiveDMD(pybind11::module_ &m);
 
+//algo/manifold_interp
+void init_Interpolator(pybind11::module_ &);
+void init_VectorInterpolator(pybind11::module_ &);
+void init_MatrixInterpolator(pybind11::module_ &);
+
 //hyperreduction
 void init_DEIM(pybind11::module_ &m);
 void init_GNAT(pybind11::module_ &m);
@@ -68,6 +73,11 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_ParametricDMD(algo);
     init_AdaptiveDMD(algo);
     init_NonuniformDMD(algo);
+
+    py::module manifold_interp = algo.def_submodule("manifold_interp");
+    init_Interpolator(manifold_interp);
+    init_VectorInterpolator(manifold_interp);
+    init_MatrixInterpolator(manifold_interp);
 
     py::module hyperreduction = m.def_submodule("hyperreduction");
     init_DEIM(hyperreduction);
