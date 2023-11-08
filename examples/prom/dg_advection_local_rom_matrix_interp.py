@@ -24,6 +24,47 @@
 //               with VisIt (visit.llnl.gov) and ParaView (paraview.org), as
 //               well as the optional saving with ADIOS2 (adios2.readthedocs.io)
 //               are also illustrated.
+//
+// For ROM (reproductive case):
+//         python3 dg_advection_local_rom_matrix_interp.py -offline
+//         python3 dg_advection_local_rom_matrix_interp.py -online
+//
+// For ROM (parametric case using matrix interpolation):
+//         rm frequencies.txt
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.02
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.02 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.03
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.03 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.04
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.04 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.06
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.06 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.07
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.07 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -offline -ff 1.08
+//         python3 dg_advection_local_rom_matrix_interp.py -interp_prep -ff 1.08 -rdim 40
+//         python3 dg_advection_local_rom_matrix_interp.py -fom -ff 1.05
+//         
+//     interpolate using linear solve:
+//         python3 dg_advection_local_rom_matrix_interp.py -online_interp -ff 1.05 -rdim 40
+//     interpolate using lagragian polynomials:
+//         python3 dg_advection_local_rom_matrix_interp.py -online_interp -ff 1.05 -rdim 40 -im "LP" 
+//     interpolate using inverse distance weighting:
+//         python3 dg_advection_local_rom_matrix_interp.py -online_interp -ff 1.05 -rdim 40 -im "IDW"
+//
+// Sample runs:
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 0 -dt 0.005
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 0 -dt 0.01
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 1 -dt 0.005 -tf 9
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 1 -rp 1 -dt 0.002 -tf 9
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 1 -rp 1 -dt 0.02 -s 13 -tf 9
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 1 -rp 1 -dt 0.004 -tf 9
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 1 -rp 1 -dt 0.005 -tf 9
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 3 -rp 2 -dt 0.0025 -tf 9 -vs 20
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 0 -o 2 -rp 1 -dt 0.01 -tf 8
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 0 -rs 2 -dt 0.005 -tf 2
+//         mpirun -np 4 python3 dg_advection_local_rom_matrix_interp.py -p 0 -rs 1 -o 2 -tf 2
+//         mpirun -np 3 python3 dg_advection_local_rom_matrix_interp.py -p 1 -rs 1 -rp 0 -dt 0.005 -tf 0.5
 '''
 
 try:
