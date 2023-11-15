@@ -570,7 +570,7 @@ def run():
 
         u_curr = mfem.Vector(U)
         u_centered = mfem.Vector(U.Size())
-        mfem.subtract_vector(u_curr, u_init, u_centered);
+        mfem.subtract_vector(u_curr, u_init, u_centered)
         u_centered_vec = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
         addSample = generator.takeSample(u_centered_vec, t, dt)
     
@@ -684,11 +684,11 @@ def run():
             u_init_interpolator = VectorInterpolator(parameter_points,
                     rotation_matrices, u_init_hats, ref_point, rbf_type, interp_method,
                     closest_rbf_val)
-            spatialbasis = basis_interpolator.interpolate(curr_point);
-            M_hat_carom = M_interpolator.interpolate(curr_point);
-            K_hat_carom = K_interpolator.interpolate(curr_point);
-            b_hat_carom = b_interpolator.interpolate(curr_point);
-            u_init_hat_carom = u_init_interpolator.interpolate(curr_point);
+            spatialbasis = basis_interpolator.interpolate(curr_point)
+            M_hat_carom = M_interpolator.interpolate(curr_point)
+            K_hat_carom = K_interpolator.interpolate(curr_point)
+            b_hat_carom = b_interpolator.interpolate(curr_point)
+            u_init_hat_carom = u_init_interpolator.interpolate(curr_point)
 
             # Unlike C++, the conversion from libROM.Matrix to mfem.DenseMatrix does not need tranpose
             M_hat = mfem.DenseMatrix(M_hat_carom.getData())
@@ -734,7 +734,7 @@ def run():
         if offline:
             u_curr = mfem.Vector(U)
             u_centered = mfem.Vector(U.Size())
-            mfem.subtract_vector(u_curr, u_init, u_centered);
+            mfem.subtract_vector(u_curr, u_init, u_centered)
             u_centered_vec = np.array((c_double * u_centered.Size()).from_address(int(u_centered.GetData())), copy=False)
             addSample = generator.takeSample(u_centered_vec, t, dt)
 
