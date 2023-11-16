@@ -355,9 +355,6 @@ def run():
         if (myid == 0):
             print("spatial basis dimension is %d x %d\n" % (numRowRB, numColumnRB))
 
-        # libROM stores the matrix row-wise, so wrapping as a DenseMatrix in MFEM means it is transposed.
-        reducedBasisT = mfem.DenseMatrix(spatialbasis.getData())
-
         # 21. form inverse ROM operator
         invReducedA = libROM.Matrix(numColumnRB, numColumnRB, False)
         ComputeCtAB(A, spatialbasis, spatialbasis, invReducedA)
