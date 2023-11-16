@@ -28,8 +28,12 @@ protected:
 
 void init_GreedySampler(pybind11::module_ &m) {
     py::class_<GreedyErrorIndicatorPoint>(m, "GreedyErrorIndicatorPoint")
-        .def_readonly("point", &GreedyErrorIndicatorPoint::point)
-        .def_readonly("localROM", &GreedyErrorIndicatorPoint::localROM);
+        .def_property_readonly("point", [](GreedyErrorIndicatorPoint &self) {
+            return self.point.get();
+         })
+        .def_property_readonly("localROM", [](GreedyErrorIndicatorPoint &self) {
+            return self.localROM.get();
+         });
         
     py::class_<GreedySampler,PyGreedySampler>(m, "GreedySampler")
         .def(py::init<std::vector<Vector>, bool, double, double, double, int, int, std::string, std::string, bool, int, bool>(),
@@ -75,9 +79,47 @@ void init_GreedySampler(pybind11::module_ &m) {
             py::arg("debug_algorithm") = false
         )
         .def(py::init<std::string, std::string>(), py::arg("base_file_name"), py::arg("output_log_path") = "")
-        .def("getNextParameterPoint", &GreedySampler::getNextParameterPoint,py::return_value_policy::reference)
-        .def("getNextPointRequiringRelativeError", &GreedySampler::getNextPointRequiringRelativeError)
-        .def("getNextPointRequiringErrorIndicator", &GreedySampler::getNextPointRequiringErrorIndicator)
+        .def("getNextParameterPoint", [](GreedySampler& self) -> std::unique_ptr<Vector> {
+            std::shared_ptr<Vector> result = self.getNextParameterPoint();
+            return std::make_unique<Vector>(*(result.get()));
+        })
+        .def("getNextPointRequiringRelativeError", [](GreedySampler& self) -> GreedyErrorIndicatorPoint {
+            // Create a deepcopy of the struct, otherwise it will get freed twice
+            GreedyErrorIndicatorPoint point = self.getNextPointRequiringRelativeError();
+            Vector *t_pt = nullptr;
+            Vector *t_lROM = nullptr;
+
+            if (point.point)
+            {
+                t_pt = new Vector(*(point.point));
+            }
+
+            if (point.localROM)
+            {
+                t_lROM = new Vector(*(point.localROM));
+            }
+
+            return createGreedyErrorIndicatorPoint(t_pt, t_lROM);
+        }, py::return_value_policy::reference)
+        .def("getNextPointRequiringErrorIndicator", [](GreedySampler& self) -> GreedyErrorIndicatorPoint {
+            // Create a deepcopy of the struct, otherwise it will get freed twice
+            GreedyErrorIndicatorPoint point = self.getNextPointRequiringErrorIndicator();
+
+            Vector *t_pt = nullptr;
+            Vector *t_lROM = nullptr;
+
+            if (point.point)
+            {
+                t_pt = new Vector(*(point.point));
+            }
+
+            if (point.localROM)
+            {
+                t_lROM = new Vector(*(point.localROM));
+            }
+
+            return createGreedyErrorIndicatorPoint(t_pt, t_lROM);
+        }, py::return_value_policy::reference)
         .def("setPointRelativeError", (void (GreedySampler::*) (double))&GreedySampler::setPointRelativeError)    
         .def("setPointErrorIndicator", (void (GreedySampler::*) (double,int)) &GreedySampler::setPointErrorIndicator)
         .def("getNearestNonSampledPoint", (int (GreedySampler::*) (CAROM::Vector)) &GreedySampler::getNearestNonSampledPoint)
@@ -85,6 +127,7 @@ void init_GreedySampler(pybind11::module_ &m) {
         .def("getParameterPointDomain", &GreedySampler::getParameterPointDomain)
         .def("getSampledParameterPoints", &GreedySampler::getSampledParameterPoints)
         .def("save", &GreedySampler::save)
+        .def("__del__", [](GreedySampler& self){ self.~GreedySampler(); })
         .def("isComplete", &GreedySampler::isComplete);
    
     m.def("createGreedyErrorIndicatorPoint", [](Vector* point, Vector* localROM) {

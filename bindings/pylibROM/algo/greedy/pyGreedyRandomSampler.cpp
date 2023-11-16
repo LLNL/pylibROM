@@ -10,7 +10,7 @@ using namespace CAROM;
 using namespace std;
 
 void init_GreedyRandomSampler(py::module &m) {
-    py::class_<GreedyRandomSampler>(m, "GreedyRandomSampler")
+    py::class_<GreedyRandomSampler, GreedySampler>(m, "GreedyRandomSampler")
         .def(py::init<CAROM::Vector, CAROM::Vector, int, bool, double, double,double, int, int, bool, std::string, std::string, bool, int, bool>(),
             py::arg("param_space_min"),
             py::arg("param_space_max"),
@@ -49,5 +49,6 @@ void init_GreedyRandomSampler(py::module &m) {
             py::arg("base_file_name"),
             py::arg("output_log_path") = ""
         )
-        .def("save", &GreedyRandomSampler::save, py::arg("base_file_name"));
+        .def("save", &GreedyRandomSampler::save, py::arg("base_file_name"))
+        .def("__del__", [](GreedyRandomSampler& self){ self.~GreedyRandomSampler(); });
 }
