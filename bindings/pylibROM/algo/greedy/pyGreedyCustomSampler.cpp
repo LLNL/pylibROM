@@ -10,7 +10,7 @@ using namespace CAROM;
 using namespace std;
 
 void init_GreedyCustomSampler(pybind11::module_ &m) {
-    py::class_<GreedyCustomSampler>(m, "GreedyCustomSampler")
+    py::class_<GreedyCustomSampler, GreedySampler>(m, "GreedyCustomSampler")
         .def(py::init<std::vector<CAROM::Vector>, bool, double, double, double, int, int, std::string, std::string, bool, int, bool>(),
             py::arg("parameter_points"),
             py::arg("check_local_rom"),
@@ -39,5 +39,6 @@ void init_GreedyCustomSampler(pybind11::module_ &m) {
             py::arg("debug_algorithm") = false)
         .def(py::init<std::string, std::string>(),
             py::arg("base_file_name"),
-            py::arg("output_log_path") = "");
+            py::arg("output_log_path") = "")
+        .def("__del__", [](GreedyCustomSampler& self){ self.~GreedyCustomSampler(); });
 }
