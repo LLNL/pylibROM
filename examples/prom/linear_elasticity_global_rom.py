@@ -222,7 +222,6 @@ ess_tdof_list = mfem.intArray()
 ess_bdr.Assign(0)
 ess_bdr[0] = 1
 fespace.GetEssentialTrueDofs(ess_bdr, ess_tdof_list)
-print("here")
 
 # 9. Initiate ROM related variables
 max_num_snapshots = 100
@@ -271,7 +270,8 @@ f.Set(dim-1, mfem.PWConstCoefficient(pull_force))
 
 b = mfem.ParLinearForm(fespace)
 b.AddBoundaryIntegrator(mfem.VectorBoundaryLFIntegrator(f))
-print('r.h.s. ...')
+if myid==0:
+    print('r.h.s. ...')
 b.Assemble()
 
 # 13. Define the solution vector x as a parallel finite element grid
