@@ -418,8 +418,6 @@ def run():
     k.Finalize(skip_zeros)
     
     B = b.ParallelAssemble()
-    M = m.ParallelAssemble()
-    K = k.ParallelAssemble()
 
     assembleTimer.Stop()
 
@@ -475,35 +473,81 @@ def run():
                 print("GLVis visualization paused.")
                 print(" Press space (in the GLVis window) to resume it.")
 
+    class DG_Solver(mfem.PyIterativeSolver):
+        def __init__(self, M, K, fes):
+            mfem.PyIterativeSolver.__init__(self)
+
+            self.M = M
+            self.K = K
+            self.fes = fes
+            self.dt = -1.0
+            self.A = None
+
+            self.block_size = fes.GetFE(0).GetDof()
+
+            self.prec = mfem.BlockILU(self.block_size, mfem.BlockILU.Reordering_MINIMUM_DISCARDED_FILL)
+
+            self.linear_solver = mfem.GMRESSolver()
+            self.linear_solver.iterative_mode = False
+            self.linear_solver.SetRelTol(1.0e-9)
+            self.linear_solver.SetAbsTol(0.0)
+            self.linear_solver.SetMaxIter(100)
+            self.linear_solver.SetPrintLevel(0)
+            self.linear_solver.SetPreconditioner(self.prec)
+
+            self.M_diag = mfem.SparseMatrix()
+            self.M.GetDiag(self.M_diag)
+
+        def SetTimeStep(self, dt):
+            if self.dt != dt:
+                self.dt = dt
+
+                # Form operator A = M - dt*K
+                self.A = mfem.Add(-dt, self.K, 0.0, self.K)
+
+                A_diag = mfem.SparseMatrix()
+                self.A.GetDiag(A_diag)
+                A_diag.Add(1.0, self.M_diag)
+
+                self.linear_solver.SetOperator(self.A)
+
+        def Mult(self, x, y):
+            self.linear_solver.Mult(x, y)
+
+        def SetOperator(self, op):
+            self.linear_solver.SetOperator(op)
+
     class FE_Evolution(mfem.PyTimeDependentOperator):
         def __init__(self, M, K, b):
             mfem.PyTimeDependentOperator.__init__(self, M.Height())
 
-            self.M_prec = mfem.HypreSmoother()
-            self.M_solver = mfem.CGSolver(M.GetComm())
-            self.T_prec = mfem.HypreSmoother()
-            self.T_solver = mfem.CGSolver(M.GetComm())
+            self.b = b
             self.z = mfem.Vector(M.Height())
 
-            self.K = K
-            self.M = M
-            self.T = None
-            self.b = b
-            self.M_prec.SetType(mfem.HypreSmoother.Jacobi)
+            if M.GetAssemblyLevel() == mfem.AssemblyLevel_LEGACY:
+                self.M = M.ParallelAssemble()
+                self.K = K.ParallelAssemble()
+            else:
+                self.M = M
+                self.K = K
+
+            self.M_solver = mfem.CGSolver(M.ParFESpace().GetComm())
+            self.M_solver.SetOperator(self.M)
+
+            if M.GetAssemblyLevel() == mfem.AssemblyLevel_LEGACY:
+                self.M_prec = mfem.HypreSmoother(self.M, mfem.HypreSmoother.Jacobi)
+                self.dg_solver = DG_Solver(self.M, self.K, M.FESpace())
+            else:
+                self.M_prec = mfem.OperatorJacobiSmoother()
+                self.M_prec.SetOperator(M)
+                self.dg_solver = None
+
             self.M_solver.SetPreconditioner(self.M_prec)
-            self.M_solver.SetOperator(M)
             self.M_solver.iterative_mode = False
             self.M_solver.SetRelTol(1e-9)
             self.M_solver.SetAbsTol(0.0)
-            self.M_solver.SetMaxIter(1000)
-            self.M_solver.SetPrintLevel(0)
-
-            self.T_solver.SetPreconditioner(self.T_prec)
-            self.T_solver.iterative_mode = False
-            self.T_solver.SetRelTol(1e-9)
-            self.T_solver.SetAbsTol(0.0)
-            self.T_solver.SetMaxIter(1000)
-            self.T_solver.SetPrintLevel(0)
+            self.M_solver.SetMaxIter(100)
+            self.M_solver.SetPrintLevel(1)
 
         def Mult(self, x, y):
             # M y = K x + b
@@ -513,12 +557,10 @@ def run():
 
         def ImplicitSolve(self, dt, x, k):
             # (M - dt*K) k = K x + b
-            if self.T is None:
-                self.T = mfem.Add(1.0, self.M, -dt, self.K)
-                self.T_solver.SetOperator(self.T)
             self.K.Mult(x, self.z)
             self.z += self.b
-            self.T_solver.Mult(self.z, k)
+            self.dg_solver.SetTimeStep(dt)
+            self.dg_solver.Mult(self.z, k)
 
     class ROM_FE_Evolution(mfem.PyTimeDependentOperator):
         def __init__(self, M, K, b, u_init_hat, num_cols):
@@ -587,7 +629,7 @@ def run():
                 print("spatial basis dimension is %d x %d\n" % (numRowRB, numColumnRB))
 
             M_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
-            ComputeCtAB(M, spatialbasis, spatialbasis, M_hat_carom)
+            ComputeCtAB(m, spatialbasis, spatialbasis, M_hat_carom)
             if interp_prep:
                 M_hat_carom.write("M_hat_%f" % f_factor)
             M_hat = mfem.DenseMatrix(M_hat_carom.getData())
@@ -595,7 +637,7 @@ def run():
             # M_hat.Transpose()
 
             K_hat_carom = libROM.Matrix(numColumnRB, numColumnRB, False)
-            ComputeCtAB(K, spatialbasis, spatialbasis, K_hat_carom)
+            ComputeCtAB(k, spatialbasis, spatialbasis, K_hat_carom)
             if interp_prep:
                 K_hat_carom.write("K_hat_%f" % f_factor)
             K_hat = mfem.DenseMatrix(K_hat_carom.getData())
@@ -610,7 +652,7 @@ def run():
             b_hat = mfem.Vector(b_hat_carom.getData(), b_hat_carom.dim())
 
             u_init_hat_carom = libROM.Vector(numColumnRB, False)
-            ComputeCtAB_vec(K, U, spatialbasis, u_init_hat_carom)
+            ComputeCtAB_vec(k, U, spatialbasis, u_init_hat_carom)
             if interp_prep:
                 u_init_hat_carom.write("U_init_hat_%f" % f_factor)
             u_init_hat = mfem.Vector(u_init_hat_carom.getData(), u_init_hat_carom.dim())
@@ -709,7 +751,7 @@ def run():
     if online:
         adv = ROM_FE_Evolution(M_hat, K_hat, b_hat, u_init_hat, numColumnRB)
     else:
-        adv = FE_Evolution(M, K, B)
+        adv = FE_Evolution(m, k, B)
     adv.SetTime(t)
     ode_solver.Init(adv)
     # assembleTimer.Stop()
