@@ -474,8 +474,8 @@ def run():
                 print(" Press space (in the GLVis window) to resume it.")
 
     class DG_Solver(mfem.PyIterativeSolver):
-        def __init__(self, M, K, fes):
-            mfem.PyIterativeSolver.__init__(self)
+        def __init__(self, M, K, fes, comm):
+            mfem.PyIterativeSolver.__init__(self, comm)
 
             self.M = M
             self.K = K
@@ -487,7 +487,7 @@ def run():
 
             self.prec = mfem.BlockILU(self.block_size, mfem.BlockILU.Reordering_MINIMUM_DISCARDED_FILL)
 
-            self.linear_solver = mfem.GMRESSolver()
+            self.linear_solver = mfem.GMRESSolver(comm)
             self.linear_solver.iterative_mode = False
             self.linear_solver.SetRelTol(1.0e-9)
             self.linear_solver.SetAbsTol(0.0)
@@ -536,7 +536,7 @@ def run():
 
             if M.GetAssemblyLevel() == mfem.AssemblyLevel_LEGACY:
                 self.M_prec = mfem.HypreSmoother(self.M, mfem.HypreSmoother.Jacobi)
-                self.dg_solver = DG_Solver(self.M, self.K, M.FESpace())
+                self.dg_solver = DG_Solver(self.M, self.K, M.FESpace(), M.ParFESpace().GetComm())
             else:
                 self.M_prec = mfem.OperatorJacobiSmoother()
                 self.M_prec.SetOperator(M)
@@ -547,7 +547,7 @@ def run():
             self.M_solver.SetRelTol(1e-9)
             self.M_solver.SetAbsTol(0.0)
             self.M_solver.SetMaxIter(100)
-            self.M_solver.SetPrintLevel(1)
+            self.M_solver.SetPrintLevel(0)
 
         def Mult(self, x, y):
             # M y = K x + b
