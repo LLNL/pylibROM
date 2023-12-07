@@ -60,13 +60,13 @@ cd /path/to/folder/pylibROM/docker/jupyter_pylibROM
 Now, run the following command to build the Docker image:
  
  ```
-docker build -t pylibROM-Jupyter:latest .
+docker build -t pylibrom-jupyter:latest .
  ```
 
 Once the image is built, you can run a container and start a Jupyter Notebook server. Replace /path/to/host/folder with the absolute path to the local directory you want to mount inside the container for Jupyter notebooks: 
 
  ```
-docker run -p 8888:8888 -v /path/to/host/folder:/notebooks -w /notebooks pylibROM-Jupyter:latest
+docker run -p 8888:8888 -v /path/to/host/folder:/notebooks -w /notebooks pylibrom-jupyter:latest
  ```
 
 
