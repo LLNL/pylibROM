@@ -54,7 +54,7 @@ This Docker container provides an environment with Jupyter Notebook for the pyli
 
 Navigate to the directory containing the Dockerfile:
  ```
-cd /path/to/folder/pylibROM/docker/jupyter_pylibROM
+cd /path/to/folder/pylibROM/docker/jupyter
  ```
 
 Now, run the following command to build the Docker image:
