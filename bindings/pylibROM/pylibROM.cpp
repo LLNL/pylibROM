@@ -23,6 +23,11 @@ void init_ParametricDMD(pybind11::module_ &m);
 void init_NonuniformDMD(pybind11::module_ &m);
 void init_AdaptiveDMD(pybind11::module_ &m);
 
+//algo/greedy
+void init_GreedySampler(pybind11::module_ &m);
+void init_GreedyCustomSampler(pybind11::module_ &m);
+void init_GreedyRandomSampler(pybind11::module_ &m);
+
 //hyperreduction
 void init_DEIM(pybind11::module_ &m);
 void init_GNAT(pybind11::module_ &m);
@@ -68,6 +73,11 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_ParametricDMD(algo);
     init_AdaptiveDMD(algo);
     init_NonuniformDMD(algo);
+
+    py::module greedy = algo.def_submodule("greedy");
+    init_GreedySampler(greedy);
+    init_GreedyCustomSampler(greedy);
+    init_GreedyRandomSampler(greedy);
 
     py::module hyperreduction = m.def_submodule("hyperreduction");
     init_DEIM(hyperreduction);
