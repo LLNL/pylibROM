@@ -123,7 +123,14 @@ void init_GreedySampler(pybind11::module_ &m) {
         .def("setPointRelativeError", (void (GreedySampler::*) (double))&GreedySampler::setPointRelativeError)    
         .def("setPointErrorIndicator", (void (GreedySampler::*) (double,int)) &GreedySampler::setPointErrorIndicator)
         .def("getNearestNonSampledPoint", (int (GreedySampler::*) (CAROM::Vector)) &GreedySampler::getNearestNonSampledPoint)
-        .def("getNearestROM", &GreedySampler::getNearestROM)
+        .def("getNearestROM", [](GreedySampler& self, Vector point) -> std::unique_ptr<Vector> {
+            std::shared_ptr<Vector> result = self.getNearestROM(point);
+            if (!result)
+            {
+                return nullptr;
+            }
+            return std::make_unique<Vector>(*(result.get()));
+        })
         .def("getParameterPointDomain", &GreedySampler::getParameterPointDomain)
         .def("getSampledParameterPoints", &GreedySampler::getSampledParameterPoints)
         .def("save", &GreedySampler::save)

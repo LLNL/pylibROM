@@ -149,6 +149,8 @@ def test_greedy_save_and_load():
     closestROM = caromGreedySampler.getNearestROM(pointToFindNearestROM)
     closestROMLoad = caromGreedySamplerLoad.getNearestROM(pointToFindNearestROM)
 
+    # there were no points sampled, so closestROM should be None
+    assert closestROM is None
     assert closestROM == closestROMLoad
 
     nextPointToSample = caromGreedySampler.getNextParameterPoint()
@@ -157,6 +159,39 @@ def test_greedy_save_and_load():
     assert nextPointToSample.dim() == nextPointToSampleLoad.dim()
     assert nextPointToSample.item(0) == nextPointToSampleLoad.item(0)
 
+
+def test_greedy_save_and_load_with_sample():
+    paramPoints = [1.0, 2.0, 3.0, 99.0, 100., 101.0]
+
+    caromGreedySampler = greedy.GreedyCustomSampler(paramPoints, False, 0.1, 1, 1, 3, 4, "", "", False, 1, True)
+
+    nextPointToSample = caromGreedySampler.getNextParameterPoint()
+    assert nextPointToSample.dim() == 1
+    assert nextPointToSample.item(0) == 3.0
+
+    # save after sampling a point to test if sampled points are restored
+    caromGreedySampler.save("greedy_test")
+
+    caromGreedySamplerLoad = greedy.GreedyCustomSampler("greedy_test")
+    caromGreedySamplerLoad.save("greedy_test_LOAD")
+
+    pointToFindNearestROM = linalg.Vector(1, False)
+    pointToFindNearestROM[0] = 1.0
+
+    closestROM = caromGreedySampler.getNearestROM(pointToFindNearestROM)
+    closestROMLoad = caromGreedySamplerLoad.getNearestROM(pointToFindNearestROM)
+
+    assert closestROM is not None
+    assert closestROM.dim() == 1
+    assert closestROM.dim() == closestROMLoad.dim()
+    assert closestROM.item(0) == 3.0
+    assert closestROM.item(0) == closestROMLoad.item(0)
+
+    nextPointToSample = caromGreedySampler.getNextParameterPoint()
+    nextPointToSampleLoad = caromGreedySamplerLoad.getNextParameterPoint()
+
+    assert nextPointToSample.dim() == nextPointToSampleLoad.dim()
+    assert nextPointToSample.item(0) == nextPointToSampleLoad.item(0)
 
 if __name__ == '__main__':
     pytest.main()
