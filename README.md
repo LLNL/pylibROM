@@ -46,6 +46,29 @@ python3 setup.py install --with-parallel --with-gslib --user
 ```
 Make sure [`swig`](https://pypi.org/project/swig) is installed first. Also, the binary file must be located in `PATH` environment variable.
 
+### pylibROM-Jupyter Docker Container
+
+This Docker container provides an environment with Jupyter Notebook for the pylibROM library. Follow the steps below to build the Docker image and run a Jupyter Notebook server.
+
+#### Build the Docker Image
+
+Navigate to the directory containing the Dockerfile:
+ ```
+cd /path/to/folder/pylibROM/docker/jupyter
+ ```
+
+Now, run the following command to build the Docker image:
+ 
+ ```
+docker build -t pylibrom-jupyter:latest .
+ ```
+
+Once the image is built, you can run a container and start a Jupyter Notebook server. Replace /path/to/host/folder with the absolute path to the local directory you want to mount inside the container for Jupyter notebooks: 
+
+ ```
+docker run -p 8888:8888 -v /path/to/host/folder:/notebooks -w /notebooks pylibrom-jupyter:latest
+ ```
+
 
 ## License
 pylibROM is distributed under the terms of the MIT license. All new contributions must be made under the MIT. See
