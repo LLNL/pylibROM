@@ -52,3 +52,14 @@ pylibROM is distributed under the terms of the MIT license. All new contribution
 [LICENSE-MIT](https://github.com/LLNL/pylibROM/blob/main/LICENSE)
 
 LLNL Release Nubmer: LLNL-CODE- 852921
+
+
+## Authors
+- Michael Barrow (LLNL)
+- Siu Wun Cheung (LLNL)
+- Youngsoo Choi (LLNL)
+- "Kevin" Seung Whan Chung (LLNL)
+- Pravija Danda (TAMU)
+- Coleman Kendrick (LLNL)
+- Hardeep Sullan (LLNL)
+- Henry Yu (LLNL)
