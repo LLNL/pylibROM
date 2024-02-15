@@ -145,6 +145,10 @@ pybind11_add_module(_pylibROM
 	bindings/pylibROM/algo/pyParametricDMD.cpp
 	bindings/pylibROM/algo/pyNonuniformDMD.cpp
   bindings/pylibROM/algo/pyAdaptiveDMD.cpp
+  bindings/pylibROM/algo/greedy/pyGreedySampler.cpp
+  bindings/pylibROM/algo/greedy/pyGreedyCustomSampler.cpp
+  bindings/pylibROM/algo/greedy/pyGreedyRandomSampler.cpp
+
 	bindings/pylibROM/hyperreduction/pyDEIM.cpp
 	bindings/pylibROM/hyperreduction/pyGNAT.cpp
 	bindings/pylibROM/hyperreduction/pyQDEIM.cpp
