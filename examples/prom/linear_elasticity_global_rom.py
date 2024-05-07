@@ -233,13 +233,13 @@ solveTimer, assembleTimer, mergeTimer = StopWatch(), StopWatch(), StopWatch()
 
 # 10. Set BasisGenerate if offline
 if offline:
-    options = la.Options(fespace.GetTrueVSize(), max_num_snapshots, 1, update_right_SV)
+    options = la.Options(fespace.GetTrueVSize(), max_num_snapshots, update_right_SV)
     generator = la.BasisGenerator(options, isIncremental, basisFileName)
 
 # 11. The merge phase
 if merge:
     mergeTimer.Start()
-    options = la.Options(fespace.GetTrueVSize(), max_num_snapshots, 1, update_right_SV)
+    options = la.Options(fespace.GetTrueVSize(), max_num_snapshots, update_right_SV)
     generator = la.BasisGenerator(options,isIncremental, basisName)
     for paramID in range(nsets):
         snapshot_filename = f'{basisName}{paramID}_snapshot'
@@ -338,7 +338,7 @@ if fom or offline:
     
     # 18. Take and write snapshot for ROM
     if offline:
-        addSample = generator.takeSample(X.GetDataArray(), 0.0, 0.01)
+        addSample = generator.takeSample(X.GetDataArray())
         generator.writeSnapshot()
 
 # 19. The online phase
@@ -346,7 +346,7 @@ if online:
     # 20. read the reduced basis
     assembleTimer.Start()
     reader = la.BasisReader(basisName)
-    spatialbasis = reader.getSpatialBasis(0.0)
+    spatialbasis = reader.getSpatialBasis()
     numRowRB = spatialbasis.numRows()
     numColumnRB = spatialbasis.numColumns()
     print(f'On rank {myid}, spatial basis dimension is {numRowRB} x {numColumnRB}')

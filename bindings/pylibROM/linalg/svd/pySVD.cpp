@@ -34,8 +34,8 @@ class PySVD : public SVD {
         }
 
 
-        bool takeSample(double* u_in, double time, bool add_without_increase) override {
-        PYBIND11_OVERLOAD_PURE(bool, SVD, takeSample, u_in, time, add_without_increase);
+        bool takeSample(double* u_in, bool add_without_increase) override {
+        PYBIND11_OVERLOAD_PURE(bool, SVD, takeSample, u_in, add_without_increase);
         }
 
 
@@ -45,18 +45,15 @@ class PySVD : public SVD {
 void init_SVD(pybind11::module_ &m) {
     py::class_<SVD, PySVD>(m, "SVD")
         .def(py::init<Options>())
-        .def("takeSample", [](SVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
-            return self.takeSample(getVectorPointer(u_in), time, add_without_increase);
-        }, py::arg("u_in"), py::arg("time"),py::arg("add_without_increase") = false)
+        .def("takeSample", [](SVD& self, py::array_t<double> &u_in, bool add_without_increase = false) {
+            return self.takeSample(getVectorPointer(u_in), add_without_increase);
+        }, py::arg("u_in"), py::arg("add_without_increase") = false)
         .def("getDim", (int (SVD::*)() const) &SVD::getDim)
         .def("getSpatialBasis", (const Matrix* (SVD::*)()) &SVD::getSpatialBasis)
         .def("getTemporalBasis", (const Matrix* (SVD::*)()) &SVD::getTemporalBasis)
         .def("getSingularValues", (const Vector* (SVD::*)()) &SVD::getSingularValues)
         .def("getSnapshotMatrix", (const Matrix* (SVD::*)()) &SVD::getSnapshotMatrix)
-        .def("getNumBasisTimeIntervals", (int (SVD::*)() const) &SVD::getNumBasisTimeIntervals)
-        .def("getBasisIntervalStartTime", (double (SVD::*)(int) const) &SVD::getBasisIntervalStartTime)
-        .def("isNewTimeInterval", (bool (SVD::*)() const) &SVD::isNewTimeInterval)
-        .def("increaseTimeInterval", (void (SVD::*)()) &SVD::increaseTimeInterval)
+        .def("getMaxNumSamples", (int (SVD::*)() const) &SVD::getMaxNumSamples)
         .def("getNumSamples", (int (SVD::*)() const) &SVD::getNumSamples)
         .def("__del__", [](SVD& self) {
         std::cout << "SVD instance is being destroyed" << std::endl;

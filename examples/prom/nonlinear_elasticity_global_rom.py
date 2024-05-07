@@ -491,7 +491,7 @@ def MergeBasis(dimFOM, nparam, max_num_snapshots, name):
     update_right_SV = False
     isIncremental = False
 
-    options = linalg.Options(dimFOM, nparam * max_num_snapshots, 1, update_right_SV)
+    options = linalg.Options(dimFOM, nparam * max_num_snapshots, update_right_SV)
     generator = linalg.BasisGenerator(options, isIncremental, "basis" + name)
 
     for paramID in range(nparam):
@@ -929,7 +929,7 @@ def run():
 
     # // 10. Create pROM object.
     if (offline):
-        options = linalg.Options(fespace.GetTrueVSize(), max_num_snapshots, 1, update_right_SV)
+        options = linalg.Options(fespace.GetTrueVSize(), max_num_snapshots, update_right_SV)
 
         if (not x_base_only):
             basis_generator_v = linalg.BasisGenerator(options, isIncremental, basisFileName + "_V")
@@ -959,7 +959,7 @@ def run():
         else:
             readerV = linalg.BasisReader("basisV")
 
-        BV_librom = readerV.getSpatialBasis(0.0)
+        BV_librom = readerV.getSpatialBasis()
 
         if (rvdim == -1): # Change rvdim
             rvdim = BV_librom.numColumns()
@@ -972,7 +972,7 @@ def run():
             print("reduced V dim = %d\n" % rvdim)
 
         readerX = linalg.BasisReader("basisX")
-        BX_librom = readerX.getSpatialBasis(0.0)
+        BX_librom = readerX.getSpatialBasis()
 
         if (rxdim == -1): # Change rxdim
             rxdim = BX_librom.numColumns()
@@ -986,7 +986,7 @@ def run():
 
         # Hyper reduce H
         readerH = linalg.BasisReader("basisH")
-        H_librom = readerH.getSpatialBasis(0.0)
+        H_librom = readerH.getSpatialBasis()
 
         # Compute sample points
         if (hdim == -1):
@@ -1222,16 +1222,16 @@ def run():
 
             # Take samples
             if ((not x_base_only) and basis_generator_v.isNextSample(t)):
-                basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
+                basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray())
                 basis_generator_v.computeNextSampleTime(vx_diff.GetBlock(0).GetDataArray(), dvdt.GetDataArray(), t)
-                basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
+                basis_generator_H.takeSample(oper.H_sp.GetDataArray())
 
             if (basis_generator_x.isNextSample(t)):
-                basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray(), t, dt)
+                basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray())
                 basis_generator_x.computeNextSampleTime(vx_diff.GetBlock(1).GetDataArray(), dxdt.GetDataArray(), t)
 
                 if (x_base_only):
-                    basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
+                    basis_generator_H.takeSample(oper.H_sp.GetDataArray())
 
         if (last_step or ((ti % vis_steps) == 0)):
             if (online):
@@ -1294,15 +1294,15 @@ def run():
 
         # Take samples
         if (not x_base_only):
-            basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray(), t, dt)
+            basis_generator_v.takeSample(vx_diff.GetBlock(0).GetDataArray())
             basis_generator_v.writeSnapshot()
             del basis_generator_v
 
-        basis_generator_H.takeSample(oper.H_sp.GetDataArray(), t, dt)
+        basis_generator_H.takeSample(oper.H_sp.GetDataArray())
         basis_generator_H.writeSnapshot()
         del basis_generator_H
 
-        basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray(), t, dt)
+        basis_generator_x.takeSample(vx_diff.GetBlock(1).GetDataArray())
         basis_generator_x.writeSnapshot()
         del basis_generator_x
 

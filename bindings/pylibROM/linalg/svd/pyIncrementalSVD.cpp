@@ -31,8 +31,8 @@ public:
         PYBIND11_OVERRIDE(const Matrix*, IncrementalSVD, getSnapshotMatrix );
     }
 
-    bool takeSample(double* u_in, double time, bool add_without_increase) override {
-        PYBIND11_OVERLOAD(bool, IncrementalSVD, takeSample, u_in, time, add_without_increase);
+    bool takeSample(double* u_in, bool add_without_increase) override {
+        PYBIND11_OVERLOAD(bool, IncrementalSVD, takeSample, u_in, add_without_increase);
     }
 
     ~PyIncrementalSVD() override {
@@ -41,8 +41,8 @@ public:
 
 protected:
 
-    void buildInitialSVD(double* u, double time) override {
-        PYBIND11_OVERRIDE_PURE(void, IncrementalSVD, buildInitialSVD, u, time);
+    void buildInitialSVD(double* u) override {
+        PYBIND11_OVERRIDE_PURE(void, IncrementalSVD, buildInitialSVD, u);
     }
 
     void computeBasis() override {
@@ -62,18 +62,15 @@ protected:
 void init_IncrementalSVD(pybind11::module_ &m) {
     py::class_<IncrementalSVD,PyIncrementalSVD>(m, "IncrementalSVD")
         .def(py::init<Options, const std::string&>())
-        .def("takeSample", [](IncrementalSVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
-            bool result = self.takeSample(getVectorPointer(u_in), time, add_without_increase);
+        .def("takeSample", [](IncrementalSVD& self, py::array_t<double> &u_in, bool add_without_increase = false) {
+            bool result = self.takeSample(getVectorPointer(u_in), add_without_increase);
             return result;
-        }, py::arg("u_in"), py::arg("time"),py::arg("add_without_increase") = false)
+        }, py::arg("u_in"), py::arg("add_without_increase") = false)
         .def("getSpatialBasis", (const Matrix* (IncrementalSVD::*)()) &IncrementalSVD::getSpatialBasis)
         .def("getTemporalBasis", (const Matrix* (IncrementalSVD::*)()) &IncrementalSVD::getTemporalBasis)
         .def("getSingularValues", (const Vector* (IncrementalSVD::*)()) &IncrementalSVD::getSingularValues)
         .def("getSnapshotMatrix", (const Matrix* (IncrementalSVD::*)()) &IncrementalSVD::getSnapshotMatrix)
         .def("getDim", (int (IncrementalSVD::*)() const) &IncrementalSVD::getDim)
-        .def("getNumBasisTimeIntervals", (int (IncrementalSVD::*)() const) &IncrementalSVD::getNumBasisTimeIntervals)
-        .def("getBasisIntervalStartTime", (double (IncrementalSVD::*)(int) const) &IncrementalSVD::getBasisIntervalStartTime)
-        .def("isNewTimeInterval", (bool (IncrementalSVD::*)() const) &IncrementalSVD::isNewTimeInterval)
-        .def("increaseTimeInterval", (void (IncrementalSVD::*)()) &IncrementalSVD::increaseTimeInterval)
+        .def("getMaxNumSamples", (int (IncrementalSVD::*)() const) &IncrementalSVD::getMaxNumSamples)
         .def("getNumSamples", (int (IncrementalSVD::*)() const) &IncrementalSVD::getNumSamples);
 }
