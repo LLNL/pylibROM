@@ -1078,5 +1078,98 @@ def test_distribute_and_gather():
     assert(not test.distributed())
     assert(np.array_equal(test.getData(), answer.getData()))
 
+
+def test_matrix_orthogonalize():
+    # Matrix data to orthonormalize
+    d_mat = np.array([[3.5, 7.1, 0.0, 0.0],
+                      [0.0, 1.9, 8.3, 0.0],
+                      [0.0, 0.0, 5.7, 4.6],
+                      [0.0, 0.0, 0.0, 3.2]])
+
+    # target matrix data
+    d_mat2 = np.eye(4)
+
+    matrix = libROM.Matrix(d_mat, False, False)
+    target = libROM.Matrix(d_mat2, False, False)
+
+    matrix.orthogonalize()
+
+    assert(np.allclose(matrix.getData(), target))
+
+
+def test_matrix_orthogonalize4():
+    # Matrix data to orthonormalize
+    d_mat = np.array([[3.5, 7.1, 0.0, 0.0],
+                      [0.0, 1.9, 8.3, 1.0e-14],
+                      [0.0, 0.0, 5.7, 1.0+1.0e-14],
+                      [0.0, 0.0, 0.0, 0.0]])
+
+    # target matrix data
+    d_mat2 = np.eye(4)
+    d_mat2[3][3] = 0.0
+
+    matrix = libROM.Matrix(d_mat, False, False)
+    target = libROM.Matrix(d_mat2, False, False)
+
+    matrix.orthogonalize(True)
+
+    assert(np.allclose(matrix.getData(), target))
+
+
+def test_matrix_orthogonalize_last():
+    # Matrix data to orthonormalize
+    d_mat = np.array([[1.0, 0.0, 0.0, 1.3],
+                      [0.0, 1.0, 0.0, 4.7],
+                      [0.0, 0.0, 1.0, 2.5],
+                      [0.0, 0.0, 0.0, 7.3]])
+
+    # target matrix data
+    d_mat2 = np.eye(4)
+
+    matrix = libROM.Matrix(d_mat, False, False)
+    target = libROM.Matrix(d_mat2, False, False)
+
+    matrix.orthogonalize_last()
+
+    assert(np.allclose(matrix.getData(), target))
+
+
+def test_matrix_orthogonalize_last2():
+    # Matrix data to orthonormalize
+    d_mat = np.array([[1.0, 0.0, 0.0, 1.3],
+                      [0.0, 1.0, 0.0, 4.7],
+                      [0.0, 0.0, 1.0, 2.5],
+                      [0.0, 0.0, 0.0, 7.3]])
+
+    # target matrix data
+    d_mat2 = np.eye(4)
+
+    matrix = libROM.Matrix(d_mat, False, False)
+    target = libROM.Matrix(d_mat2, False, False)
+
+    matrix.orthogonalize_last(-1, True)
+
+    assert(np.allclose(matrix.getData(), target))
+
+
+def test_matrix_orthogonalize_last4():
+    # Matrix data to orthonormalize
+    d_mat = np.array([[1.0, 0.0, 0.0, 1.3],
+                      [0.0, 1.0, 0.0, 4.7],
+                      [0.0, 0.0, 9.8, 2.5],
+                      [0.0, 0.0, 0.0, 7.3]])
+
+    # target matrix data
+    d_mat2 = np.eye(4)
+
+    matrix = libROM.Matrix(d_mat, False, False)
+    target = libROM.Matrix(d_mat2, False, False)
+
+    matrix.orthogonalize_last(3, True)
+    matrix.orthogonalize_last(4, True)
+
+    assert(np.allclose(matrix.getData(), target))
+
+
 if __name__ == '__main__':
     pytest.main()
