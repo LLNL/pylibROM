@@ -32,6 +32,7 @@ void init_Options(pybind11::module_ &m) {
         .def_readwrite("min_sampling_time_step_scale", &Options::min_sampling_time_step_scale)
         .def_readwrite("sampling_time_step_scale", &Options::sampling_time_step_scale)
         .def_readwrite("max_sampling_time_step_scale", &Options::max_sampling_time_step_scale)
+        .def_readwrite("static_svd_preserve_snapshot", &Options::static_svd_preserve_snapshot)
         .def("setMaxBasisDimension", &Options::setMaxBasisDimension, py::arg("max_basis_dimension_"))
         .def("setSingularValueTol", &Options::setSingularValueTol, py::arg("singular_value_tol_"))
         .def("setDebugMode", &Options::setDebugMode,  py::arg("debug_algorithm_"))

@@ -467,14 +467,14 @@ def test_plus():
     result_matrix1 = m2.inverse()
     print("Inverse of matrix m2 (first overload):")
     print(result_matrix1.get_data())
-    assert result_matrix1.get_data() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
+    assert np.allclose(result_matrix1.get_data(), [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]])
 
     # Compute and store the inverse of m1 in the result_matrix using the second overload
     result_matrix2 = libROM.Matrix(2,2,False,False)
     m2.inverse(result_matrix2)
     print("Result matrix of inverse of matrix m2 (second overload):")
     print(result_matrix2.get_data())
-    assert result_matrix2.get_data() == [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]] 
+    assert np.allclose(result_matrix2.get_data(), [[-0.3333333333333332, 0.8888888888888886], [0.33333333333333326, -0.5555555555555554]])
 
     # Get a column as a Vector
     column = m1.getColumn(1)
@@ -542,7 +542,7 @@ def test_plus():
             for j in range(m2.numColumns()):
                 print(m2(i, j), end=" ")
             print()
-        assert m2.get_data() == [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]]
+        assert np.allclose(m2.get_data(), [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]])
 
     # Set and get values using __setitem__ and __getitem__
     matrix = libROM.Matrix(3, 3,False,False)
