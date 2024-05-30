@@ -81,8 +81,8 @@ class CMakeBuild(build_ext):
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
             cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
-            if (not use_mfem):
-                cmake_args += ["-DUSE_MFEM=OFF"]
+
+        cmake_args += ["-DUSE_MFEM={:s}".format('ON' if use_mfem else 'OFF')]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code

@@ -1,6 +1,14 @@
 #include <pybind11/pybind11.h>
 
 #include "CAROM_config.h"
+#include "pylibROM_config.h"
+
+// check that libROM has MFEM if pylibROM is using MFEM
+#ifdef PYLIBROM_HAS_MFEM
+#ifndef CAROM_HAS_MFEM
+#error "libROM was not compiled with MFEM support"
+#endif
+#endif
 
 namespace py = pybind11;
 
@@ -49,7 +57,7 @@ void init_Database(pybind11::module_ &m);
 void init_HDFDatabase(pybind11::module_ &m);
 void init_CSVDatabase(pybind11::module_ &m);
 
-#ifdef CAROM_HAS_MFEM
+#ifdef PYLIBROM_HAS_MFEM
 //mfem
 void init_mfem_Utilities(pybind11::module_ &m);
 void init_mfem_PointwiseSnapshot(pybind11::module_ &m);
@@ -101,7 +109,7 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_STSampling(hyperreduction);
     init_Utilities(hyperreduction);
 
-#ifdef CAROM_HAS_MFEM
+#ifdef PYLIBROM_HAS_MFEM
     py::module mfem = m.def_submodule("mfem");
     init_mfem_Utilities(mfem);
     init_mfem_PointwiseSnapshot(mfem);

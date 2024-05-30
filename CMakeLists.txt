@@ -104,6 +104,7 @@ if (USE_MFEM)
     find_path(PARMETIS_INCLUDES metis.h
         "$ENV{PARMETIS_DIR}/metis/include"
         "${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
+    set(PYLIBROM_HAS_MFEM 1)
 endif()
 #===================== pylibROM =============================
 
@@ -111,6 +112,9 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(MPI REQUIRED)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/bindings/pylibROM/pylibROM_config.h.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/bindings/pylibROM/pylibROM_config.h)
 
 set(SOURCE_DIR "bindings/pylibROM")
 include_directories(
@@ -121,22 +125,6 @@ include_directories(
 	${HDF5_C_INCLUDE_DIRS}
 )
 link_libraries(${HDF5_LIBRARIES})
-
-if (USE_MFEM)
-    target_include_directories(
-        _pylibROM
-        ${MFEM_INCLUDES}
-        ${HYPRE_INCLUDES}
-        ${PARMETIS_INCLUDES}
-        ${MFEM_C_INCLUDE_DIRS})
-
-    target_link_libraries(
-        _pylibROM
-        ${MFEM}
-        ${HYPRE}
-        ${PARMETIS}
-        ${METIS})
-endif()
 
 add_subdirectory("extern/pybind11")
 
@@ -190,5 +178,23 @@ endif()
 
 pybind11_add_module(_pylibROM ${PYLIBROM_SOURCES})
 message("building pylibROM...")
+
+if (USE_MFEM)
+    target_include_directories(
+        _pylibROM
+        PUBLIC
+        ${MFEM_INCLUDES}
+        ${HYPRE_INCLUDES}
+        ${PARMETIS_INCLUDES}
+        ${MFEM_C_INCLUDE_DIRS})
+
+    target_link_libraries(
+        _pylibROM
+        PUBLIC
+        ${MFEM}
+        ${HYPRE}
+        ${PARMETIS}
+        ${METIS})
+endif()
 
 target_link_libraries(_pylibROM PRIVATE ROM)
