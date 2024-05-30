@@ -5,6 +5,8 @@ project(_pylibROM)
 set(CMAKE_BUILD_TYPE Debug)
 set(PYBIND11_FINDPYTHON ON)
 
+option (USE_MFEM "Build pylibROM with MFEM" OFF)
+
 #=================== ScaLAPACK (optional) ==================
 option(BUILD_SCALAPACK "Build static ScaLAPACK for libROM" OFF)
 
@@ -50,14 +52,18 @@ if (BUILD_LIBROM)
 	# )
 	# add_custom_target(RUN_LIBROM_BUILD ALL DEPENDS LIBROM_BUILD)
 
+    option (LIBROM_BUILD_CMD "Command used to build libROM and dependencies" CACHE STRING "${LIBROM_SCRIPTS_DIR}/compile.sh -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake")
+    if (USE_MFEM)
+        set(LIBROM_BUILD_CMD "${LIBROM_BUILD_CMD} -m -g")
+    endif()
 	ExternalProject_Add(
         	libROM
         	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
         	CONFIGURE_COMMAND ""
         	BINARY_DIR ${LIBROM_DIR}
-        	BUILD_COMMAND ${LIBROM_SCRIPTS_DIR}/compile.sh -m -g -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake
-        	INSTALL_COMMAND ""
-	)	
+            BUILD_COMMAND ${LIBROM_BUILD_CMD}
+            INSTALL_COMMAND ""
+    )
 	message("Building libROM dependency...")
 endif(BUILD_LIBROM)
 
@@ -72,32 +78,33 @@ execute_process(COMMAND python3 -c "import mpi4py; print(mpi4py.get_include())" 
 # # TODO(kevin): We do not bind mfem-related functions until we figure out how to type-cast SWIG Object.
 # #              Until then, mfem-related functions need to be re-implemented on python-end, using PyMFEM.
 
-find_library(MFEM mfem
-	"$ENV{MFEM_DIR}/lib"
-	"$ENV{MFEM_DIR}"
-	"${LIBROM_DIR}/dependencies/mfem")
-find_library(HYPRE HYPRE
-	"$ENV{HYPRE_DIR}/lib"
-	"${LIBROM_DIR}/dependencies/hypre/src/hypre/lib")
-find_library(PARMETIS parmetis
-	"$ENV{PARMETIS_DIR}/lib"
-	"$ENV{PARMETIS_DIR}/build/lib/libparmetis"
-	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
-find_library(METIS metis
-	"$ENV{METIS_DIR}/lib"
-	"$ENV{PARMETIS_DIR}/build/lib/libmetis"
-	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
-find_path(MFEM_INCLUDES mfem.hpp
-	"$ENV{MFEM_DIR}/include"
-	"$ENV{MFEM_DIR}"
-	"${LIBROM_DIR}/dependencies/mfem")
-find_path(HYPRE_INCLUDES HYPRE.h
-	"$ENV{HYPRE_DIR}/include"
-	"${LIBROM_DIR}/dependencies/hypre/src/hypre/include")
-find_path(PARMETIS_INCLUDES metis.h
-	"$ENV{PARMETIS_DIR}/metis/include"
-	"${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
-
+if (USE_MFEM)
+    find_library(MFEM mfem
+        "$ENV{MFEM_DIR}/lib"
+        "$ENV{MFEM_DIR}"
+        "${LIBROM_DIR}/dependencies/mfem")
+    find_library(HYPRE HYPRE
+        "$ENV{HYPRE_DIR}/lib"
+        "${LIBROM_DIR}/dependencies/hypre/src/hypre/lib")
+    find_library(PARMETIS parmetis
+        "$ENV{PARMETIS_DIR}/lib"
+        "$ENV{PARMETIS_DIR}/build/lib/libparmetis"
+        "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libparmetis")
+    find_library(METIS metis
+        "$ENV{METIS_DIR}/lib"
+        "$ENV{PARMETIS_DIR}/build/lib/libmetis"
+        "${LIBROM_DIR}/dependencies/parmetis-4.0.3/build/lib/libmetis")
+    find_path(MFEM_INCLUDES mfem.hpp
+        "$ENV{MFEM_DIR}/include"
+        "$ENV{MFEM_DIR}"
+        "${LIBROM_DIR}/dependencies/mfem")
+    find_path(HYPRE_INCLUDES HYPRE.h
+        "$ENV{HYPRE_DIR}/include"
+        "${LIBROM_DIR}/dependencies/hypre/src/hypre/include")
+    find_path(PARMETIS_INCLUDES metis.h
+        "$ENV{PARMETIS_DIR}/metis/include"
+        "${LIBROM_DIR}/dependencies/parmetis-4.0.3/metis/include")
+endif()
 #===================== pylibROM =============================
 
 
@@ -105,30 +112,36 @@ set(CMAKE_CXX_STANDARD 14)
 
 find_package(MPI REQUIRED)
 
-set(SOURCE_DIR "bindings/pylibROM") 
+set(SOURCE_DIR "bindings/pylibROM")
 include_directories(
 	${SOURCE_DIR} 
 	${LIBROM_INCLUDE_DIR} 
 	${MPI_INCLUDE_PATH}
 	${MPI4PY}
 	${HDF5_C_INCLUDE_DIRS}
-	${MFEM_INCLUDES}
-	${HYPRE_INCLUDES}
-	${PARMETIS_INCLUDES}
-	${MFEM_C_INCLUDE_DIRS}
 )
-link_libraries(
-	${HDF5_LIBRARIES}
-	${MFEM}
-	${HYPRE}
-	${PARMETIS}
-	${METIS}
-)
+link_libraries(${HDF5_LIBRARIES})
+
+if (USE_MFEM)
+    target_include_directories(
+        _pylibROM
+        ${MFEM_INCLUDES}
+        ${HYPRE_INCLUDES}
+        ${PARMETIS_INCLUDES}
+        ${MFEM_C_INCLUDE_DIRS})
+
+    target_link_libraries(
+        _pylibROM
+        ${MFEM}
+        ${HYPRE}
+        ${PARMETIS}
+        ${METIS})
+endif()
 
 add_subdirectory("extern/pybind11")
 
-pybind11_add_module(_pylibROM
-    bindings/pylibROM/pylibROM.cpp
+set(PYLIBROM_SOURCES
+	bindings/pylibROM/pylibROM.cpp
 
 	bindings/pylibROM/linalg/pyMatrix.cpp
 	bindings/pylibROM/linalg/pyVector.cpp
@@ -165,12 +178,17 @@ pybind11_add_module(_pylibROM
 	bindings/pylibROM/utils/pyHDFDatabase.cpp
 	bindings/pylibROM/utils/pyCSVDatabase.cpp
 
-	bindings/pylibROM/mfem/pyUtilities.cpp
-	bindings/pylibROM/mfem/pyPointwiseSnapshot.cpp
-	bindings/pylibROM/mfem/pySampleMesh.cpp
-
 	bindings/pylibROM/python_utils/cpp_utils.hpp
 )
+
+if (USE_MFEM)
+    set(PYLIBROM_SOURCES ${PYLIBROM_SOURCES}
+        bindings/pylibROM/mfem/pyUtilities.cpp
+        bindings/pylibROM/mfem/pyPointwiseSnapshot.cpp
+        bindings/pylibROM/mfem/pySampleMesh.cpp)
+endif()
+
+pybind11_add_module(_pylibROM ${PYLIBROM_SOURCES})
 message("building pylibROM...")
 
 target_link_libraries(_pylibROM PRIVATE ROM)

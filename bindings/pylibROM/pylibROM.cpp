@@ -1,5 +1,7 @@
 #include <pybind11/pybind11.h>
 
+#include "CAROM_config.h"
+
 namespace py = pybind11;
 
 //linalg
@@ -47,10 +49,12 @@ void init_Database(pybind11::module_ &m);
 void init_HDFDatabase(pybind11::module_ &m);
 void init_CSVDatabase(pybind11::module_ &m);
 
+#ifdef CAROM_HAS_MFEM
 //mfem
 void init_mfem_Utilities(pybind11::module_ &m);
 void init_mfem_PointwiseSnapshot(pybind11::module_ &m);
 void init_mfem_SampleMesh(pybind11::module_ &m);
+#endif
 
 PYBIND11_MODULE(_pylibROM, m) {
     py::module utils = m.def_submodule("utils");
@@ -97,10 +101,12 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_STSampling(hyperreduction);
     init_Utilities(hyperreduction);
 
+#ifdef CAROM_HAS_MFEM
     py::module mfem = m.def_submodule("mfem");
     init_mfem_Utilities(mfem);
     init_mfem_PointwiseSnapshot(mfem);
     init_mfem_SampleMesh(mfem);
+#endif
 
     // py::module python_utils = m.def_submodule("python_utils");
 }

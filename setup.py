@@ -16,6 +16,7 @@ from setuptools.command.build_ext import build_ext
 # Take the global option for pre-installed librom directory.
 librom_dir = None
 install_scalapack = False
+use_mfem = True
 for arg in sys.argv:
     if (arg[:13] == "--librom_dir="):
         librom_dir = arg[13:]
@@ -23,6 +24,12 @@ for arg in sys.argv:
 if "--install_scalapack" in sys.argv:
     install_scalapack = True
     sys.argv.remove("--install_scalapack")
+if "--no-mfem" in sys.argv:
+    use_mfem = False
+    sys.argv.remove("--no-mfem")
+if "--use-mfem" in sys.argv:
+    use_mfem = True
+    sys.argv.remove("--use-mfem")
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -64,8 +71,9 @@ class CMakeBuild(build_ext):
             librom_dir += "/extern/libROM"
             print("Installing libROM library: %s" % librom_dir)
             
-            librom_cmd = "cd %s && ./scripts/compile.sh -m -g -t ./cmake/toolchains/simple.cmake" % librom_dir
+            librom_cmd = "cd %s && ./scripts/compile.sh -t ./cmake/toolchains/simple.cmake" % librom_dir
             if (install_scalapack): librom_cmd += " -s"
+            if (use_mfem): librom_cmd += " -m -g"
             print("libROM installation command: %s" % librom_cmd)
             subprocess.run(
                 librom_cmd, shell=True, check=True
@@ -73,6 +81,8 @@ class CMakeBuild(build_ext):
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
             cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
+            if (not use_mfem):
+                cmake_args += ["-DUSE_MFEM=OFF"]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
@@ -165,7 +175,7 @@ setup(
     # author_email="dean0x7d@gmail.com",
     description="Python Interface for LLNL libROM",
     long_description="",
-    packages=find_packages(where='bindings'),
+    packages=find_packages(where='bindings', exclude=['pylibROM.mfem'] if use_mfem == False else ['']),
     package_dir={"":"bindings"},
     # packages=['bindings/pylibROM'],
     ext_modules=[CMakeExtension("_pylibROM")],
