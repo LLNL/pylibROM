@@ -145,6 +145,9 @@ pybind11_add_module(_pylibROM
 	bindings/pylibROM/algo/pyParametricDMD.cpp
 	bindings/pylibROM/algo/pyNonuniformDMD.cpp
 	bindings/pylibROM/algo/pyAdaptiveDMD.cpp
+	bindings/pylibROM/algo/greedy/pyGreedySampler.cpp
+	bindings/pylibROM/algo/greedy/pyGreedyCustomSampler.cpp
+	bindings/pylibROM/algo/greedy/pyGreedyRandomSampler.cpp
 	bindings/pylibROM/algo/manifold_interp/pyInterpolator.cpp
 	bindings/pylibROM/algo/manifold_interp/pyMatrixInterpolator.cpp
 	bindings/pylibROM/algo/manifold_interp/pyVectorInterpolator.cpp

@@ -28,6 +28,11 @@ void init_Interpolator(pybind11::module_ &);
 void init_VectorInterpolator(pybind11::module_ &);
 void init_MatrixInterpolator(pybind11::module_ &);
 
+//algo/greedy
+void init_GreedySampler(pybind11::module_ &m);
+void init_GreedyCustomSampler(pybind11::module_ &m);
+void init_GreedyRandomSampler(pybind11::module_ &m);
+
 //hyperreduction
 void init_DEIM(pybind11::module_ &m);
 void init_GNAT(pybind11::module_ &m);
@@ -78,6 +83,11 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_Interpolator(manifold_interp);
     init_VectorInterpolator(manifold_interp);
     init_MatrixInterpolator(manifold_interp);
+
+    py::module greedy = algo.def_submodule("greedy");
+    init_GreedySampler(greedy);
+    init_GreedyCustomSampler(greedy);
+    init_GreedyRandomSampler(greedy);
 
     py::module hyperreduction = m.def_submodule("hyperreduction");
     init_DEIM(hyperreduction);
