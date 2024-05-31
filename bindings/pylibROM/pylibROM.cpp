@@ -5,9 +5,10 @@
 
 // check that libROM has MFEM if pylibROM is using MFEM
 #ifdef PYLIBROM_HAS_MFEM
-#ifndef CAROM_HAS_MFEM
-#error "libROM was not compiled with MFEM support"
-#endif
+// temporarily disabled until libROM upstream adds this option
+// #ifndef CAROM_HAS_MFEM
+// #error "libROM was not compiled with MFEM support"
+// #endif
 #endif
 
 namespace py = pybind11;
