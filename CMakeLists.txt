@@ -52,18 +52,18 @@ if (BUILD_LIBROM)
 	# )
 	# add_custom_target(RUN_LIBROM_BUILD ALL DEPENDS LIBROM_BUILD)
 
-    option (LIBROM_BUILD_CMD "Command used to build libROM and dependencies" CACHE STRING "${LIBROM_SCRIPTS_DIR}/compile.sh -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake")
+    set(LIBROM_BUILD_CMD "${LIBROM_SCRIPTS_DIR}/compile.sh -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake" CACHE STRING  "Command used to build libROM and dependencies")
     if (USE_MFEM)
         set(LIBROM_BUILD_CMD "${LIBROM_BUILD_CMD} -m -g")
     endif()
-	ExternalProject_Add(
-        	libROM
-        	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
-        	CONFIGURE_COMMAND ""
-        	BINARY_DIR ${LIBROM_DIR}
-            BUILD_COMMAND ${LIBROM_BUILD_CMD}
-            INSTALL_COMMAND ""
-    )
+	# ExternalProject_Add(
+    #     	libROM
+    #     	SOURCE_DIR ${LIBROM_SCRIPTS_DIR}
+    #     	CONFIGURE_COMMAND ""
+    #     	BINARY_DIR ${LIBROM_DIR}
+    #         BUILD_COMMAND ${LIBROM_BUILD_CMD}
+    #         INSTALL_COMMAND ""
+    # )
 	message("Building libROM dependency...")
 endif(BUILD_LIBROM)
 
