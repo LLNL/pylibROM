@@ -98,7 +98,6 @@ void init_matrix(pybind11::module_ &m) {
              self.mult(other,result);
              return result; 
         }, py::return_value_policy::take_ownership)
-        .def("mult", (Vector* (Matrix::*)(const Vector*) const) &Matrix::mult, py::return_value_policy::take_ownership)
         .def("mult",[](const Matrix& self,const Vector& other,Vector* result){
              self.mult(other,*result);
         })

@@ -75,22 +75,12 @@ void init_vector(pybind11::module_ &m) {
             });
         })
 
-        .def("transform", [](Vector &self, Vector* result, py::function transformer) {
-            self.transform(result, [transformer](const int size, double* vector) {
-                transformer(size, py::array_t<double>(size, vector));
-            });
-        })
         .def("transform", [](Vector &self, py::function transformer) {
             self.transform([transformer](const int size, double* origVector, double* resultVector) {
                 transformer(size, py::array_t<double>(size, origVector), py::array_t<double>(size, resultVector));
             });
         })
         .def("transform", [](Vector &self, Vector& result, py::function transformer) {
-            self.transform(result, [transformer](const int size, double* origVector, double* resultVector) {
-                transformer(size, py::array_t<double>(size, origVector), py::array_t<double>(size, resultVector));
-            });
-        })
-        .def("transform", [](Vector &self, Vector* result, py::function transformer) {
             self.transform(result, [transformer](const int size, double* origVector, double* resultVector) {
                 transformer(size, py::array_t<double>(size, origVector), py::array_t<double>(size, resultVector));
             });
@@ -104,14 +94,12 @@ void init_vector(pybind11::module_ &m) {
         .def("dim", &Vector::dim)
 
         .def("inner_product", (double (Vector::*)(const Vector&) const) &Vector::inner_product)
-        .def("inner_product", (double (Vector::*)(const Vector*) const) &Vector::inner_product)
 
         .def("norm", &Vector::norm)
         .def("norm2", &Vector::norm2)
         .def("normalize", &Vector::normalize)
 
-        .def("plus", (Vector* (Vector::*)(const Vector&) const) &Vector::plus)
-        .def("plus", (Vector* (Vector::*)(const Vector*) const) &Vector::plus)
+        .def("plus", (std::unique_ptr<Vector> (Vector::*)(const Vector&) const) &Vector::plus)
         .def("plus", [](const Vector& self,const Vector& other,Vector* result) {
             self.plus(other,*result);
         })
