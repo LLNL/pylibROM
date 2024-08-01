@@ -18,7 +18,7 @@ public:
 
 void init_HDFDatabaseMPIO(pybind11::module_ &m) {
 
-    py::class_<HDFDatabaseMPIO, HDFDatabase, PyHDFDatabaseMPIO> hdfdb(m, "HDFDatabaseMPIO");
+    py::class_<HDFDatabaseMPIO, HDFDatabase, PyDerivedDatabase<HDFDatabaseMPIO>> hdfdb(m, "HDFDatabaseMPIO");
 
     // Constructor
     hdfdb.def(py::init<>());
@@ -26,6 +26,9 @@ void init_HDFDatabaseMPIO(pybind11::module_ &m) {
     hdfdb.def("create", [](HDFDatabaseMPIO &self, const std::string& file_name,
                            const mpi4py_comm &comm) -> bool {
         return self.create(file_name, comm.value);
+    });
+    hdfdb.def("create", [](HDFDatabaseMPIO &self, const std::string& file_name) -> bool {
+        return self.create(file_name, MPI_COMM_NULL);
     });
     hdfdb.def("open", [](HDFDatabaseMPIO &self, const std::string& file_name,
                          const std::string &type, const mpi4py_comm &comm) -> bool {

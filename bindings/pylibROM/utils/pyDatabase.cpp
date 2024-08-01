@@ -25,15 +25,7 @@ void init_Database(pybind11::module_ &m) {
         .export_values();
 
     // https://github.com/pybind/pybind11/issues/2351
-    db.def("create", [](Database &self, const std::string &file_name,
-                        const mpi4py_comm &comm) -> bool {
-        return self.create(file_name, comm.value);
-    });
-    db.def("open", [](Database &self, const std::string &file_name,
-                      const std::string &type, const mpi4py_comm &comm) -> bool {
-        return self.open(file_name, type, comm.value);
-    });
-
+    //db.def("create", &Database::create);
     // // TODO(kevin): finish binding of member functions.
     db.def("getInteger", [](
         Database &self, const std::string& key)

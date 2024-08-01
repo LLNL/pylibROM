@@ -23,9 +23,16 @@ void init_HDFDatabase(pybind11::module_ &m) {
                            const mpi4py_comm &comm) -> bool {
         return self.create(file_name, comm.value);
     });
+    hdfdb.def("create", [](HDFDatabase &self, const std::string& file_name) -> bool {
+        return self.create(file_name, MPI_COMM_NULL);
+    });
     hdfdb.def("open", [](HDFDatabase &self, const std::string& file_name,
                          const std::string &type, const mpi4py_comm &comm) -> bool {
         return self.open(file_name, type, comm.value);
+    });
+    hdfdb.def("open", [](HDFDatabase &self, const std::string& file_name,
+                         const std::string &type) -> bool {
+        return self.open(file_name, type, MPI_COMM_NULL);
     });
     hdfdb.def("close", &HDFDatabase::close);
 

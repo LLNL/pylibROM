@@ -40,6 +40,10 @@ namespace pybind11 {
                                 return_value_policy /* policy */,
                                 handle /* parent */)
             {
+                if (src == MPI_COMM_NULL) {
+                    return Py_None;
+                }
+
                 // Create an mpi4py handle
                 return PyMPIComm_New(src.value);
             }

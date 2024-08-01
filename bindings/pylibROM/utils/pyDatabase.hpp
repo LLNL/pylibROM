@@ -21,27 +21,30 @@ public:
     using DatabaseType::DatabaseType; // Inherit constructors from the base class
 
     bool
-    create(const std::string& file_name)
+    create(const std::string& file_name, const MPI_Comm comm=MPI_COMM_NULL) override
     {
         PYBIND11_OVERRIDE_PURE(
             bool,               /* Return type */
             DatabaseType,       /* Parent class */
             create,             /* Name of function in C++ (must match Python name) */
-            file_name           /* Argument(s) */
+            file_name,          /* Argument(s) */
+            mpi4py_comm(comm)
         );
     }
 
     bool
     open(
         const std::string& file_name,
-        const std::string& type)
+        const std::string& type,
+        const MPI_Comm comm=MPI_COMM_NULL) override
     {
         PYBIND11_OVERRIDE_PURE(
             bool,                  /* Return type */
             DatabaseType,          /* Parent class */
             open,                  /* Name of function in C++ (must match Python name) */
             file_name,             /* Argument(s) */
-            type
+            type,
+            mpi4py_comm(comm)
         );
     }
 
@@ -51,7 +54,7 @@ public:
         PYBIND11_OVERRIDE_PURE(
             bool,                  /* Return type */
             DatabaseType,          /* Parent class */
-            close                  /* Name of function in C++ (must match Python name) */
+            close,                  /* Name of function in C++ (must match Python name) */
         );
     }
 
@@ -191,26 +194,30 @@ public:
     using PyDatabase<DerivedDatabaseType>::PyDatabase;
 
     bool
-    create(const std::string& file_name)
+    create(const std::string& file_name,
+           const MPI_Comm comm=MPI_COMM_NULL) override
     {
         PYBIND11_OVERRIDE(
             bool,                    /* Return type */
             DerivedDatabaseType,     /* Child class */
             create,                  /* Name of function in C++ (must match Python name) */
-            file_name                /* Argument(s) */
+            file_name,               /* Argument(s) */
+            mpi4py_comm(comm)
         );
     }
 
     bool
     open(
         const std::string& file_name,
-        const std::string& type)
+        const std::string& type,
+        const MPI_Comm comm=MPI_COMM_NULL) override
     {
         PYBIND11_OVERRIDE(
             bool,                    /* Return type */
             DerivedDatabaseType,     /* Child class */
             open,                    /* Name of function in C++ (must match Python name) */
-            file_name, type         /* Argument(s) */
+            file_name, type,         /* Argument(s) */
+            mpi4py_comm(comm)
         );
     }
 

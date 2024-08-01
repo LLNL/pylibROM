@@ -12,9 +12,10 @@ using namespace CAROM;
 
 void init_BasisReader(pybind11::module_ &m) {
      py::class_<BasisReader>(m, "BasisReader")
-        .def(py::init<const std::string&, Database::formats>(),
+        .def(py::init<const std::string&, Database::formats, const int>(),
             py::arg("base_file_name"),
-            py::arg("file_format") = Database::formats::HDF5
+            py::arg("file_format") = Database::formats::HDF5,
+            py::arg("dim") = -1
         )
         .def("getSpatialBasis",(Matrix* (BasisReader::*)()) &BasisReader::getSpatialBasis)
         .def("getSpatialBasis",(Matrix* (BasisReader::*)(int)) &BasisReader::getSpatialBasis,

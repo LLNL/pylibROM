@@ -54,13 +54,20 @@ void init_CSVDatabase(pybind11::module_ &m) {
     csvdb.def(py::init<>());
 
     csvdb.def("create", [](CSVDatabase &self, const std::string& file_name,
-                           const mpi4py_comm &comm) -> bool {
+                            const mpi4py_comm comm) -> bool {
         return self.create(file_name, comm.value);
-    });
+    }, py::arg("file_name"), py::arg("comm"));
+    csvdb.def("create", [](CSVDatabase &self, const std::string& file_name) -> bool {
+        return self.create(file_name, MPI_COMM_NULL);
+    }, py::arg("file_name"));
     csvdb.def("open", [](CSVDatabase &self, const std::string& file_name,
-                         const std::string &type, const mpi4py_comm &comm) -> bool {
+                         const std::string &type, const mpi4py_comm comm) -> bool {
         return self.open(file_name, type, comm.value);
-    });
+    }, py::arg("file_name"), py::arg("type"), py::arg("comm"));
+    csvdb.def("open", [](CSVDatabase &self, const std::string& file_name,
+                         const std::string &type) -> bool {
+        return self.open(file_name, type, MPI_COMM_NULL);
+    }, py::arg("file_name"), py::arg("type"));
     csvdb.def("close", &CSVDatabase::close);
 
     // TODO(kevin): finish binding of member functions.
