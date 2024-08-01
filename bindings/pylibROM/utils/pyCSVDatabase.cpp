@@ -16,34 +16,6 @@ class PyCSVDatabase : public PyDerivedDatabase<CSVDatabase> {
 public:
     using PyDerivedDatabase<CSVDatabase>::PyDerivedDatabase;
 
-    void
-    putComplexVector(
-        const std::string& file_name,
-        const std::vector<std::complex<double>>& data,
-        int nelements) override
-    {
-        PYBIND11_OVERRIDE(
-            void,                  /* Return type */
-            CSVDatabase,       /* Child class */
-            putComplexVector,        /* Name of function in C++ (must match Python name) */
-            file_name, data, nelements   /* Argument(s) */
-        );
-    }
-
-    void
-    putStringVector(
-        const std::string& file_name,
-        const std::vector<std::string>& data,
-        int nelements) override
-    {
-        PYBIND11_OVERRIDE(
-            void,                  /* Return type */
-            CSVDatabase,       /* Child class */
-            putStringVector,        /* Name of function in C++ (must match Python name) */
-            file_name, data, nelements   /* Argument(s) */
-        );
-    }
-
     // somehow this function is not virtual on c++ side. technically does not need this trampoline?
     void
     getStringVector(
@@ -81,8 +53,14 @@ void init_CSVDatabase(pybind11::module_ &m) {
     // Constructor
     csvdb.def(py::init<>());
 
-    csvdb.def("create", &CSVDatabase::create);
-    csvdb.def("open", &CSVDatabase::open);
+    csvdb.def("create", [](CSVDatabase &self, const std::string& file_name,
+                           const mpi4py_comm &comm) -> bool {
+        return self.create(file_name, comm.value);
+    });
+    csvdb.def("open", [](CSVDatabase &self, const std::string& file_name,
+                         const std::string &type, const mpi4py_comm &comm) -> bool {
+        return self.open(file_name, type, comm.value);
+    });
     csvdb.def("close", &CSVDatabase::close);
 
     // TODO(kevin): finish binding of member functions.

@@ -56,6 +56,7 @@ void init_Utilities(pybind11::module_ &m);
 void init_mpi_utils(pybind11::module_ &m);
 void init_Database(pybind11::module_ &m);
 void init_HDFDatabase(pybind11::module_ &m);
+void init_HDFDatabaseMPIO(pybind11::module_ &m);
 void init_CSVDatabase(pybind11::module_ &m);
 
 #ifdef PYLIBROM_HAS_MFEM
@@ -70,6 +71,7 @@ PYBIND11_MODULE(_pylibROM, m) {
     init_mpi_utils(utils);
     init_Database(utils);
     init_HDFDatabase(utils);
+    init_HDFDatabaseMPIO(utils);
     init_CSVDatabase(utils);
     
 	py::module linalg = m.def_submodule("linalg");

@@ -164,6 +164,7 @@ set(PYLIBROM_SOURCES
 	bindings/pylibROM/utils/pyDatabase.hpp
 	bindings/pylibROM/utils/pyDatabase.cpp
 	bindings/pylibROM/utils/pyHDFDatabase.cpp
+	bindings/pylibROM/utils/pyHDFDatabaseMPIO.cpp
 	bindings/pylibROM/utils/pyCSVDatabase.cpp
 
 	bindings/pylibROM/python_utils/cpp_utils.hpp
