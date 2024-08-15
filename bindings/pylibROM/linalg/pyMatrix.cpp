@@ -177,7 +177,11 @@ void init_matrix(pybind11::module_ &m) {
 
         .def("transposePseudoinverse",(void (Matrix::*)()) &Matrix::transposePseudoinverse)
 
-        .def("qr_factorize",(Matrix* (Matrix::*)() const) &Matrix::qr_factorize,py::return_value_policy::take_ownership)
+        .def("qr_factorize", [](const Matrix& self) -> std::vector<std::unique_ptr<Matrix>> {
+            std::vector<std::unique_ptr<Matrix>> qr;
+            self.qr_factorize(qr);
+            return qr;
+        })
 
         // TODO (kevin): due to the difference between python and c++, technically we should not take
         //               row_pivot and row_pivot_owner as input parameters, just returning them in the end as outputs.
