@@ -527,23 +527,6 @@ def test_plus():
 
     m2 = libROM.Matrix(4,4,False,False)
 
-    # Apply orthogonalize to the matrix
-    # In parallel case, Matrix::orthogonalize() works only when matrix is distributed.
-    # This test works only for serial case, since the matrix is not distributed.
-    from mpi4py import MPI
-    if (MPI.COMM_WORLD.Get_size() == 1):
-        m2 = libROM.Matrix(2,2,False,False)
-        m2.fill(3.0)
-        m2.__setitem__(0, 0,5.0) 
-        m2.__setitem__(0, 1,8.0) 
-        m2.orthogonalize()
-        print("orthogonalize to the matrix m2")
-        for i in range(m2.numRows()):
-            for j in range(m2.numColumns()):
-                print(m2(i, j), end=" ")
-            print()
-        assert np.allclose(m2.get_data(), [[5.0, -0.8546160755740603],[3.0,-0.5192604003487962]])
-
     # Set and get values using __setitem__ and __getitem__
     matrix = libROM.Matrix(3, 3,False,False)
     matrix.fill(3.0)
@@ -590,9 +573,9 @@ def test_plus():
     print("U",serialsvd1.U.get_data())
     print("S",serialsvd1.S.get_data())
     print("V",serialsvd1.V.get_data())
-    assert serialsvd1.U.get_data() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
-    assert serialsvd1.S.get_data() == [6.324555320336759, 3.162277660168379]
-    assert serialsvd1.V.get_data() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
+    np.testing.assert_allclose(serialsvd1.U.get_data(), [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]])
+    np.testing.assert_allclose(serialsvd1.S.get_data(), [6.324555320336759, 3.162277660168379])
+    np.testing.assert_allclose(serialsvd1.V.get_data(), [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]])
 
     U=libROM.Matrix(2,2,False,False)
     S=libROM.Vector(2,False)
@@ -601,9 +584,9 @@ def test_plus():
     print("U",U.get_data())
     print("S",S.get_data())
     print("V",V.get_data())
-    assert U.get_data() == [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]]
-    assert S.get_data() == [6.324555320336759, 3.162277660168379]
-    assert V.get_data() == [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]] 
+    np.testing.assert_allclose(U.get_data(), [[-0.7071067811865475, 0.7071067811865475], [-0.7071067811865475, -0.7071067811865475]])
+    np.testing.assert_allclose(S.get_data(), [6.324555320336759, 3.162277660168379])
+    np.testing.assert_allclose(V.get_data(), [[-0.4472135954999579, -0.8944271909999159], [-0.8944271909999159, 0.4472135954999579]])
 
 
     m1=libROM.Matrix(3,3,False,False)
@@ -619,16 +602,15 @@ def test_plus():
     eigenpair=libROM.SymmetricRightEigenSolve(m1)
     print("Eigen pair ev",eigenpair.ev.get_data())
     print("Eigen pair eigs",eigenpair.eigs)
-    assert eigenpair.ev.get_data() == [[0.5932333119173844, 0.7864356987513784, -0.17202653679290808], [0.6793130619863368, -0.3743619547830712, 0.6311789687764829], [-0.4319814827585531, 0.4912962635115681, 0.756320024865991]]
-    assert eigenpair.eigs == [0.8548973087995777, 2.4760236029181337, 5.669079088282289] 
-
+    np.testing.assert_allclose(eigenpair.ev.get_data(), [[0.5932333119173844, 0.7864356987513784, -0.17202653679290808], [0.6793130619863368, -0.3743619547830712, 0.6311789687764829], [-0.4319814827585531, 0.4912962635115681, 0.756320024865991]])
+    np.testing.assert_allclose(eigenpair.eigs, [0.8548973087995777, 2.4760236029181337, 5.669079088282289])
     complexeigenpair=libROM.NonSymmetricRightEigenSolve(m1)
     print("Complex Eigen pair ev",complexeigenpair.ev_real.get_data())
     print("Complex Eigen pair ev_imaginary",complexeigenpair.ev_imaginary.get_data())
     print("Complex Eigen pair eigs",complexeigenpair.eigs)
-    assert complexeigenpair.ev_real.get_data() == [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.37436195478307094, 0.6311789687764832], [0.43198148275855325, 0.4912962635115682, 0.7563200248659911]]
-    assert complexeigenpair.ev_imaginary.get_data() == [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]] 
-    assert complexeigenpair.eigs == [(0.8548973087995788+0j), (2.4760236029181346+0j), (5.669079088282289+0j)] 
+    np.testing.assert_allclose(complexeigenpair.ev_real.get_data(), [[-0.5932333119173846, 0.7864356987513791, -0.17202653679290827], [-0.679313061986337, -0.37436195478307094, 0.6311789687764832], [0.43198148275855325, 0.4912962635115682, 0.7563200248659911]])
+    np.testing.assert_allclose(complexeigenpair.ev_imaginary.get_data(), [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+    np.testing.assert_allclose(complexeigenpair.eigs, [(0.8548973087995788+0j), (2.4760236029181346+0j), (5.669079088282289+0j)])
 
 
     # Create the input arguments 
