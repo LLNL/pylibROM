@@ -18,19 +18,20 @@ from setuptools.command.install import install as _install
 librom_dir = None
 install_scalapack = False
 use_mfem = True
+# TODO: fix this.. passing options through pip to setuptools with PEP517 is not working
 for arg in sys.argv:
-    if (arg[:13] == "--librom_dir="):
+    if (arg[:13] == "--librom_dir=" or arg[:13] == "--librom-dir="):
         librom_dir = arg[13:]
         sys.argv.remove(arg)
-# if "--install_scalapack" in sys.argv:
-#     install_scalapack = True
-#     sys.argv.remove("--install_scalapack")
-# if "--no-mfem" in sys.argv:
-#     use_mfem = False
-#     sys.argv.remove("--no-mfem")
-# if "--use-mfem" in sys.argv:
-#     use_mfem = True
-#     sys.argv.remove("--use-mfem")
+    if (arg[:19] == "--install_scalapack"):
+        install_scalapack = True
+        sys.argv.remove(arg)
+    if (arg[:9] == "--no-mfem"):
+        use_mfem = False
+        sys.argv.remove(arg)
+    if (arg[:10] == "--use-mfem"):
+        use_mfem = True
+        sys.argv.remove(arg)
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -195,7 +196,7 @@ class CMakeBuild(build_ext):
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
         )
         subprocess.run(
-            ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
+            ["cmake", "--build", ".", "-j 8", "-v", *build_args], cwd=build_temp, check=True
         )
 
 
