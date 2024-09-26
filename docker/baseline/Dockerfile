@@ -60,9 +60,9 @@ WORKDIR $LIB_DIR
 RUN git clone https://github.com/mfem/PyMFEM.git
 WORKDIR ./PyMFEM
 # --with-gslib flag does not work with later versions.
-RUN git checkout v4.5.2
+RUN git checkout v_4.7.0.1
 # We need to use this hack until we can submit a pull request to PyMFEM.
-RUN wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
+#RUN wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
 RUN sudo python3 setup.py install --with-parallel --with-gslib
 
 # install lldb and gdb for debugging
