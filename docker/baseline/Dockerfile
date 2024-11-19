@@ -10,7 +10,7 @@ WORKDIR /$ENVDIR
 # install packages
 RUN sudo apt-get install -yq git
 RUN sudo apt-get install --no-install-recommends -yq make gcc gfortran libssl-dev cmake
-RUN sudo apt-get install -yq libopenblas-dev libmpich-dev libblas-dev liblapack-dev libscalapack-mpi-dev libhdf5-serial-dev
+RUN sudo apt-get install -yq libopenblas-dev libmpich-dev libblas-dev liblapack-dev libscalapack-mpi-dev libhdf5-mpi-dev hdf5-tools
 RUN sudo apt-get install -yq vim
 RUN sudo apt-get install -yq git-lfs
 RUN sudo apt-get install -yq valgrind
@@ -63,7 +63,7 @@ WORKDIR ./PyMFEM
 RUN git checkout v_4.7.0.1
 # We need to use this hack until we can submit a pull request to PyMFEM.
 #RUN wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
-RUN sudo python3 setup.py install --with-parallel --with-gslib
+RUN sudo python3 setup.py install --with-parallel --with-gslib --with-lapack
 
 # install lldb and gdb for debugging
 RUN sudo apt-get install -yq lldb gdb
