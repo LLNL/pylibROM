@@ -28,6 +28,10 @@
 # // Final-time prediction error (Last line in run/hc_parametric_tw/dmd_par5_prediction_error.csv):
 # //   0.0006507358659606
 # //
+# // Parametric time windowing DMD command with custom reduced dimension size for each window (for HDF version, append -hdf):
+# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -rdim_window_file rdim_window_example.csv -offline
+# //   python3 parametric_tw_csv.py -o hc_parametric_tw -nwinsamp 25 -dtc 0.01 -rdim_window_file rdim_window_example.csv -online
+# //
 # // =============================================================================
 # //
 # // Description: Parametric time windowing DMD on general CSV datasets.
@@ -216,6 +220,9 @@ if __name__ == "__main__":
     parser.add_argument("-hdfmode", "--hdfmodefilename", dest='fileNameMode',
                         action='store', default=0, type=int,
                         help="HDF filename mode.")
+    parser.add_argument("-rdim_window_file", "--rdim_window_filename", dest='RDIMWindowfileName',
+                        action='store', default='', type=str,
+                        help="CSV file storing rdim for each window.")
     
     args = parser.parse_args()
     if (myid == 0):
@@ -255,6 +262,7 @@ if __name__ == "__main__":
     subsample               = args.subsample
     eval_subsample          = args.eval_subsample
     fileNameMode            = args.fileNameMode
+    RDIMWindowfileName      = args.RDIMWindowfileName
 
     assert((not (offline and online)) and (offline or online))
     assert(not ((dtc > 0.0) and (ddt > 0.0)))
@@ -320,6 +328,28 @@ if __name__ == "__main__":
     par_vectors     = []
     indicator_init  = []
     indicator_last  = []
+
+    #######
+    #load window list here
+    #######
+    use_rdim_windows=False
+    window_dim_list=[]
+    if RDIMWindowfileName != "":
+        if not RDIMWindowfileName.endswith(".csv"):
+            RDIMWindowfileName += ".csv"
+        window_dim_list = csv_db.getStringVector((list_dir) + "/" + RDIMWindowfileName, False)
+        if window_dim_list[0] == 'RDIM':
+            use_rdim_windows=True
+        elif window_dim_list[0] == 'EF':
+            use_rdim_windows=False
+        else:
+            raise RuntimeError("Expected RDIM or EF as first line in window file")
+        for window in range(len(window_dim_list)):
+            window_dim_list[window] = window_dim_list[window].split(',')
+        window_dim_list = window_dim_list[1:] # chop header from list
+        print("Read window file with {} windows:".format(len(window_dim_list)))
+        for window in window_dim_list:
+            print("  Window {}: {} = {}".format(window[0], "RDIM" if use_rdim_windows else "EF", window[1]))
 
     training_par_list = csv_db.getStringVector((list_dir) + "/" + train_list + ".csv", False)
     npar = len(training_par_list)
@@ -529,9 +559,20 @@ if __name__ == "__main__":
             if (myid == 0):
                 print("Loaded %d samples for %s." % (snap_bound[1] - snap_bound[0] + 1, par_dir))
 
+            if len(window_dim_list) > 0:
+                # check that window samples is consistent with number of windows in the csv file
+                tot_samples=snap_bound[1] - snap_bound[0]
+                assert((len(window_dim_list)*windowNumSamples) == tot_samples), "Mismatch between -nwinsamp, number of windows in -rdim_window_file, and total number of samples"
+
             for window in range(numWindows):
                 if (useWindowDims):
                     rdim = windowDim[window]
+
+                if len(window_dim_list) > 0:
+                    if use_rdim_windows:
+                        rdim = int(window_dim_list[window][1])
+                    else:
+                        ef = float(window_dim_list[window][1])
 
                 if (rdim != -1):
                     if (myid == 0):
