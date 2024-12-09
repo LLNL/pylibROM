@@ -5,6 +5,8 @@
 #include "utils/HDFDatabaseMPIO.h"
 #include "utils/pyDatabase.hpp"
 #include "python_utils/cpp_utils.hpp"
+#include "CAROM_config.h"
+
 
 namespace py = pybind11;
 using namespace CAROM;
@@ -23,6 +25,7 @@ void init_HDFDatabaseMPIO(pybind11::module_ &m) {
     // Constructor
     hdfdb.def(py::init<>());
 
+#if HDF5_IS_PARALLEL
     hdfdb.def("create", [](HDFDatabaseMPIO &self, const std::string& file_name,
                            const mpi4py_comm &comm) -> bool {
         return self.create(file_name, comm.value);
@@ -85,5 +88,6 @@ void init_HDFDatabaseMPIO(pybind11::module_ &m) {
     });
 
     hdfdb.def("writeAttribute", &HDFDatabaseMPIO::writeAttribute);
+#endif
 }
 

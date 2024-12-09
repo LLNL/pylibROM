@@ -22,16 +22,12 @@ use_mfem = True
 for arg in sys.argv:
     if (arg[:13] == "--librom_dir=" or arg[:13] == "--librom-dir="):
         librom_dir = arg[13:]
-        sys.argv.remove(arg)
     if (arg[:19] == "--install_scalapack"):
         install_scalapack = True
-        sys.argv.remove(arg)
     if (arg[:9] == "--no-mfem"):
         use_mfem = False
-        sys.argv.remove(arg)
     if (arg[:10] == "--use-mfem"):
         use_mfem = True
-        sys.argv.remove(arg)
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {

@@ -54,7 +54,7 @@ if (BUILD_LIBROM)
 
     set(LIBROM_BUILD_CMD "${LIBROM_SCRIPTS_DIR}/compile.sh -t ${LIBROM_DIR}/cmake/toolchains/simple.cmake" CACHE STRING  "Command used to build libROM and dependencies")
     if (USE_MFEM)
-        set(LIBROM_BUILD_CMD "${LIBROM_BUILD_CMD} -m -g")
+        set(LIBROM_BUILD_CMD "${LIBROM_BUILD_CMD} -m -g -l")
     endif()
 	# ExternalProject_Add(
     #     	libROM
