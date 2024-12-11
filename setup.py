@@ -20,7 +20,11 @@ install_scalapack = False
 use_mfem = True
 # TODO: fix this.. passing options through pip to setuptools with PEP517 is not working
 for arg in sys.argv:
-    if (arg[:13] == "--librom_dir=" or arg[:13] == "--librom-dir="):
+    if (arg[:13] == "--librom_dir="):
+        librom_dir = arg[13:]
+        sys.argv.remove(arg)
+        sys.argv.append("--librom-dir={}".format(arg[13:]))
+    if (arg[:13] == "--librom-dir="):
         librom_dir = arg[13:]
     if (arg[:19] == "--install_scalapack"):
         install_scalapack = True
@@ -103,7 +107,7 @@ class CMakeBuild(build_ext):
             
             librom_cmd = "cd %s && ./scripts/compile.sh -t ./cmake/toolchains/simple.cmake" % librom_dir
             if (install_scalapack): librom_cmd += " -s"
-            if (use_mfem): librom_cmd += " -m -g"
+            if (use_mfem): librom_cmd += " -m -g -l"
             print("libROM installation command: %s" % librom_cmd)
             subprocess.run(
                 librom_cmd, shell=True, check=True
