@@ -37,22 +37,22 @@ void init_HDFDatabaseMPIO(pybind11::module_ &m) {
                          const std::string &type, const mpi4py_comm &comm) -> bool {
         return self.open(file_name, type, comm.value);
     });
-    hdfdb.def("close", &HDFDatabase::close);
+    hdfdb.def("close", &HDFDatabaseMPIO::close);
 
     // TODO(kevin): finish binding of member functions.
     hdfdb.def("putDoubleArray", [](
-        HDFDatabaseMPIO &self, const std::string& key, py::array_t<double> &data, int nelements)
+        HDFDatabaseMPIO &self, const std::string& key, py::array_t<double> &data, int nelements, bool distributed = false)
     {
         self.putDoubleArray(key, getVectorPointer(data), nelements);
-    });
-    hdfdb.def("putDoubleVector", &HDFDatabase::putDoubleVector);
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
+    hdfdb.def("putDoubleVector", &HDFDatabaseMPIO::putDoubleVector, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
-    hdfdb.def("putInteger", &HDFDatabase::putInteger);
+    hdfdb.def("putInteger", &HDFDatabaseMPIO::putInteger);
     hdfdb.def("putIntegerArray", [](
-        HDFDatabaseMPIO &self, const std::string& key, py::array_t<int> &data, int nelements)
+        HDFDatabaseMPIO &self, const std::string& key, py::array_t<int> &data, int nelements, bool distributed = false)
     {
         self.putIntegerArray(key, getVectorPointer(data), nelements);
-    });
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
     hdfdb.def("getIntegerArray", [](
         HDFDatabaseMPIO &self, const std::string& key, int nelements)

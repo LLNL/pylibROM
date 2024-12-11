@@ -38,18 +38,18 @@ void init_HDFDatabase(pybind11::module_ &m) {
 
     // TODO(kevin): finish binding of member functions.
     hdfdb.def("putDoubleArray", [](
-        HDFDatabase &self, const std::string& key, py::array_t<double> &data, int nelements)
+        HDFDatabase &self, const std::string& key, py::array_t<double> &data, int nelements, bool distributed = false)
     {
-        self.putDoubleArray(key, getVectorPointer(data), nelements);
-    });
-    hdfdb.def("putDoubleVector", &HDFDatabase::putDoubleVector);
+        self.putDoubleArray(key, getVectorPointer(data), nelements, distributed);
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
+    hdfdb.def("putDoubleVector", &HDFDatabase::putDoubleVector, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
     hdfdb.def("putInteger", &HDFDatabase::putInteger);
     hdfdb.def("putIntegerArray", [](
-        HDFDatabase &self, const std::string& key, py::array_t<int> &data, int nelements)
+        HDFDatabase &self, const std::string& key, py::array_t<int> &data, int nelements, bool distributed = false)
     {
         self.putIntegerArray(key, getVectorPointer(data), nelements);
-    });
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
     hdfdb.def("getIntegerArray", [](
         HDFDatabase &self, const std::string& key, int nelements)

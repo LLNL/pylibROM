@@ -72,17 +72,17 @@ void init_CSVDatabase(pybind11::module_ &m) {
 
     // TODO(kevin): finish binding of member functions.
     csvdb.def("putDoubleArray", [](
-        CSVDatabase &self, const std::string& key, py::array_t<double> &data, int nelements)
+        CSVDatabase &self, const std::string& key, py::array_t<double> &data, int nelements, bool distributed = false)
     {
-        self.putDoubleArray(key, getVectorPointer(data), nelements);
-    });
-    csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector);
+        self.putDoubleArray(key, getVectorPointer(data), nelements, distributed);
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
+    csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
     csvdb.def("putInteger", &CSVDatabase::putInteger);
     csvdb.def("putIntegerArray", [](
-        CSVDatabase &self, const std::string& key, py::array_t<int> &data, int nelements)
+        CSVDatabase &self, const std::string& key, py::array_t<int> &data, int nelements, bool distributed = false)
     {
         self.putIntegerArray(key, getVectorPointer(data), nelements);
-    });
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
     csvdb.def("getIntegerArray", [](
         CSVDatabase &self, const std::string& key, int nelements)
