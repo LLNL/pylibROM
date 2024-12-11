@@ -729,6 +729,9 @@ if __name__ == "__main__":
     if (offline):
         del dmd_u
 
+    if not csvFormat:
+        db.close()
+
 #ifdef MFEM_USE_GSLIB
     del pws
     del pwsnap_CAROM
