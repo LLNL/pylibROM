@@ -40,7 +40,7 @@ jobs:
             git submodule status
       - name: build
         run: |
-            pip install ./ --global-option="--librom-dir=/env/dependencies/libROM"
+            pip install -v --user -C"--build-option=install" -C"--build-option=--librom-dir=/env/dependencies/libROM" -C"--build-option=-v" ./
       - name: check install
         run: |
             python3 -c "import pylibROM"
