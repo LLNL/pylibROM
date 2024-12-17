@@ -20,11 +20,7 @@ install_scalapack = False
 use_mfem = True
 # TODO: fix this.. passing options through pip to setuptools with PEP517 is not working
 for arg in sys.argv:
-    if (arg[:13] == "--librom_dir="):
-        librom_dir = arg[13:]
-        sys.argv.remove(arg)
-        sys.argv.append("--librom-dir={}".format(arg[13:]))
-    if (arg[:13] == "--librom-dir="):
+    if (arg[:13] == "--librom_dir=" or arg[:13] == "--librom-dir="):
         librom_dir = arg[13:]
     if (arg[:19] == "--install_scalapack"):
         install_scalapack = True
@@ -212,14 +208,10 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="pylibROM",
-    # version="0.0.1",
-    # author="Dean Moldovan",
-    # author_email="dean0x7d@gmail.com",
     description="Python Interface for LLNL libROM",
     long_description="",
     packages=find_packages(where='bindings', exclude=['pylibROM.mfem'] if use_mfem == False else ['']),
     package_dir={"":"bindings"},
-    # packages=['bindings/pylibROM'],
     ext_modules=[CMakeExtension("_pylibROM")],
     cmdclass={
         "build_ext": CMakeBuild,

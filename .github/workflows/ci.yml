@@ -40,7 +40,10 @@ jobs:
             git submodule status
       - name: build
         run: |
-            pip install ./ --global-option="--librom_dir=/env/dependencies/libROM"
+            pip install ./ --global-option="--librom-dir=/env/dependencies/libROM"
+      - name: check install
+        run: |
+            python3 -c "import pylibROM"
       - name: test
         run: |
             cd tests
@@ -106,6 +109,9 @@ jobs:
             cd build
             cmake .. -DLIBROM_DIR=/env/dependencies/libROM
             make
+      - name: check install
+        run: |
+            python3 -c "import pylibROM"
       - name: test
         run: |
             cd tests
@@ -168,6 +174,10 @@ jobs:
       - name: build
         run: |
             pip install ./
+            export LD_LIBRARY_PATH=/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
+      - name: check install
+        run: |
+            python3 -c "import pylibROM"
       - name: test
         run: |
             cd tests
