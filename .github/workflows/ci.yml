@@ -177,11 +177,11 @@ jobs:
             pip install ./
       - name: check install
         run: |
-            export LD_LIBRARY_PATH=/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
             python3 -c "import pylibROM"
       - name: test
         run: |
-            export LD_LIBRARY_PATH=/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:/home/test/pylibROM/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
             cd tests
             echo run pyVector unit test
             pytest test_pyVector.py --verbose
