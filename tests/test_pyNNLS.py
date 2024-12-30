@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 import pytest
 import numpy as np
-import scipy as sp
+from scipy import optimize
 from mpi4py import MPI
 import _pylibROM.linalg as la
 
@@ -13,7 +13,7 @@ A = np.random.rand(5,10)
 x = np.zeros((10,))
 rhs_lb, rhs_ub = np.ones((5,))*(3.5-1e-5), np.ones((5,))*(3.5+1e-5)
 b = (rhs_lb+rhs_ub)/2
-sol,res = sp.optimize.nnls(A,b)
+sol,res = optimize.nnls(A,b)
 
 
 def test_getNumProcs():
