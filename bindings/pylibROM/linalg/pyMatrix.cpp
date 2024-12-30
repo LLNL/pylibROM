@@ -84,7 +84,7 @@ void init_matrix(pybind11::module_ &m) {
         .def("getFirstNColumns", (void (Matrix::*)(int, Matrix&) const) &Matrix::getFirstNColumns)
         
         .def("mult",[](const Matrix& self, const Matrix& other){
-             Matrix* result = new Matrix();
+             Matrix* result = nullptr;
              self.mult(other,result);
              return result; 
         },py::return_value_policy::take_ownership)
@@ -94,7 +94,7 @@ void init_matrix(pybind11::module_ &m) {
         })
         .def("mult", (void (Matrix::*)(const Matrix&, Matrix&) const) &Matrix::mult)
         .def("mult", [](Matrix& self, const Vector& other){
-             Vector* result = new Vector();
+             Vector* result = nullptr;
              self.mult(other,result);
              return result; 
         }, py::return_value_policy::take_ownership)
@@ -112,7 +112,7 @@ void init_matrix(pybind11::module_ &m) {
             })
 
         .def("elementwise_mult",[](const Matrix& self, const Matrix& other) {
-                Matrix* result = new Matrix();
+                Matrix* result = nullptr;
                 self.elementwise_mult(other, result);
                 return result;
             }, py::return_value_policy::take_ownership)
@@ -123,7 +123,7 @@ void init_matrix(pybind11::module_ &m) {
         .def("elementwise_mult",(void (Matrix::*)(const Matrix&,Matrix&) const) &Matrix::elementwise_mult)
         
         .def("elementwise_square",[](const Matrix& self) {
-                Matrix* result = new Matrix();
+                Matrix* result = nullptr;
                 self.elementwise_square(result);
                 return result;
             },py::return_value_policy::take_ownership)
@@ -135,7 +135,7 @@ void init_matrix(pybind11::module_ &m) {
         .def("multPlus", (void (Matrix::*)(Vector&,const Vector&,double) const) &Matrix::multPlus)
 
         .def("transposeMult",[](const Matrix& self, const Matrix& other) {
-                 Matrix* result = new Matrix();
+                 Matrix* result = nullptr;
                  self.transposeMult(other, result);
                  return result;
              },py::return_value_policy::take_ownership)
@@ -145,7 +145,7 @@ void init_matrix(pybind11::module_ &m) {
         })
         .def("transposeMult", (void (Matrix::*)(const Matrix&, Matrix&) const) &Matrix::transposeMult)
         .def("transposeMult",[](const Matrix& self, const Vector& other) {
-                 Vector* result = new Vector();
+                 Vector* result = nullptr;
                  self.transposeMult(other, result);
                  return result;
              },py::return_value_policy::take_ownership)
@@ -177,7 +177,11 @@ void init_matrix(pybind11::module_ &m) {
 
         .def("transposePseudoinverse",(void (Matrix::*)()) &Matrix::transposePseudoinverse)
 
-        .def("qr_factorize",(Matrix* (Matrix::*)() const) &Matrix::qr_factorize,py::return_value_policy::take_ownership)
+        .def("qr_factorize", [](const Matrix& self) -> std::vector<std::unique_ptr<Matrix>> {
+            std::vector<std::unique_ptr<Matrix>> qr;
+            self.qr_factorize(qr);
+            return qr;
+        })
 
         // TODO (kevin): due to the difference between python and c++, technically we should not take
         //               row_pivot and row_pivot_owner as input parameters, just returning them in the end as outputs.
@@ -189,7 +193,8 @@ void init_matrix(pybind11::module_ &m) {
             return std::make_tuple(row_pivot, row_pivot_owner);
         })
 
-        .def("orthogonalize", (void (Matrix::*)()) &Matrix::orthogonalize)
+        .def("orthogonalize", (void (Matrix::*)(bool, double)) &Matrix::orthogonalize, py::arg("double_pass") = false, py::arg("zero_tol") = 1.0e-15)
+        .def("orthogonalize_last", (void (Matrix::*)(int, bool, double)) &Matrix::orthogonalize_last, py::arg("ncols") = -1, py::arg("double_pass") = false, py::arg("zero_tol") = 1.0e-15)
 
         .def("item", (const double& (Matrix::*)(int, int) const) &Matrix::item)
         .def("__getitem__", [](Matrix& self, int row, int col) { 

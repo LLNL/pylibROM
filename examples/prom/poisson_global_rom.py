@@ -240,15 +240,15 @@ def run():
 
     # 10. Set BasisGenerator if offline
     if (offline):
-        options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
-                                update_right_SV)
+        options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots,
+                                 update_right_SV)
         generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
 
     # 11. The merge phase
     if (merge):
         mergeTimer.Start()
-        options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots, 1,
-                                update_right_SV)
+        options = libROM.Options(fespace.GetTrueVSize(), max_num_snapshots,
+                                 update_right_SV)
         generator = libROM.BasisGenerator(options, isIncremental, basisName)
         for paramID in range(nsets):
             snapshot_filename = "%s%d_snapshot" % (basisName, paramID)
@@ -339,7 +339,7 @@ def run():
             # NOTE: mfem Vector::GetData returns a SWIG Object of type double *.
             # To make it compatible with pybind11, we use ctypes to read data from the memory address.
             xData = np.array((c_double * X.Size()).from_address(int(X.GetData())), copy=False) # this does not copy the data.
-            addSample = generator.takeSample(xData, 0.0, 0.01)
+            addSample = generator.takeSample(xData)
             generator.writeSnapshot()
             del generator
             del options
@@ -349,7 +349,7 @@ def run():
         # 20. read the reduced basis
         assembleTimer.Start()
         reader = libROM.BasisReader(basisName)
-        spatialbasis = reader.getSpatialBasis(0.0)
+        spatialbasis = reader.getSpatialBasis()
         numRowRB = spatialbasis.numRows()
         numColumnRB = spatialbasis.numColumns()
         if (myid == 0):

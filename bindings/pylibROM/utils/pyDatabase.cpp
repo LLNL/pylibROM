@@ -21,9 +21,12 @@ void init_Database(pybind11::module_ &m) {
     py::enum_<Database::formats>(db, "formats")
         .value("HDF5", Database::formats::HDF5)
         .value("CSV", Database::formats::CSV)
+        .value("HDF5_MPIO", Database::formats::HDF5_MPIO)
         .export_values();
 
-    // TODO(kevin): finish binding of member functions.
+    // https://github.com/pybind/pybind11/issues/2351
+    //db.def("create", &Database::create);
+    // // TODO(kevin): finish binding of member functions.
     db.def("getInteger", [](
         Database &self, const std::string& key)
     {

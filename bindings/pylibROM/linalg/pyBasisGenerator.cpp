@@ -20,9 +20,9 @@ void init_BasisGenerator(pybind11::module_ &m) {
         )
         .def("isNextSample", (bool (BasisGenerator::*)(double)) &BasisGenerator::isNextSample)
         .def("updateRightSV", (bool (BasisGenerator::*)()) &BasisGenerator::updateRightSV)
-        .def("takeSample", [](BasisGenerator& self, py::array_t<double> &u_in, double time, double dt, bool add_without_increase = false) {
-            return self.takeSample(getVectorPointer(u_in), time, dt, add_without_increase);
-        }, py::arg("u_in"), py::arg("time"), py::arg("dt"), py::arg("add_without_increase") = false)
+        .def("takeSample", [](BasisGenerator& self, py::array_t<double> &u_in, bool add_without_increase = false) {
+            return self.takeSample(getVectorPointer(u_in), add_without_increase);
+        }, py::arg("u_in"), py::arg("add_without_increase") = false)
         .def("endSamples", &BasisGenerator::endSamples, py::arg("kind") = "basis")
         .def("writeSnapshot", (void (BasisGenerator::*)()) &BasisGenerator::writeSnapshot)
         .def("loadSamples", (void (BasisGenerator::*)(const std::string&, const std::string&, int, Database::formats)) &BasisGenerator::loadSamples,
@@ -39,8 +39,6 @@ void init_BasisGenerator(pybind11::module_ &m) {
         .def("getTemporalBasis", (const Matrix* (BasisGenerator::*)()) &BasisGenerator::getTemporalBasis,py::return_value_policy::reference)
         .def("getSingularValues", (const Vector* (BasisGenerator::*)()) &BasisGenerator::getSingularValues,py::return_value_policy::reference)
         .def("getSnapshotMatrix", (const Matrix* (BasisGenerator::*)()) &BasisGenerator::getSnapshotMatrix,py::return_value_policy::reference)
-        .def("getNumBasisTimeIntervals", (int (BasisGenerator::*)() const) &BasisGenerator::getNumBasisTimeIntervals)
-        .def("getBasisIntervalStartTime", (double (BasisGenerator::*)(int) const) &BasisGenerator::getBasisIntervalStartTime, py::arg("which_interval"))
         .def("getNumSamples",(int (BasisGenerator::*)() const) &BasisGenerator::getNumSamples)
         .def("__del__", [](BasisGenerator& self) { self.~BasisGenerator(); }); // Destructor
 

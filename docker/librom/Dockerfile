@@ -12,18 +12,16 @@ WORKDIR $LIB_DIR
 RUN sudo git clone https://github.com/mfem/PyMFEM.git
 WORKDIR ./PyMFEM
 # --with-gslib flag does not work with later versions.
-RUN sudo git checkout v4.5.2
+RUN sudo git checkout v_4.7.0.1
 # We need to use this hack until we can submit a pull request to PyMFEM.
-RUN sudo wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
-RUN sudo python3 setup.py install --with-parallel --with-gslib
+#RUN sudo wget -O setup.py https://github.com/LLNL/pylibROM/raw/prom_parallel/extern/PyMFEM.setup.py
+RUN sudo python3 setup.py install --with-parallel --with-gslib --with-lapack
 
 # install libROM
 WORKDIR $LIB_DIR
 RUN sudo git clone https://github.com/LLNL/libROM.git
 WORKDIR ./libROM
 RUN sudo git pull
-# pylibROM is currently based on a specific commit of the libROM.
-RUN sudo git checkout 0809d7d09dc24f0963c38fc8c0a2649948142ba0
 WORKDIR ./build
 RUN sudo cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=${USE_MFEM} -DMFEM_USE_GSLIB=${MFEM_USE_GSLIB}
 # RUN sudo cmake .. -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUSE_MFEM=OFF

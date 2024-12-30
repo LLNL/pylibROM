@@ -14,9 +14,9 @@ except ModuleNotFoundError:
 import numpy as np 
 
 def test_writeBasis():
-    options = libROM.Options(4, 20, 3, True, True)
+    options = libROM.Options(4, 20, True, True)
     generator = libROM.BasisGenerator(options, False, "basis.h5", Database.formats.HDF5)
-    result = generator.takeSample(np.array([1.0, 2.0, 3.0]), 1.0, 0.1) 
+    result = generator.takeSample(np.array([1.0, 2.0, 3.0])) 
     base_file_name = "basis_file"
     basis_writer = libROM.BasisWriter(generator, base_file_name, Database.formats.HDF5)
     basis_writer.writeBasis("basis")

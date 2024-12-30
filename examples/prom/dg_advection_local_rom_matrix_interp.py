@@ -606,7 +606,7 @@ def run():
 
     # 10. Set BasisGenerator if offline
     if offline:
-        options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
+        options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots,
                             update_right_SV)
         generator = libROM.BasisGenerator(options, isIncremental, basisName)
 
@@ -614,15 +614,15 @@ def run():
         u_centered = mfem.Vector(U.Size())
         mfem.subtract_vector(u_curr, u_init, u_centered)
         u_centered_vec = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
-        addSample = generator.takeSample(u_centered_vec, t, dt)
+        addSample = generator.takeSample(u_centered_vec)
     
     if online:
         if not online_interp:
             reader = libROM.BasisReader(basisName)
             if rdim != -1:
-                spatialbasis = reader.getSpatialBasis(0.0, rdim)
+                spatialbasis = reader.getSpatialBasis(rdim)
             else:
-                spatialbasis = reader.getSpatialBasis(0.0, ef)
+                spatialbasis = reader.getSpatialBasis(ef)
             numRowRB = spatialbasis.numRows()
             numColumnRB = spatialbasis.numColumns()
             if (myid == 0):
@@ -684,7 +684,7 @@ def run():
                 if rdim == -1:
                     raise RuntimeError("rdim must be used for interpolation.")
 
-                parametricSpatialBasis = reader.getSpatialBasis(0.0, rdim)
+                parametricSpatialBasis = reader.getSpatialBasis(rdim)
                 numRowRB = parametricSpatialBasis.numRows()
                 numColumnRB = parametricSpatialBasis.numColumns()
                 bases.append(parametricSpatialBasis)
@@ -778,7 +778,7 @@ def run():
             u_centered = mfem.Vector(U.Size())
             mfem.subtract_vector(u_curr, u_init, u_centered)
             u_centered_vec = np.array((c_double * u_centered.Size()).from_address(int(u_centered.GetData())), copy=False)
-            addSample = generator.takeSample(u_centered_vec, t, dt)
+            addSample = generator.takeSample(u_centered_vec)
 
         if done or ti % vis_steps == 0:
             if myid == 0:

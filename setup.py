@@ -8,21 +8,26 @@ from pathlib import Path
 # It recommends using "--config-settings", though there is no clear documentation about this.
 # For now, we enforce to use the versions < 23.3.0.
 import pkg_resources
-pkg_resources.require(['pip < 23.3.0'])
+#pkg_resources.require(['pip < 23.3.0'])
 
 from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
+from setuptools.command.install import install as _install
 
 # Take the global option for pre-installed librom directory.
 librom_dir = None
 install_scalapack = False
+use_mfem = True
+# TODO: fix this.. passing options through pip to setuptools with PEP517 is not working
 for arg in sys.argv:
-    if (arg[:13] == "--librom_dir="):
+    if (arg[:13] == "--librom_dir=" or arg[:13] == "--librom-dir="):
         librom_dir = arg[13:]
-        sys.argv.remove(arg)
-if "--install_scalapack" in sys.argv:
-    install_scalapack = True
-    sys.argv.remove("--install_scalapack")
+    if (arg[:19] == "--install_scalapack"):
+        install_scalapack = True
+    if (arg[:9] == "--no-mfem"):
+        use_mfem = False
+    if (arg[:10] == "--use-mfem"):
+        use_mfem = True
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
 PLAT_TO_CMAKE = {
@@ -41,6 +46,38 @@ class CMakeExtension(Extension):
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
 
 
+class InstallBuild(_install):
+
+    user_options = _install.user_options + [
+        ("librom-dir=", None, "Path to libROM root directory. If specified, pylibROM will use this instead of compiling its own libROM."),
+        ("install-scalapack", None, "Enables SCALAPACK when building libROM."),
+        ("use-mfem", None, "Compile pylibROM with MFEM enabled."),
+        ("no-mfem", None, "Compile pylibROM without MFEM.")
+        ]
+
+    negative_opt = dict(_install.negative_opt)
+    negative_opt.update({"no-mfem" : "use-mfem"})
+
+    def run(self):
+        _install.run(self)
+
+
+    def initialize_options(self):
+        _install.initialize_options(self)
+        self.librom_dir = None
+        self.install_scalapack = False
+        self.use_mfem = True
+
+
+    def finalize_options(self):
+        global librom_dir, install_scalapack, use_mfem
+        librom_dir = self.librom_dir
+        install_scalapack = self.install_scalapack
+        use_mfem = self.use_mfem
+
+        _install.finalize_options(self)
+
+
 class CMakeBuild(build_ext):
     def build_extension(self, ext: CMakeExtension) -> None:
         # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
@@ -57,15 +94,16 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-        global librom_dir, install_scalapack
+        global librom_dir, install_scalapack, use_mfem
         cmake_args = []
         if (librom_dir is None):
             librom_dir = os.path.dirname(os.path.realpath(__file__))
-            librom_dir += "/extern/libROM"
+            librom_dir += "/extern/libROM/"
             print("Installing libROM library: %s" % librom_dir)
             
-            librom_cmd = "cd %s && ./scripts/compile.sh -m -g -t ./cmake/toolchains/simple.cmake" % librom_dir
+            librom_cmd = "cd %s && ./scripts/compile.sh -t ./cmake/toolchains/simple.cmake" % librom_dir
             if (install_scalapack): librom_cmd += " -s"
+            if (use_mfem): librom_cmd += " -m -g -l"
             print("libROM installation command: %s" % librom_cmd)
             subprocess.run(
                 librom_cmd, shell=True, check=True
@@ -73,6 +111,8 @@ class CMakeBuild(build_ext):
         else:
             print("Using pre-installed libROM library: %s" % librom_dir)
             cmake_args += [f"-DLIBROM_DIR=%s" % librom_dir]
+
+        cmake_args += ["-DUSE_MFEM={:s}".format('ON' if use_mfem else 'OFF')]
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
@@ -152,25 +192,30 @@ class CMakeBuild(build_ext):
             ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
         )
         subprocess.run(
-            ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
+            ["cmake", "--build", ".", "-j 8", "-v", *build_args], cwd=build_temp, check=True
         )
+
+
+    def initialize_options(self):
+        build_ext.initialize_options(self)
+
+
+    def finalize_options(self):
+        build_ext.finalize_options(self)
 
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="pylibROM",
-    # version="0.0.1",
-    # author="Dean Moldovan",
-    # author_email="dean0x7d@gmail.com",
     description="Python Interface for LLNL libROM",
     long_description="",
-    packages=find_packages(where='bindings'),
+    packages=find_packages(where='bindings', exclude=['pylibROM.mfem'] if use_mfem == False else ['']),
     package_dir={"":"bindings"},
-    # packages=['bindings/pylibROM'],
     ext_modules=[CMakeExtension("_pylibROM")],
     cmdclass={
         "build_ext": CMakeBuild,
+        "install": InstallBuild
     },
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},

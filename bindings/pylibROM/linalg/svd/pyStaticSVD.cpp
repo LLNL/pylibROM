@@ -14,8 +14,8 @@ public:
     using StaticSVD::StaticSVD;
 
 
-    bool takeSample(double* u_in, double time, bool add_without_increase = false) override {
-    PYBIND11_OVERRIDE(bool, StaticSVD, takeSample, u_in, time, add_without_increase);
+    bool takeSample(double* u_in, bool add_without_increase = false) override {
+    PYBIND11_OVERRIDE(bool, StaticSVD, takeSample, u_in, add_without_increase);
     }
 
 
@@ -50,19 +50,16 @@ public:
 void init_StaticSVD(pybind11::module& m) {
     py::class_<StaticSVD, PyStaticSVD>(m, "StaticSVD")
         .def(py::init(&PyStaticSVD::create), py::arg("options"))
-        .def("takeSample", [](StaticSVD& self, py::array_t<double> &u_in, double time,bool add_without_increase = false) {
-            bool result = self.takeSample(getVectorPointer(u_in), time, add_without_increase);
+        .def("takeSample", [](StaticSVD& self, py::array_t<double> &u_in, bool add_without_increase = false) {
+            bool result = self.takeSample(getVectorPointer(u_in), add_without_increase);
             return result;
-        }, py::arg("u_in"),py::arg("time"),py::arg("add_without_increase") = false)
+        }, py::arg("u_in"), py::arg("add_without_increase") = false)
         .def("getSpatialBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getSpatialBasis,py::return_value_policy::reference_internal)
         .def("getTemporalBasis", (const Matrix* (StaticSVD::*)()) &StaticSVD::getTemporalBasis,py::return_value_policy::reference_internal)
         .def("getSingularValues", (const Vector* (StaticSVD::*)()) &StaticSVD::getSingularValues,py::return_value_policy::reference_internal)
         .def("getSnapshotMatrix", (const Matrix* (StaticSVD::*)()) &StaticSVD::getSnapshotMatrix,py::return_value_policy::reference_internal)
         .def("getDim", (int (StaticSVD::*)() const) &StaticSVD::getDim)
-        .def("getNumBasisTimeIntervals", (int (StaticSVD::*)() const) &StaticSVD::getNumBasisTimeIntervals)
-        .def("getBasisIntervalStartTime", (double (StaticSVD::*)(int) const) &StaticSVD::getBasisIntervalStartTime)
-        .def("isNewTimeInterval", (bool (StaticSVD::*)() const) &StaticSVD::isNewTimeInterval)
-        .def("increaseTimeInterval", (void (StaticSVD::*)()) &StaticSVD::increaseTimeInterval)
+        .def("getMaxNumSamples", (int (StaticSVD::*)() const) &StaticSVD::getMaxNumSamples)
         .def("getNumSamples", (int (StaticSVD::*)() const) &StaticSVD::getNumSamples);
         
 }

@@ -447,14 +447,14 @@ basisFileName = "%s%d" % (basisName, id)
 
 # BasisGenerator for snapshot collection in offline phase 
 if offline:
-    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
+    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisFileName)
 
 # BasisGenerator for basis construction in online phase 
 if merge:
     mergeTimer.Start()
-    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots, 1,
+    options = libROM.Options(fes.GetTrueVSize(), max_num_snapshots,
                             update_right_SV)
     generator = libROM.BasisGenerator(options, isIncremental, basisName)
     for paramID in range(nsets):
@@ -476,9 +476,9 @@ assembleTimer.Start()
 if online:
     reader = libROM.BasisReader(basisName)
     if rdim != -1:
-        spatialbasis = reader.getSpatialBasis(0.0, rdim)
+        spatialbasis = reader.getSpatialBasis(rdim)
     else:
-        spatialbasis = reader.getSpatialBasis(0.0, ef)
+        spatialbasis = reader.getSpatialBasis(ef)
     numRowRB = spatialbasis.numRows()
     numColumnRB = spatialbasis.numColumns()
     if (myid == 0):
@@ -524,7 +524,7 @@ if offline:
     u_centered = mfem.Vector(U.Size())
     mfem.subtract_vector(u_curr, u_init, u_centered);
     u_centered_vec = np.array((c_double * U.Size()).from_address(int(u_centered.GetData())), copy=False)
-    addSample = generator.takeSample(u_centered_vec, t, dt)
+    addSample = generator.takeSample(u_centered_vec)
 
 while not done:
     dt_real = min(dt, t_final - t)
@@ -544,7 +544,7 @@ while not done:
         u_centered = mfem.Vector(U.Size())
         mfem.subtract_vector(u_curr, u_init, u_centered);
         u_centered_vec = np.array((c_double * u_centered.Size()).from_address(int(u_centered.GetData())), copy=False)
-        addSample = generator.takeSample(u_centered_vec, t, dt)
+        addSample = generator.takeSample(u_centered_vec)
 
     if done or ti % vis_steps == 0:
         if myid == 0:

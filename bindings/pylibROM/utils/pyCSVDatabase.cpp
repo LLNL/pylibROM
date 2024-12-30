@@ -16,34 +16,6 @@ class PyCSVDatabase : public PyDerivedDatabase<CSVDatabase> {
 public:
     using PyDerivedDatabase<CSVDatabase>::PyDerivedDatabase;
 
-    void
-    putComplexVector(
-        const std::string& file_name,
-        const std::vector<std::complex<double>>& data,
-        int nelements) override
-    {
-        PYBIND11_OVERRIDE(
-            void,                  /* Return type */
-            CSVDatabase,       /* Child class */
-            putComplexVector,        /* Name of function in C++ (must match Python name) */
-            file_name, data, nelements   /* Argument(s) */
-        );
-    }
-
-    void
-    putStringVector(
-        const std::string& file_name,
-        const std::vector<std::string>& data,
-        int nelements) override
-    {
-        PYBIND11_OVERRIDE(
-            void,                  /* Return type */
-            CSVDatabase,       /* Child class */
-            putStringVector,        /* Name of function in C++ (must match Python name) */
-            file_name, data, nelements   /* Argument(s) */
-        );
-    }
-
     // somehow this function is not virtual on c++ side. technically does not need this trampoline?
     void
     getStringVector(
@@ -81,23 +53,36 @@ void init_CSVDatabase(pybind11::module_ &m) {
     // Constructor
     csvdb.def(py::init<>());
 
-    csvdb.def("create", &CSVDatabase::create);
-    csvdb.def("open", &CSVDatabase::open);
+    csvdb.def("create", [](CSVDatabase &self, const std::string& file_name,
+                            const mpi4py_comm comm) -> bool {
+        return self.create(file_name, comm.value);
+    }, py::arg("file_name"), py::arg("comm"));
+    csvdb.def("create", [](CSVDatabase &self, const std::string& file_name) -> bool {
+        return self.create(file_name, MPI_COMM_NULL);
+    }, py::arg("file_name"));
+    csvdb.def("open", [](CSVDatabase &self, const std::string& file_name,
+                         const std::string &type, const mpi4py_comm comm) -> bool {
+        return self.open(file_name, type, comm.value);
+    }, py::arg("file_name"), py::arg("type"), py::arg("comm"));
+    csvdb.def("open", [](CSVDatabase &self, const std::string& file_name,
+                         const std::string &type) -> bool {
+        return self.open(file_name, type, MPI_COMM_NULL);
+    }, py::arg("file_name"), py::arg("type"));
     csvdb.def("close", &CSVDatabase::close);
 
     // TODO(kevin): finish binding of member functions.
     csvdb.def("putDoubleArray", [](
-        CSVDatabase &self, const std::string& key, py::array_t<double> &data, int nelements)
+        CSVDatabase &self, const std::string& key, py::array_t<double> &data, int nelements, bool distributed = false)
     {
-        self.putDoubleArray(key, getVectorPointer(data), nelements);
-    });
-    csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector);
+        self.putDoubleArray(key, getVectorPointer(data), nelements, distributed);
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
+    csvdb.def("putDoubleVector", &CSVDatabase::putDoubleVector, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
     csvdb.def("putInteger", &CSVDatabase::putInteger);
     csvdb.def("putIntegerArray", [](
-        CSVDatabase &self, const std::string& key, py::array_t<int> &data, int nelements)
+        CSVDatabase &self, const std::string& key, py::array_t<int> &data, int nelements, bool distributed = false)
     {
         self.putIntegerArray(key, getVectorPointer(data), nelements);
-    });
+    }, py::arg("key"), py::arg("data"), py::arg("nelements"), py::arg("distributed") = false);
 
     csvdb.def("getIntegerArray", [](
         CSVDatabase &self, const std::string& key, int nelements)
