@@ -177,7 +177,11 @@ void init_matrix(pybind11::module_ &m) {
 
         .def("transposePseudoinverse",(void (Matrix::*)()) &Matrix::transposePseudoinverse)
 
-        .def("qr_factorize",(Matrix* (Matrix::*)() const) &Matrix::qr_factorize,py::return_value_policy::take_ownership)
+        .def("qr_factorize", [](const Matrix& self) -> std::vector<std::unique_ptr<Matrix>> {
+            std::vector<std::unique_ptr<Matrix>> qr;
+            self.qr_factorize(qr);
+            return qr;
+        })
 
         // TODO (kevin): due to the difference between python and c++, technically we should not take
         //               row_pivot and row_pivot_owner as input parameters, just returning them in the end as outputs.
@@ -189,7 +193,8 @@ void init_matrix(pybind11::module_ &m) {
             return std::make_tuple(row_pivot, row_pivot_owner);
         })
 
-        .def("orthogonalize", (void (Matrix::*)()) &Matrix::orthogonalize)
+        .def("orthogonalize", (void (Matrix::*)(bool, double)) &Matrix::orthogonalize, py::arg("double_pass") = false, py::arg("zero_tol") = 1.0e-15)
+        .def("orthogonalize_last", (void (Matrix::*)(int, bool, double)) &Matrix::orthogonalize_last, py::arg("ncols") = -1, py::arg("double_pass") = false, py::arg("zero_tol") = 1.0e-15)
 
         .def("item", (const double& (Matrix::*)(int, int) const) &Matrix::item)
         .def("__getitem__", [](Matrix& self, int row, int col) { 

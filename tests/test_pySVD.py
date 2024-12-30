@@ -14,42 +14,18 @@ except ModuleNotFoundError:
 import numpy as np 
 
 def test_getDim():
-    options = libROM.Options(4, 20, 3, True, True)
+    options = libROM.Options(4, 20, True, True)
     svd = SVD.SVD(options)
     dim = svd.getDim()
     assert dim == 4
 
-def test_getNumBasisTimeIntervals():
-    options = libROM.Options(4, 20, 3, True, True)
+def test_getMaxNumSamples():
+    options = libROM.Options(4, 20, True, True)
     svd = SVD.SVD(options)
-    num_intervals = svd.getNumBasisTimeIntervals()
-    assert num_intervals == 0
-
-def test_getBasisIntervalStartTime():
-    options = libROM.Options(4, 20, 3, True, True)
-    svd = SVD.SVD(options)
-    num_intervals = svd.getNumBasisTimeIntervals()
-    for interval in range(num_intervals):
-        start_time = svd.getBasisIntervalStartTime(interval)
-        assert interval == start_time
-
-def test_isNewTimeInterval():
-    options = libROM.Options(4, 20, 3, True, True)
-    svd = SVD.SVD(options)
-    is_new_interval = svd.isNewTimeInterval()
-    assert is_new_interval == True
-
-def test_increaseTimeInterval():
-    options = libROM.Options(4, 20, 3, True, True)
-    svd = SVD.SVD(options)
-    svd.increaseTimeInterval()
-    num_intervals = svd.getNumBasisTimeIntervals()
-    for interval in range(num_intervals):
-        start_time = svd.getBasisIntervalStartTime(interval)
-        assert interval == start_time
+    assert(svd.getMaxNumSamples() == 20)
 
 def test_getNumSamples():
-    options = libROM.Options(4, 20, 3, True, True)
+    options = libROM.Options(4, 20, True, True)
     svd = SVD.SVD(options)
     num_samples = svd.getNumSamples()
     assert num_samples == 0

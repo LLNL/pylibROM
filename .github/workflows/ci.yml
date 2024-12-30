@@ -40,7 +40,10 @@ jobs:
             git submodule status
       - name: build
         run: |
-            pip install ./ --global-option="--librom_dir=/env/dependencies/libROM"
+            pip install -v --user -C"--build-option=install" -C"--build-option=--librom-dir=/env/dependencies/libROM" -C"--build-option=-v" ./
+      - name: check install
+        run: |
+            python3 -c "import pylibROM"
       - name: test
         run: |
             cd tests
@@ -106,6 +109,10 @@ jobs:
             cd build
             cmake .. -DLIBROM_DIR=/env/dependencies/libROM
             make
+      - name: check install
+        run: |
+            cd build
+            python3 -c "import _pylibROM"
       - name: test
         run: |
             cd tests
@@ -168,8 +175,13 @@ jobs:
       - name: build
         run: |
             pip install ./
+      - name: check install
+        run: |
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
+            python3 -c "import pylibROM"
       - name: test
         run: |
+            export LD_LIBRARY_PATH=$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libparmetis/:$GITHUB_WORKSPACE/extern/libROM/dependencies/parmetis-4.0.3/build/lib/libmetis/
             cd tests
             echo run pyVector unit test
             pytest test_pyVector.py --verbose

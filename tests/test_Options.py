@@ -8,16 +8,14 @@ import numpy as np
 options = libROM.Options(4, 20)
 print("dim",options.dim)
 print("max_basis_dimension",options.max_basis_dimension)
-print("samples_per_time_interval",options.samples_per_time_interval)
-print("max_time_intervals",options.max_time_intervals)
+print("max_num_samples",options.max_num_samples)
 print("update_right_SV",options.update_right_SV)
 print("write_snapshots",options.write_snapshots)
 
 #Testing with all arguments
-options = libROM.Options(4, 20,3,True,False)
+options = libROM.Options(4, 20,True,False)
 print("dim",options.dim)
-print("samples_per_time_interval",options.samples_per_time_interval)
-print("max_time_intervals",options.max_time_intervals)
+print("max_num_samples",options.max_num_samples)
 print("update_right_SV",options.update_right_SV)
 print("write_snapshots",options.write_snapshots)
 

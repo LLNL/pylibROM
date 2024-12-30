@@ -10,10 +10,9 @@ using namespace CAROM;
 void init_Options(pybind11::module_ &m) {
 
     py::class_<Options>(m, "Options")
-        .def(py::init<int, int, int, bool, bool>(), py::arg("dim_"), py::arg("samples_per_time_interval_"),py::arg("max_time_intervals_") = -1,py::arg("update_right_SV_") = false, py::arg("write_snapshots_") = false)
+        .def(py::init<int, int, bool, bool>(), py::arg("dim_"), py::arg("max_num_samples_"),py::arg("update_right_SV_") = false, py::arg("write_snapshots_") = false)
         .def_readwrite("dim", &Options::dim)
-        .def_readwrite("samples_per_time_interval", &Options::samples_per_time_interval)
-        .def_readwrite("max_time_intervals", &Options::max_time_intervals)
+        .def_readwrite("max_num_samples", &Options::max_num_samples)
         .def_readwrite("update_right_SV", &Options::update_right_SV)
         .def_readwrite("write_snapshots", &Options::write_snapshots)
         .def_readwrite("max_basis_dimension", &Options::max_basis_dimension)
@@ -33,6 +32,7 @@ void init_Options(pybind11::module_ &m) {
         .def_readwrite("min_sampling_time_step_scale", &Options::min_sampling_time_step_scale)
         .def_readwrite("sampling_time_step_scale", &Options::sampling_time_step_scale)
         .def_readwrite("max_sampling_time_step_scale", &Options::max_sampling_time_step_scale)
+        .def_readwrite("static_svd_preserve_snapshot", &Options::static_svd_preserve_snapshot)
         .def("setMaxBasisDimension", &Options::setMaxBasisDimension, py::arg("max_basis_dimension_"))
         .def("setSingularValueTol", &Options::setSingularValueTol, py::arg("singular_value_tol_"))
         .def("setDebugMode", &Options::setDebugMode,  py::arg("debug_algorithm_"))
